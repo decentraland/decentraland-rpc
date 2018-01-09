@@ -5,8 +5,8 @@
   "main": "dist/client/index.js",
   "typings": "dist/client/index.d.ts",
   "scripts": {
-    "build:host": "rollup -c build/rollup.host.config.js",
-    "build:client": "rollup -c build/rollup.client.config.js",
+    "build:host": "rollup -c build/config.host.js",
+    "build:client": "rollup -c build/config.client.js",
     "build": "npm run build:host && npm run build:client"
   },
   "repository": {

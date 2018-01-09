@@ -21,9 +21,6 @@ coverage
 # node-waf configuration
 .lock-wscript
 
-# Compiled binary addons (http://nodejs.org/api/addons.html)
-build/Release
-
 # Dependency directory
 node_modules
 
@@ -48,8 +45,7 @@ terminal.glue
 !.elasticbeanstalk/*.global.yml
 
 .gradle
-*.js
-**/*.js
+src/**/*.js
 
 !rollup.config.js
 
