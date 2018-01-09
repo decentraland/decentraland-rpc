@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "esnext",
+    "diagnostics": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "es2015",
+      "es2015.promise"
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}

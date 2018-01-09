@@ -1,0 +1,30 @@
+{
+  "name": "dcl-script-host",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/client/index.js",
+  "typings": "dist/client/index.d.ts",
+  "scripts": {
+    "build:host": "rollup -c build/rollup.host.config.js",
+    "build:client": "rollup -c build/rollup.client.config.js",
+    "build": "npm run build:host && npm run build:client"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/decentraland/script.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/decentraland/script/issues"
+  },
+  "homepage": "https://github.com/decentraland/script#readme",
+  "devDependencies": {
+    "rollup": "^0.53.3",
+    "rollup-plugin-node-resolve": "^3.0.0",
+    "rollup-plugin-typescript2": "^0.9.0",
+    "typescript": "^2.6.2"
+  },
+  "dependencies": {}
+}

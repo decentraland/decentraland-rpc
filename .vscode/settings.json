@@ -1,0 +1,17 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/package-lock.json": true,
+    ".editorconfig": true,
+    "**/.rpt2_cache": true,
+    "node_modules": true
+  },
+  "editor.tabSize": 2,
+  "files.encoding": "utf8",
+  "files.insertFinalNewline": true,
+  "typescript.tsdk": "node_modules/typescript/lib"
+}

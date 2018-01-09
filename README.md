@@ -1,0 +1,1 @@
+Super simple quickstart for rollup + typescript
