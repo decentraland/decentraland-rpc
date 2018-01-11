@@ -5,11 +5,11 @@
   "main": "dist/client/index.js",
   "typings": "dist/client/index.d.ts",
   "scripts": {
-    "build:host": "rollup -c build/config.host.js",
-    "build:client": "rollup -c build/config.client.js",
+    "build:host": "./bin/compile.js src/host/index.ts",
+    "build:client": "./bin/compile.js src/client/index.ts",
     "build:test": "./bin/compile.js test/fixtures/*.ts && ./bin/compile.js test/scenarios/index.ts",
     "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
-    "build": "rimraf dist && npm run build:host && npm run build:client && npm run build:cli && npm run build:test"
+    "build": "rimraf dist && npm run build:cli && npm run build:host && npm run build:client && npm run build:cli && npm run build:test"
   },
   "repository": {
     "type": "git",
@@ -30,9 +30,6 @@
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
     "rimraf": "^2.6.2",
-    "rollup": "^0.53.3",
-    "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-typescript2": "^0.9.0",
     "typescript": "^2.6.2"
   },
   "dependencies": {

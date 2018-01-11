@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "declarationDir": "../../dist",
+    "outDir": "../../dist/client",
     "lib": [
       "es2015",
       "es2015.promise",
