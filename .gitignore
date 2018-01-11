@@ -49,5 +49,6 @@ test/**/*.js
 dist
 test/out
 
-bin/*
-!bin/*.ts
+bin/**/*.js
+bin/**/*.map
+bin/**/*.d.ts
