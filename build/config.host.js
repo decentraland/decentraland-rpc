@@ -7,13 +7,14 @@ export default {
     typescript({
       verbosity: 2,
       clean: true,
-      tsconfig: 'src/host/tsconfig.json'
+      tsconfig: 'src/host/tsconfig.json',
+      useTsconfigDeclarationDir: true
     }),
     resolve()
   ],
   output: [
     {
-      file: 'dist/umd/bundle.js',
+      file: 'dist/host/index.js',
       format: 'umd',
       name: 'DCLScriptingHost',
       sourcemap: true

@@ -1,7 +1,13 @@
-import { ttt } from "../common/lib";
+import { Server } from "../common/json-rpc/Server";
 
+export class ScriptingHost {
+  loadScript(url: string) {
+    const worker = new Worker(url);
 
+    return new Server(worker);
+  }
+}
 
-export function xxx() {
-  ttt();
+export namespace ScriptingHost {
+
 }

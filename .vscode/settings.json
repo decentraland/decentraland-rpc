@@ -8,7 +8,13 @@
     "**/package-lock.json": true,
     ".editorconfig": true,
     "**/.rpt2_cache": true,
-    "node_modules": true
+    "**/*.js": {
+      "when": "$(basename).ts"
+    },
+    "**/*.map": {
+      "when": "$(basename)"
+    },
+    "test/**/*.d.ts": true
   },
   "editor.tabSize": 2,
   "files.encoding": "utf8",

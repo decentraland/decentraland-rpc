@@ -7,14 +7,15 @@ export default {
     typescript({
       verbosity: 2,
       clean: true,
-      tsconfig: 'src/client/tsconfig.json'
+      tsconfig: 'src/client/tsconfig.json',
+      useTsconfigDeclarationDir: true
     }),
     resolve()
   ],
   output: [
     {
-      file: 'dist/umd/bundle.js',
-      format: 'umd',
+      file: 'dist/client/index.js',
+      format: 'es',
       name: 'DCLScriptingClient',
       sourcemap: true
     }

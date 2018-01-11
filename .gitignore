@@ -36,19 +36,18 @@ node_modules
 # Sublime
 terminal.glue
 
-*.pem
 *.zip
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
 
 .gradle
 src/**/*.js
+test/**/*.js
 
 !rollup.config.js
 
 .rpt2_cache
 
 dist
+test/out
+
+bin/*
+!bin/*.ts

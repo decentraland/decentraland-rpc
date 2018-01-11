@@ -7,7 +7,9 @@
   "scripts": {
     "build:host": "rollup -c build/config.host.js",
     "build:client": "rollup -c build/config.client.js",
-    "build": "npm run build:host && npm run build:client"
+    "build:test": "./bin/compile.js test/fixtures/*.ts && ./bin/compile.js test/scenarios/index.ts",
+    "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
+    "build": "rimraf dist && npm run build:host && npm run build:client && npm run build:cli && npm run build:test"
   },
   "repository": {
     "type": "git",
@@ -21,10 +23,22 @@
   },
   "homepage": "https://github.com/decentraland/script#readme",
   "devDependencies": {
+    "@types/glob": "^5.0.34",
+    "@types/mocha": "^2.2.46",
+    "assert": "^1.4.1",
+    "express": "^4.16.2",
+    "mocha": "^4.1.0",
+    "mocha-headless-chrome": "^1.7.1",
+    "rimraf": "^2.6.2",
     "rollup": "^0.53.3",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-typescript2": "^0.9.0",
     "typescript": "^2.6.2"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@types/puppeteer": "^0.13.9",
+    "@types/webpack": "^3.8.2",
+    "awesome-typescript-loader": "^3.4.1",
+    "webpack": "^3.10.0"
+  }
 }
