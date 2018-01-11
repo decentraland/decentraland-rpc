@@ -7,7 +7,7 @@
   "scripts": {
     "build:host": "./bin/compile.js src/host/index.ts dist/host/index.js",
     "build:client": "./bin/compile.js src/client/index.ts dist/client/index.js",
-    "build:test": "./bin/compile.js test/fixtures/*.ts && ./bin/compile.js test/scenarios/index.ts",
+    "build:test": "rimraf test/out && ./bin/compile.js 'test/fixtures/*.ts' && ./bin/compile.js test/scenarios/index.ts",
     "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
     "build": "rimraf dist && npm run build:cli && npm run build:host && npm run build:client && npm run build:cli && npm run build:test",
     "test": "npm run build && node ./bin/test.js",

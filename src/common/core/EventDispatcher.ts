@@ -47,14 +47,14 @@ function turnOffCallback(f) {
 
 export interface EventDispatcherEventsBase {
   [key: string]: Function;
-};
+}
 
 export class EventDispatcher<T = EventDispatcherEventsBase> {
   private ed_bindings: Dictionary<EventDispatcherBinding[]> = {};
   private ed_bindCount = 0;
 
   on<K extends keyof T>(event: K, callback: T[K], once?: boolean): EventDispatcherBinding;
-  on(event: string, callback: Function, once?: boolean): EventDispatcherBinding;
+  on(event: string, callback: (...args: any[]) => void, once?: boolean): EventDispatcherBinding;
   on(event, callback, once?: boolean): EventDispatcherBinding {
     this.ed_bindCount++;
 

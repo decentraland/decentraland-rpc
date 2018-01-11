@@ -2,6 +2,7 @@ import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
 
 export interface ServerOpts extends JsonRpc2.LogOpts {
+  exposedAPI?: any;
 }
 
 /**
@@ -13,18 +14,35 @@ export class Server extends EventDispatcher implements JsonRpc2.Server {
   private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map();
   private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
+  private _isEnabled = false;
 
-  constructor(worker: Worker, opts?: ServerOpts) {
+  get isEnabled(): boolean {
+    return this._isEnabled;
+  }
+
+  constructor(worker: Worker, opts: ServerOpts = {}) {
     super();
     this.setLogging(opts);
 
     if (!worker) {
-      throw new TypeError('server cannot be undefined or null');
+      throw new TypeError('worker cannot be undefined or null');
     }
 
     this._worker = worker;
+
     worker.addEventListener('message', (me: MessageEvent) => this.processMessage(me.data));
     worker.addEventListener('error', (me: ErrorEvent) => this.emit('error', me));
+  }
+
+  /**
+   * Execute this method after configuring the RPC methods and listeners.
+   * It will send an empty notification to the client, then it (the client) will send all the enqueued messages.
+   */
+  enable() {
+    if (!this._isEnabled) {
+      this._isEnabled = true;
+      this.notify('RPC.Enabled');
+    }
   }
 
   private processMessage(messageStr: string): void {

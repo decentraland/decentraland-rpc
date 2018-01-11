@@ -5,7 +5,7 @@ import { resolve } from 'path';
 
 const Express = require('express');
 const fs = require('fs');
-const shouldClose = process.argv.some($ => $ != '--keep-open');
+const keepOpen = process.argv.some($ => $ == '--keep-open');
 let app = new Express();
 let port = process.env.PORT || 3000;
 
@@ -28,19 +28,19 @@ app.listen(port, function (error) {
 
     const options = {
       file: `http://localhost:${port}`,
-      visible: !shouldClose
+      visible: keepOpen
     };
 
     runner(options)
       .then(result => {
         let json = JSON.stringify(result);
         console.dir(result);
-        shouldClose || process.exit(0);
+        keepOpen || process.exit(0);
       })
       .catch(err => {
         console.error(err.message || JSON.stringify(err));
         console.dir(err);
-        shouldClose || process.exit(1);
+        keepOpen || process.exit(1);
       });
   }
 });

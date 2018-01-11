@@ -17,6 +17,7 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
   private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
   private _requestQueue: string[] = [];
+  private _connected = false;
 
   constructor(opts?: ClientOpts) {
     super();
@@ -33,6 +34,13 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
     addEventListener('message',
       (message: MessageEvent) => this.processMessage(message.data)
     );
+
+    addEventListener('message', () => {
+      if (this._connected == false) {
+        this._connected = true;
+        this._sendQueuedRequests();
+      }
+    }, { once: true });
 
     addEventListener('error',
       (err: ErrorEvent) => this.emit('error', err)
@@ -87,11 +95,13 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
   }
 
   private _sendQueuedRequests() {
-    for (let messageStr of this._requestQueue) {
-      this._logMessage(messageStr, 'send');
-      postMessage(messageStr);
+    if (this._connected) {
+      const queue = this._requestQueue.splice(0, this._requestQueue.length);
+      for (let messageStr of queue) {
+        this._logMessage(messageStr, 'send');
+        postMessage(messageStr);
+      }
     }
-    this._requestQueue = [];
   }
 
   private _logMessage(message: string, direction: 'send' | 'receive') {
@@ -110,8 +120,8 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
 
     return new Promise((resolve, reject) => {
       try {
-        this._send(message);
         this._responsePromiseMap.set(id, { resolve, reject });
+        this._send(message);
       } catch (error) {
         return reject(error);
       }

@@ -58,9 +58,9 @@ export async function compile(opt: ICompilerOptions) {
       }
     });
 
-    compiler.apply(new ProgressPlugin({
-      profile: false
-    }));
+    // compiler.apply(new ProgressPlugin({
+    //   profile: false
+    // }));
 
     compiler.run((err, stats) => {
       if (err) {
@@ -109,11 +109,7 @@ export async function cli(args: string[]) {
         : dirname(outputFile);
 
     if (outputFile.startsWith(outputPath)) {
-      outputFile = outputFile.replace(outputPath, '');
-    }
-
-    if (outputFile.startsWith('/')) {
-      outputFile = outputFile.replace('/', '');
+      outputFile = outputFile.replace(outputPath + '/', '');
     }
 
     const options: ICompilerOptions = {
@@ -124,12 +120,11 @@ export async function cli(args: string[]) {
     };
 
     console.log(`
-processing
-  file: ${file}
-  tsconfig: ${options.tsconfig}
-  outDir: ${options.outputPath}
+compiling: ${file}
   outFile: ${options.output}
-    `);
+   outDir: ${options.outputPath}
+ tsconfig: ${options.tsconfig}
+    `.trim());
 
     const result = await compile(options);
 

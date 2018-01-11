@@ -7,6 +7,7 @@
     "sourceMap": true,
     "moduleResolution": "node",
     "declaration": true,
+    "strictFunctionTypes": true,
     "forceConsistentCasingInFileNames": true,
     "lib": [
       "es2015",

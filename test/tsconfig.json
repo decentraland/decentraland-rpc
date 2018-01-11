@@ -6,6 +6,7 @@
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
+    "strictFunctionTypes": true,
     "outDir": "out",
     "lib": [
       "es2015",

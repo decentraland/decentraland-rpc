@@ -7,4 +7,4 @@ if (typeof onmessage == 'undefined' || typeof postMessage == 'undefined') {
 new Function(`XMLHttpRequest = function () { throw new Error('XMLHttpRequest is disabled. Please use fetch'); };`)();
 
 export const ScriptingClient = new Client();
-export const API = ScriptingClient.api('DCL');
+export const API = ScriptingClient.api();

@@ -4,7 +4,7 @@ import { ScriptingHost } from '../../dist/host';
 import assert = require('assert');
 
 describe('Basic scripting communication scenarios', function () {
-  it('Should create a WebWorker from a URL', async () => {
+  it('1.Echo', async () => {
     const scriptingHost = new ScriptingHost();
     const worker = await scriptingHost.loadScript('test/out/1.Echo.js');
 
@@ -14,21 +14,61 @@ describe('Basic scripting communication scenarios', function () {
     worker.setLogging({ logConsole: true, logEmit: true });
 
     worker.expose('MethodX', async (message) => {
-      console.log('MethodX was triggered', message);
       return { number: randomNumber };
     });
 
     worker.expose('JumpBack', async (data) => {
-      console.log('JumpBack was triggered', data);
       receivedNumber = data.number;
     });
 
-    worker.notify('Start');
+    worker.enable();
 
     await new Promise((ok) => {
       setTimeout(ok, 1000);
     });
 
     assert.equal(receivedNumber, randomNumber, 'exchanged numbers must match');
+  });
+
+  it('2.Debugger', async () => {
+    const scriptingHost = new ScriptingHost();
+    const worker = await scriptingHost.loadScript('test/out/2.Debugger.js');
+
+    let didStop = false;
+
+    worker.setLogging({ logConsole: true, logEmit: true });
+
+    const api = worker.api();
+
+    const enable = () => { };
+
+    api.Debugger.expose({ enable });
+    api.Profiler.expose({ enable });
+
+    api.Runtime.expose({
+      enable,
+      run() { }
+    });
+
+    api.Profiler.expose({
+      enable,
+      start() {
+        setTimeout(() => {
+          api.Runtime.emitExecutionContextDestroyed();
+        }, 16);
+      },
+      stop() {
+        didStop = true;
+        return { data: "noice!" };
+      }
+    });
+
+    worker.enable();
+
+    await new Promise((ok) => {
+      setTimeout(ok, 1000);
+    });
+
+    assert.equal(didStop, true, 'Did stop should have been called.');
   });
 });
