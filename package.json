@@ -10,7 +10,8 @@
     "build:test": "./bin/compile.js test/fixtures/*.ts && ./bin/compile.js test/scenarios/index.ts",
     "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
     "build": "rimraf dist && npm run build:cli && npm run build:host && npm run build:client && npm run build:cli && npm run build:test",
-    "test": "npm run build && node ./bin/test.js"
+    "test": "npm run build && node ./bin/test.js",
+    "test:local": "npm run build && node ./bin/test.js --keep-open"
   },
   "repository": {
     "type": "git",

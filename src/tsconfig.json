@@ -2,9 +2,8 @@
   "compilerOptions": {
     "declarationDir": "../dist",
     "outDir": "../dist",
-    "module": "es2015",
-    "target": "es2015",
-    "diagnostics": true,
+    "module": "commonjs",
+    "target": "es6",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true,

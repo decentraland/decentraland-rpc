@@ -1,7 +1,7 @@
 import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
 
-export { JsonRpc2 }
+export { JsonRpc2 };
 
 export interface ClientOpts extends JsonRpc2.LogOpts {
 
@@ -14,7 +14,6 @@ export interface ClientOpts extends JsonRpc2.LogOpts {
 export class Client extends EventDispatcher implements JsonRpc2.Client {
   private _responsePromiseMap: Map<number, { resolve: Function, reject: Function }> = new Map();
   private _nextMessageId: number = 0;
-  private _connected: boolean = false;
   private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
   private _requestQueue: string[] = [];
@@ -88,13 +87,11 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
   }
 
   private _sendQueuedRequests() {
-    if (this._connected) {
-      for (let messageStr of this._requestQueue) {
-        this._logMessage(messageStr, 'send');
-        postMessage(messageStr);
-      }
-      this._requestQueue = [];
+    for (let messageStr of this._requestQueue) {
+      this._logMessage(messageStr, 'send');
+      postMessage(messageStr);
     }
+    this._requestQueue = [];
   }
 
   private _logMessage(message: string, direction: 'send' | 'receive') {

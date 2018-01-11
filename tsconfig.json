@@ -2,7 +2,6 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "esnext",
-    "diagnostics": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "sourceMap": true,

@@ -145,6 +145,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
     }
   }
 
+  emit(event: 'error', error: any);
   emit<K extends keyof T>(event: K, ...params: any[]);
   emit(event: string, ...params: any[]);
   emit(event: string) {
@@ -183,6 +184,8 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
           e && e.cb && e.enabled && e.cb.apply(this, args);
         }
       }
+    } else if (event === 'error') {
+      throw arguments[1] || new Error();
     }
   }
 }

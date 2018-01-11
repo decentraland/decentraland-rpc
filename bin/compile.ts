@@ -38,7 +38,8 @@ export async function compile(opt: ICompilerOptions) {
       entry: opt.file,
       output: {
         filename: opt.output,
-        path: opt.outputPath
+        path: opt.outputPath,
+        libraryTarget: 'umd'
       },
 
       resolve: {
@@ -132,14 +133,16 @@ processing
 
     const result = await compile(options);
 
-    console.log(result.toString({
-      assets: true,
-      colors: true,
-      entrypoints: true,
-      env: true,
-      errors: true,
-      publicPath: true
-    }));
+    if (result.hasErrors() || result.hasWarnings()) {
+      console.log(result.toString({
+        assets: true,
+        colors: true,
+        entrypoints: true,
+        env: true,
+        errors: true,
+        publicPath: true
+      }));
+    }
   }
 }
 
