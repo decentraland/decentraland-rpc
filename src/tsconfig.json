@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "declarationDir": "../dist",
+    "outDir": "../dist",
+    "module": "es2015",
+    "target": "es2015",
+    "diagnostics": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": [
+      "es2015",
+      "es2015.promise",
+      "webworker",
+      "dom"
+    ]
+  },
+  "exclude": [
+    "../node_modules"
+  ]
+}

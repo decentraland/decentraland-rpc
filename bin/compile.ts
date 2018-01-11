@@ -4,7 +4,7 @@ import webpack = require('webpack');
 import ProgressPlugin = require('webpack/lib/ProgressPlugin');
 import glob = require('glob');
 import { promisify, callbackify } from 'util';
-import { resolve, parse as parsePath, dirname } from 'path';
+import { resolve, parse as parsePath, dirname, relative } from 'path';
 import { TsConfigPathsPlugin } from 'awesome-typescript-loader';
 
 import fs = require('fs');
@@ -95,15 +95,25 @@ export async function cli(args: string[]) {
 
     const parsedTsConfig = require(configFile);
 
+    let outputFile =
+      args[3]
+        ? resolve(process.cwd(), args[3])
+        : parsedTsConfig.compilerOptions.outFile
+          ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
+          : (parsed.name + '.js');
+
     const outputPath =
       parsedTsConfig.compilerOptions.outDir
         ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
-        : dirname(file);
+        : dirname(outputFile);
 
-    const outputFile =
-      parsedTsConfig.compilerOptions.outFile
-        ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
-        : (parsed.name + '.js');
+    if (outputFile.startsWith(outputPath)) {
+      outputFile = outputFile.replace(outputPath, '');
+    }
+
+    if (outputFile.startsWith('/')) {
+      outputFile = outputFile.replace('/', '');
+    }
 
     const options: ICompilerOptions = {
       file: file,

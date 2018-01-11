@@ -14,7 +14,7 @@ app.get('/', function (req, res) {
   res.sendFile(resolve(__dirname, '../test/index.html'));
 });
 
-console.log(resolve(__dirname, '../node_modules'))
+console.log(resolve(__dirname, '../node_modules'));
 
 app.use('/test', Express.static(resolve(__dirname, '../test')));
 app.use('/node_modules', Express.static(resolve(__dirname, '../node_modules')));
@@ -35,14 +35,13 @@ app.listen(port, function (error) {
       .then(result => {
         let json = JSON.stringify(result);
         console.dir(result);
-        process.exit(1);
+        process.exit(0);
       })
       .catch(err => {
         console.error(err.message || JSON.stringify(err));
         console.dir(err);
         process.exit(1);
       });
-
   }
 });
 

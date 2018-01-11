@@ -1,7 +1,0 @@
-{
-  "compilerOptions": {
-    "declarationDir": "../../dist",
-    "outDir": "../../dist/host"
-  },
-  "extends": "../../tsconfig.json"
-}
