@@ -3,7 +3,7 @@ import * as JsonRpc2 from "./json-rpc";
 
 export { JsonRpc2 };
 
-export interface ClientOpts extends JsonRpc2.LogOpts {
+export interface ClientOpts extends JsonRpc2.ILogOpts {
 
 }
 
@@ -11,7 +11,7 @@ export interface ClientOpts extends JsonRpc2.LogOpts {
  * Creates a RPC Client.
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
-export class Client extends EventDispatcher implements JsonRpc2.Client {
+export class Client extends EventDispatcher implements JsonRpc2.IClient {
   private _responsePromiseMap: Map<number, { resolve: Function, reject: Function }> = new Map();
   private _nextMessageId: number = 0;
   private _emitLog: boolean = false;
@@ -84,7 +84,7 @@ export class Client extends EventDispatcher implements JsonRpc2.Client {
   }
 
   /** Set logging for all received and sent messages */
-  public setLogging({ logEmit, logConsole }: JsonRpc2.LogOpts = {}) {
+  public setLogging({ logEmit, logConsole }: JsonRpc2.ILogOpts = {}) {
     this._emitLog = logEmit;
     this._consoleLog = logConsole;
   }

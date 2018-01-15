@@ -52,3 +52,5 @@ test/out
 bin/**/*.js
 bin/**/*.map
 bin/**/*.d.ts
+
+TODO.yml

@@ -44,7 +44,7 @@ export interface Response {
   result?: any;
 
   /** Error object from Server if method invocation resulted in an error. */
-  error?: Error;
+  error?: IError;
 
   /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
   jsonrpc?: '2.0';
@@ -53,7 +53,7 @@ export interface Response {
 /**
  * Error object representation when a method invocation fails.
  */
-export interface Error {
+export interface IError {
   /** Indicates the error type that occurred. */
   code: ErrorCode;
 
@@ -86,7 +86,7 @@ export const enum ErrorCode {
 export type PromiseOrNot<T> = Promise<T> | T;
 
 /** A JsonRPC Client that abstracts the transportation of messages to and from the Server. */
-export interface Client {
+export interface IClient {
   /** Creates a Request object and sends to the Server. Returns the Response from the Server as a Promise. */
   call: (method: string, params: any) => Promise<any>;
 
@@ -98,7 +98,7 @@ export interface Client {
 }
 
 /** A JsonRPC Server that abstracts the transportation of messages to and from the Client */
-export interface Server {
+export interface IServer {
   /**
    * Invokes the handler function when Client sends a Request and sends the Response back.
    * If handler function returns a Promise, then it waits for the promise to be resolved or rejected before returning.
@@ -113,7 +113,7 @@ export interface Server {
   notify: (method: string, params?: any) => void;
 }
 
-export interface LogOpts {
+export interface ILogOpts {
   /** All messages will be emmitted and can be handled by client.on('receive', (msg: string) => void) and client.on('send', (msg: string) => any)  */
   logEmit?: boolean;
 

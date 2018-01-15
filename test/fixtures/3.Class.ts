@@ -11,8 +11,10 @@ const x = async () => {
     API.Runtime.run(),
   ]);
 
+  const mutex = new Promise((resolve) => API.Profiler.onExecutionContextDestroyed(resolve));
+
   await API.Profiler.start();
-  await new Promise((resolve) => API.Runtime.onExecutionContextDestroyed(resolve));
+  await mutex;
   await API.Profiler.stop();
 };
 

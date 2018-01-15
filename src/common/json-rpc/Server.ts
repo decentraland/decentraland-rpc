@@ -1,7 +1,7 @@
 import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
 
-export interface ServerOpts extends JsonRpc2.LogOpts {
+export interface ServerOpts extends JsonRpc2.ILogOpts {
   exposedAPI?: any;
 }
 
@@ -9,8 +9,8 @@ export interface ServerOpts extends JsonRpc2.LogOpts {
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
  */
-export class Server extends EventDispatcher implements JsonRpc2.Server {
-  private _worker: Worker;
+export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServer {
+  protected _worker: Worker;
   private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map();
   private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
@@ -92,7 +92,7 @@ export class Server extends EventDispatcher implements JsonRpc2.Server {
   }
 
   /** Set logging for all received and sent messages */
-  public setLogging({ logEmit, logConsole }: JsonRpc2.LogOpts = {}) {
+  public setLogging({ logEmit, logConsole }: JsonRpc2.ILogOpts = {}) {
     this._emitLog = logEmit;
     this._consoleLog = logConsole;
   }
@@ -124,7 +124,7 @@ export class Server extends EventDispatcher implements JsonRpc2.Server {
     }
   }
 
-  private _errorFromCode(code: JsonRpc2.ErrorCode, data?: any, method?: string): JsonRpc2.Error {
+  private _errorFromCode(code: JsonRpc2.ErrorCode, data?: any, method?: string): JsonRpc2.IError {
     let message = '';
 
     switch (code) {
@@ -176,7 +176,7 @@ export class Server extends EventDispatcher implements JsonRpc2.Server {
           target[prop] = this.api(`${prop}.`);
         } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
           const method = prop[2].toLowerCase() + prop.substr(3);
-          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, handler);
+          target[prop] = (handler: any) => this.on(`${prefix}${method}`, handler);
         } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
           const method = prop[4].toLowerCase() + prop.substr(5);
           target[prop] = (params: any) => this.notify(`${prefix}${method}`, params);
