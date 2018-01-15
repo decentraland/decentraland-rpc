@@ -1,6 +1,6 @@
 {
-  "name": "dcl-script-host",
-  "version": "1.0.0",
+  "name": "dcl-scripting",
+  "version": "0.0.1",
   "description": "",
   "main": "dist/client/index.js",
   "typings": "dist/client/index.d.ts",
