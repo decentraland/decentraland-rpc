@@ -3,12 +3,13 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
+import { future } from './Helpers';
 
 it('1.Echo', async () => {
   const worker = await ScriptingHost.fromURL('test/out/1.Echo.js');
 
   const randomNumber = Math.random();
-  let receivedNumber = null;
+  const aFuture = future();
 
   worker.setLogging({ logConsole: true, logEmit: true });
 
@@ -17,14 +18,10 @@ it('1.Echo', async () => {
   });
 
   worker.expose('JumpBack', async (data) => {
-    receivedNumber = data.number;
+    aFuture.resolve(data.number);
   });
 
   worker.enable();
 
-  await new Promise((ok) => {
-    setTimeout(ok, 1000);
-  });
-
-  assert.equal(receivedNumber, randomNumber, 'exchanged numbers must match');
+  assert.equal(await aFuture, randomNumber, 'exchanged numbers must match');
 });

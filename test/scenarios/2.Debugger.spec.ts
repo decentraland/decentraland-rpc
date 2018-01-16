@@ -2,11 +2,12 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
+import { future } from './Helpers';
 
 it('2.Debugger', async () => {
   const worker = await ScriptingHost.fromURL('test/out/2.Debugger.js');
 
-  let didStop = false;
+  let aFuture = future();
 
   worker.setLogging({ logConsole: true, logEmit: true });
 
@@ -30,16 +31,12 @@ it('2.Debugger', async () => {
       }, 16);
     },
     stop() {
-      didStop = true;
+      aFuture.resolve(333);
       return { data: "noice!" };
     }
   });
 
   worker.enable();
 
-  await new Promise((ok) => {
-    setTimeout(ok, 1000);
-  });
-
-  assert.equal(didStop, true, 'Did stop should have been called.');
+  assert.equal(await aFuture, 333, 'Did stop should have been called.');
 });

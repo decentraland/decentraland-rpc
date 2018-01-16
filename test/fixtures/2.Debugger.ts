@@ -1,4 +1,4 @@
-import { ScriptingClient, API } from '../..';
+import { ScriptingClient, API } from '../../dist/client';
 
 
 ScriptingClient.setLogging({ logConsole: true, logEmit: true });

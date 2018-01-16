@@ -2,8 +2,9 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
+import { future } from './Helpers';
 
-let didStop = false;
+const aFuture = future();
 
 class Debugger extends BasePlugin {
   getApi(): ExposedAPI {
@@ -27,7 +28,7 @@ class Profiler extends BasePlugin {
         }, 16);
       },
       stop: async () => {
-        didStop = true;
+        aFuture.resolve(true);
         return { data: "noice!" };
       }
     };
@@ -56,9 +57,5 @@ it('3.Class (with scripting host plugins)', async () => {
 
   worker.setLogging({ logConsole: true, logEmit: true });
 
-  await new Promise((ok) => {
-    setTimeout(ok, 1000);
-  });
-
-  assert.equal(didStop, true, 'Did stop should have been called.');
+  assert.equal(await aFuture, true);
 });
