@@ -2,10 +2,14 @@
 
 import webpack = require('webpack');
 import ProgressPlugin = require('webpack/lib/ProgressPlugin');
-import glob = require('glob');
+import globPkg = require('glob');
 import { promisify, callbackify } from 'util';
 import { resolve, parse as parsePath, dirname, relative } from 'path';
-import { TsConfigPathsPlugin } from 'awesome-typescript-loader';
+import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader';
+
+import rimraf = require('rimraf');
+
+const isWatching = process.argv.some($ => $ == '--watch');
 
 import fs = require('fs');
 
@@ -25,20 +29,20 @@ export function findConfigFile(baseDir: string, configFileName: string) {
 
 export interface ICompilerOptions {
   file: string;
-  output: string;
-  outputPath: string;
+  outFile: string;
+  outDir: string;
   tsconfig: string;
+  target?: "web" | "webworker" | "node";
 }
-
-
 
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
-    const compiler = webpack({
+
+    const options: webpack.Configuration = {
       entry: opt.file,
       output: {
-        filename: opt.output,
-        path: opt.outputPath,
+        filename: opt.outFile,
+        path: opt.outDir,
         libraryTarget: 'umd'
       },
 
@@ -46,35 +50,117 @@ export async function compile(opt: ICompilerOptions) {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: [".ts", ".tsx", ".js", ".json"],
         plugins: [
-          new TsConfigPathsPlugin({ configFileName: opt.tsconfig })
+          new TsConfigPathsPlugin({ configFileName: opt.tsconfig }),
+          new CheckerPlugin()
         ]
       },
-
+      watch: isWatching,
       module: {
         rules: [
           // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-          { test: /\.tsx?$/, loader: "awesome-typescript-loader", options: { configFileName: opt.tsconfig } }
+          { test: /\.tsx?$/, loader: "awesome-typescript-loader", options: { configFileName: opt.tsconfig, silent: true } }
         ]
-      }
-    });
+      },
+      target: opt.target
+    };
+
+    const compiler = webpack(options);
 
     // compiler.apply(new ProgressPlugin({
     //   profile: false
     // }));
 
-    compiler.run((err, stats) => {
-      if (err) {
-        onError(err);
-      } else {
-        onSuccess(stats);
-      }
-    });
+    if (!isWatching) {
+      compiler.run((err, stats) => {
+        if (err) {
+          onError(err);
+        } else {
+          onSuccess(stats);
+        }
+      });
+    } else {
+      compiler.watch({ ignored: /node_modules/, aggregateTimeout: 1000 }, (err, stats) => {
+        if (stats.hasErrors() || stats.hasWarnings()) {
+          console.log(stats.toString({
+            colors: true,
+            errors: true,
+            warnings: true
+          }));
+        } else {
+          console.log("OK  " + opt.file + " -> " + opt.outDir + "/" + opt.outFile);
+        }
+
+        if (!err) {
+          onSuccess(stats);
+        }
+      });
+    }
   });
 }
 
-export async function cli(args: string[]) {
-  const files = await new Promise<string[]>((onSuccess, onFailure) => {
-    glob(process.argv[2], { absolute: true }, (err, values) => {
+
+
+export async function processFile(opt: { file: string, outFile?: string, watch?: boolean, target?: string }) {
+  if (opt.file.endsWith('.json'))
+    return processJson(opt.file);
+
+  const parsed = parsePath(opt.file);
+
+  const configFile = findConfigFile(dirname(opt.file), 'tsconfig.json');
+
+  if (!configFile) {
+    throw new Error(`Unable to find a tsconfig.json file for ${opt.file}`);
+  }
+
+  const parsedTsConfig = require(configFile);
+
+  let outFile =
+    opt.outFile
+      ? resolve(process.cwd(), opt.outFile)
+      : parsedTsConfig.compilerOptions.outFile
+        ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
+        : (parsed.name + '.js');
+
+  const outDir =
+    parsedTsConfig.compilerOptions.outDir
+      ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
+      : dirname(outFile);
+
+  if (outFile.startsWith(outDir)) {
+    outFile = outFile.replace(outDir + '/', '');
+  }
+
+  const options: ICompilerOptions = {
+    file: opt.file,
+    outFile,
+    outDir,
+    tsconfig: configFile
+  };
+
+  console.log(`
+compiling: ${opt.file}
+  outFile: ${options.outFile}
+   outDir: ${options.outDir}
+ tsconfig: ${options.tsconfig}
+  `);
+
+  const result = await compile(options);
+
+  if (result.hasErrors() || result.hasWarnings()) {
+    console.log(result.toString({
+      assets: true,
+      colors: true,
+      entrypoints: true,
+      env: true,
+      errors: true,
+      publicPath: true
+    }));
+  }
+}
+
+export async function glob(path: string) {
+  return await new Promise<string[]>((onSuccess, onFailure) => {
+    globPkg(path, { absolute: true }, (err, values) => {
       if (err) {
         onFailure(err);
       } else {
@@ -82,66 +168,55 @@ export async function cli(args: string[]) {
       }
     });
   });
+}
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const parsed = parsePath(file);
-    const outFile = parsed.name + '-out.js';
+export async function cli(args: string[]) {
+  const files = await glob(process.argv[2]);
 
-    const configFile = findConfigFile(dirname(files[i]), 'tsconfig.json');
+  await Promise.all(files.map($ => processFile({ file: $, outFile: args[3] })));
+}
 
-    if (!configFile) {
-      throw new Error(`Unable to find a tsconfig.json file for ${file}`);
-    }
+export async function processJson(file: string) {
+  const config: any[] = require(file);
 
-    const parsedTsConfig = require(configFile);
+  if (typeof config != 'object' || !(config instanceof Array)) {
+    throw new Error(`Config file ${file} is not a valid sequence of steps`);
+  }
 
-    let outputFile =
-      args[3]
-        ? resolve(process.cwd(), args[3])
-        : parsedTsConfig.compilerOptions.outFile
-          ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
-          : (parsed.name + '.js');
+  if (config.length == 0)
+    throw new Error(`Config file ${file} describes no compilation steps`);
 
-    const outputPath =
-      parsedTsConfig.compilerOptions.outDir
-        ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
-        : dirname(outputFile);
+  for (let i = 0; i < config.length; i++) {
+    const $ = config[i];
 
-    if (outputFile.startsWith(outputPath)) {
-      outputFile = outputFile.replace(outputPath + '/', '');
-    }
+    if ($.kind == 'RM') {
+      // delete a folder
+      console.log(`
+        Deleting folder: ${$.path}
+      `.trim());
+      rimraf.sync($.path);
+    } else if ($.kind == 'TS') {
+      // compile TS
+      const files = await glob($.file);
 
-    const options: ICompilerOptions = {
-      file: file,
-      output: outputFile,
-      outputPath,
-      tsconfig: configFile
-    };
-
-    console.log(`
-compiling: ${file}
-  outFile: ${options.output}
-   outDir: ${options.outputPath}
- tsconfig: ${options.tsconfig}
-    `.trim());
-
-    const result = await compile(options);
-
-    if (result.hasErrors() || result.hasWarnings()) {
-      console.log(result.toString({
-        assets: true,
-        colors: true,
-        entrypoints: true,
-        env: true,
-        errors: true,
-        publicPath: true
-      }));
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        await processFile({ ...$, file });
+      }
+    } else {
+      console.error(`Unknown compilation step ${JSON.stringify($, null, 2)}`);
     }
   }
 }
 
-cli(process.argv).catch(err => {
-  console.error(err);
-  process.exit(1);
-});
+cli(process.argv)
+  .then(() => {
+    if (isWatching) {
+      console.log("The compiler is watching file changes...");
+      process.stdin.resume();
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    process.exit(1);
+  });

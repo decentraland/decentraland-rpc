@@ -1,0 +1,40 @@
+[
+  {
+    "name": "Delete dist folder",
+    "kind": "RM",
+    "path": "./dist"
+  },
+  {
+    "name": "Delete out folder",
+    "kind": "RM",
+    "path": "./test/out"
+  },
+  {
+    "name": "Scripting host",
+    "kind": "TS",
+    "file": "./src/host/index.ts",
+    "outFile": "./dist/host/index.js",
+    "watch": true
+  },
+  {
+    "name": "Scripting client",
+    "kind": "TS",
+    "file": "./src/client/index.ts",
+    "outFile": "./dist/client/index.js",
+    "watch": true
+  },
+  {
+    "name": "Compile test web workers",
+    "kind": "TS",
+    "file": "./test/fixtures/*.ts",
+    "target": "webworker",
+    "watch": true
+  },
+  {
+    "name": "Compile tests web workers",
+    "kind": "TS",
+    "file": "./test/scenarios/index.ts",
+    "target": "web",
+    "watch": true
+  }
+]
