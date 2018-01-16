@@ -83,50 +83,58 @@ export async function cli(args: string[]) {
     });
   });
 
-  for (let i = 0; i < files.length; i++) {
-    const file = files[i];
-    const parsed = parsePath(file);
+  const parsedFilePaths = await Promise.all(files.map(parsePath));
+
+  const configFiles = await Promise.all(files.map((file, index) => {
+    const parsed = parsedFilePaths[index];
     const outFile = parsed.name + '-out.js';
 
-    const configFile = findConfigFile(dirname(files[i]), 'tsconfig.json');
+    const configFile = findConfigFile(dirname(file), 'tsconfig.json');
 
     if (!configFile) {
       throw new Error(`Unable to find a tsconfig.json file for ${file}`);
     }
 
-    const parsedTsConfig = require(configFile);
+    return configFile
+  }))
+  const configs = await Promise.all(configFiles.map(file => require(file)))
 
-    let outputFile =
-      args[3]
+  const outputFiles = await Promise.all(configs.map((config, index) => {
+    const configFile = configFiles[index]
+    return args[3]
         ? resolve(process.cwd(), args[3])
-        : parsedTsConfig.compilerOptions.outFile
-          ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
-          : (parsed.name + '.js');
+        : config.compilerOptions.outFile
+          ? resolve(dirname(configFile), config.compilerOptions.outFile)
+          : (parsedFilePaths[index].name + '.js');
+  }));
 
+  const options = await Promise.all(configs.map((config, index) => {
     const outputPath =
-      parsedTsConfig.compilerOptions.outDir
-        ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
-        : dirname(outputFile);
+      config.compilerOptions.outDir
+        ? resolve(dirname(configFiles[index]), config.compilerOptions.outDir)
+        : dirname(outputFiles[index]);
 
-    if (outputFile.startsWith(outputPath)) {
-      outputFile = outputFile.replace(outputPath + '/', '');
+    if (outputFiles[index].startsWith(outputPath)) {
+      outputFiles[index] = outputFiles[index].replace(outputPath + '/', '');
     }
 
-    const options: ICompilerOptions = {
-      file: file,
-      output: outputFile,
+    return {
+      file: files[index],
+      output: outputFiles[index],
       outputPath,
-      tsconfig: configFile
+      tsconfig: configFiles[index]
     };
+  }));
 
+  await Promise.all(options.map(async (option, index) => {
     console.log(`
-compiling: ${file}
-  outFile: ${options.output}
-   outDir: ${options.outputPath}
- tsconfig: ${options.tsconfig}
+compiling: ${option.file}
+  outFile: ${option.output}
+   outDir: ${option.outputPath}
+ tsconfig: ${option.tsconfig}
     `.trim());
 
-    const result = await compile(options);
+    const result = await compile(option);
 
     if (result.hasErrors() || result.hasWarnings()) {
       console.log(result.toString({
@@ -138,7 +146,7 @@ compiling: ${file}
         publicPath: true
       }));
     }
-  }
+  }));
 }
 
 cli(process.argv).catch(err => {
