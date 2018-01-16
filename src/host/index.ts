@@ -2,7 +2,7 @@ import { Server } from "../common/json-rpc/Server";
 import { Dictionary } from "../common/core/EventDispatcher";
 
 export interface ExposedAPI {
-  [method: string]: (() => Promise<any>) | ((...args) => Promise<any>);
+  [method: string]: (() => Promise<any>) | ((arg) => Promise<any>);
 }
 
 export interface ScriptingHostPlugin {
@@ -10,8 +10,8 @@ export interface ScriptingHostPlugin {
   terminate(): void;
 }
 
-export interface ScriptingHostPluginConstructor {
-  new(api: any, permissons: any, metadata: any): ScriptingHostPlugin;
+export interface ScriptingHostPluginConstructor<T> {
+  new(api: any, permissons: any, metadata: any): T;
 }
 
 export interface ScriptingHostEvents {
@@ -20,9 +20,9 @@ export interface ScriptingHostEvents {
   willEnable: any;
 }
 
-export const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor> = {};
+export const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor<ScriptingHostPlugin>> = {};
 
-function registerPlugin(name: string, api: ScriptingHostPluginConstructor) {
+function registerPlugin(name: string, api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
   if (name in RegisteredAPIs) {
     throw new Error(`The API ${name} is already registered`);
   }
@@ -62,6 +62,20 @@ export class ScriptingHost extends Server<ScriptingHostEvents> {
     this.enable();
   }
 
+  getPluginInstance<X>(plugin: { new(...args): X }): X | null;
+  getPluginInstance(name: string): ScriptingHostPlugin | null;
+  getPluginInstance(arg) {
+    if (typeof arg == 'string') {
+      return this.apiInstances[arg] || null;
+    } else if (typeof arg == 'function') {
+      return Object
+        .keys(this.apiInstances)
+        .map($ => this.apiInstances[$])
+        .find($ => $ instanceof arg);
+    }
+    return null;
+  }
+
   terminate() {
     this.emit('willTerminate');
 
@@ -79,7 +93,7 @@ export class ScriptingHost extends Server<ScriptingHostEvents> {
   }
 
 
-  static registerPlugin(name: string, api: ScriptingHostPluginConstructor): void {
+  static registerPlugin(name: string, api: ScriptingHostPluginConstructor<any>): void {
     registerPlugin(name, api);
   }
 

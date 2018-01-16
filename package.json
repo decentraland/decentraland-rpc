@@ -9,7 +9,7 @@
     "watch": "npm run build:cli && ./bin/compile.js compiler.cfg.json --watch",
     "build": "npm run build:cli && ./bin/compile.js compiler.cfg.json",
     "test": "npm run build && node ./bin/test.js",
-    "test:local": "npm run build && node ./bin/test.js --keep-open"
+    "test:local": "npm run build && (npm run watch & node ./bin/test.js --keep-open)"
   },
   "repository": {
     "type": "git",

@@ -185,7 +185,17 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
         }
       }
     } else if (event === 'error') {
-      throw arguments[1] || new Error();
+      if (arguments[1] instanceof Error) {
+        throw arguments[1];
+      }
+
+      if (typeof arguments[1] == 'string') {
+        throw new Error(arguments[1]);
+      }
+
+      console.error(arguments);
+
+      throw arguments[1];
     }
   }
 }

@@ -55,7 +55,7 @@ it('3.Class (with scripting host plugins)', async () => {
 
   const worker = await ScriptingHost.fromURL('test/out/3.Class.js');
 
-  worker.setLogging({ logConsole: true, logEmit: true });
+  // worker.setLogging({ logConsole: true, logEmit: true });
 
   assert.equal(await aFuture, true);
 });

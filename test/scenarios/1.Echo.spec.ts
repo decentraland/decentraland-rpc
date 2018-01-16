@@ -11,7 +11,7 @@ it('1.Echo', async () => {
   const randomNumber = Math.random();
   const aFuture = future();
 
-  worker.setLogging({ logConsole: true, logEmit: true });
+  // worker.setLogging({ logConsole: true, logEmit: true });
 
   worker.expose('MethodX', async (message) => {
     return { number: randomNumber };

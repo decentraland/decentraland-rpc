@@ -1,8 +1,5 @@
 import { ScriptingClient, API } from '../../dist/client';
 
-
-ScriptingClient.setLogging({ logConsole: true, logEmit: true });
-
 const x = async () => {
   await Promise.all([
     API.Runtime.enable(),
@@ -19,5 +16,4 @@ const x = async () => {
 };
 
 x()
-  .then(() => console.log('Done.'))
   .catch(x => ScriptingClient.notify('Error', [x.toString(), x]));

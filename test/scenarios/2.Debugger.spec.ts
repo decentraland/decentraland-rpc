@@ -9,7 +9,7 @@ it('2.Debugger', async () => {
 
   let aFuture = future();
 
-  worker.setLogging({ logConsole: true, logEmit: true });
+  // worker.setLogging({ logConsole: true, logEmit: true });
 
   const api = worker.api();
 

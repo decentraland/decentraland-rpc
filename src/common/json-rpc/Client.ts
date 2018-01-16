@@ -68,6 +68,8 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
         if (message.result) {
           promise.resolve(message.result);
         } else if (message.error) {
+          const error = Object.assign(new Error(message.error.message), message.error);
+
           promise.reject(message.error);
         } else {
           this.emit('error', new Error(`Response must have result or error: ${messageStr}`));
