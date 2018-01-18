@@ -54,6 +54,5 @@ ScriptingHost.registerPlugin('Runtime', Runtime);
 testInWorker('test/out/3.Class.js', {
   validateResult: async (result) => {
     assert.equal(await aFuture, true);
-  },
-  log: true
+  }
 });

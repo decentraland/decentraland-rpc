@@ -89,7 +89,14 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     }
   }
 
-  call(method: string, params?: any): Promise<any> {
+  call(method: string): Promise<any>;
+  call(method: string, params: any[]): Promise<any>;
+  call(method: string, params: { [key: string]: any }): Promise<any>;
+  call(method: string, params?: any) {
+    if (typeof params != 'undefined' && typeof params != 'object') {
+      throw new Error('Params must be structured data (Array | Object)');
+    }
+
     const id = ++this._nextMessageId;
     const message: JsonRpc2.IRequest = { id, method, params };
 
@@ -103,7 +110,14 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     });
   }
 
-  notify(method: string, params?: any): void {
+  notify(method: string): void;
+  notify(method: string, params: any[]): void;
+  notify(method: string, params: { [key: string]: any }): void;
+  notify(method: string, params?: any[]): void {
+    if (typeof params != 'undefined' && typeof params != 'object') {
+      throw new Error('Params must be structured data (Array | Object)');
+    }
+
     this._send({ method, params });
   }
 
@@ -131,14 +145,20 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
         } else if (prefix === void 0) { // Prefix is undefined. Create domain prefix
           target[prop] = this.api(`${prop}.`);
         } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
-          const method = prop[2].toLowerCase() + prop.substr(3);
-          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, handler);
+          const method = prop.substr(2);
+          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, (params) => {
+            if (params && (params instanceof Array)) {
+              handler.apply(null, params);
+            } else {
+              handler.call(null, params);
+            }
+          });
         } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
-          const method = prop[4].toLowerCase() + prop.substr(5);
-          target[prop] = (params: any) => this.notify(`${prefix}${method}`, params);
+          const method = prop.substr(4);
+          target[prop] = (...args) => this.notify(`${prefix}${method}`, args);
         } else {
           const method = prop;
-          target[prop] = (params: any) => this.call(`${prefix}${method}`, params);
+          target[prop] = (...args) => this.call(`${prefix}${method}`, args);
         }
 
         return target[prop];

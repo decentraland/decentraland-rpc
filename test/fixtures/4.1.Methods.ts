@@ -19,12 +19,4 @@ test(async () => {
 
   await shouldFail(() => API.Methods.failsWithoutParams(), 'failsWithoutParams');
   await shouldFail(() => API.Methods.failsWithParams(1), 'failsWithParams');
-
-  // try {
-  //   await API.Methods.failsWithParams(1);
-  //   throw new Error('Unreachable');
-  // } catch (e) {
-  //   if (e.message == 'Unreachable')
-  //     throw new Error('failsWithParams did not fail');
-  // }
 });

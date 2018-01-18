@@ -50,28 +50,40 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
         const handler = this._exposedMethodsMap.get(request.method);
         // Handler is defined so lets call it
         if (handler) {
-          try {
-            const result: JsonRpc2.PromiseOrNot<any> = handler.call(null, request.params);
-            if (result instanceof Promise) {
-              // Result is a promise, so lets wait for the result and handle accordingly
-              result.then((actualResult: any) => {
-                this._send(from, { id: request.id, result: actualResult || {} });
-              }).catch((error: Error) => {
-                this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
-              });
-            } else {
-              // Result is not a promise so send immediately
-              this._send(from, { id: request.id, result: result || {} });
+          if (request.params && typeof request.params != 'object') {
+            this._sendError(from, request, JsonRpc2.ErrorCode.InvalidParams, new Error('params is not an Array or Object'));
+          } else {
+            try {
+              const result: JsonRpc2.PromiseOrNot<any> =
+                request.params instanceof Array
+                  ? handler.apply(null, request.params)
+                  : handler.call(null, request.params)
+                ;
+
+              if (result instanceof Promise) {
+                // Result is a promise, so lets wait for the result and handle accordingly
+                result
+                  .then((actualResult: any) => {
+                    this._send(from, { id: request.id, result: actualResult || [] });
+                  })
+                  .catch((error: Error) => {
+                    this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
+                  });
+              } else {
+                // Result is not a promise so send immediately
+                this._send(from, { id: request.id, result: result || [] });
+              }
+
+            } catch (error) {
+              this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
             }
-          } catch (error) {
-            this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
           }
         } else {
           this._sendError(from, request, JsonRpc2.ErrorCode.MethodNotFound);
         }
       } else {
         // Message is a notification, so just emit
-        this.emit(request.method, request.params, from);
+        this.emit(request.method, request.params);
       }
     } else {
       // No method property, send InvalidRequest error
@@ -140,11 +152,17 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     return { code, message, data };
   }
 
-  expose(method: string, handler: (params: any) => Promise<any>): void {
+  expose(method: string, handler: (...params: any[]) => Promise<any>): void {
     this._exposedMethodsMap.set(method, handler);
   }
 
-  notify(method: string, params?: any): void {
+  notify(method: string): void;
+  notify(method: string, params: any[]): void;
+  notify(method: string, params: { [key: string]: any }): void;
+  notify(method: string, params?: any[]): void {
+    if (typeof params != 'undefined' && typeof params != 'object') {
+      throw new Error('Params must be structured data (Array | Object)');
+    }
     // Broadcast message to all clients
     const clients = this.getAllClients();
 
@@ -179,11 +197,18 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
         } else if (prefix === void 0) {
           target[prop] = this.api(`${prop}.`);
         } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
-          const method = prop[2].toLowerCase() + prop.substr(3);
-          target[prop] = (handler: any) => this.on(`${prefix}${method}`, handler);
+          const method = prop.substr(2);
+
+          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, (params) => {
+            if (params && (params instanceof Array)) {
+              handler.apply(null, params);
+            } else {
+              handler.call(null, params);
+            }
+          });
         } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
-          const method = prop[4].toLowerCase() + prop.substr(5);
-          target[prop] = (params: any) => this.notify(`${prefix}${method}`, params);
+          const method = prop.substr(4);
+          target[prop] = (...args) => this.notify(`${prefix}${method}`, args);
         } else if (prop === 'expose') {
           target[prop] = (module: any) => {
             if (!module || typeof module !== 'object') {

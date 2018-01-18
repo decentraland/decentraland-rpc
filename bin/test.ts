@@ -76,4 +76,9 @@ wss.on('connection', function connection(ws, req) {
     users.splice(users.indexOf(thisUser), 1);
   });
 
+  ws.on('error', (e) => console.log(e));
+
 });
+
+wss.on('error', (e) => console.log(e));
+server.on('error', (e) => console.log(e));

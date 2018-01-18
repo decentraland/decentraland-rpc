@@ -69,14 +69,11 @@ describe(file, () => {
   });
 
   it('waits the result', async () => {
-
-
-
     const resultX = await (workerX.getPluginInstance(Test).waitForPass());
     const resultO = await (workerO.getPluginInstance(Test).waitForPass());
 
-    console.log('X state', resultX);
-    console.log('O state', resultO);
+    console.log('X state ', resultX);
+    console.log('O state ', resultO);
   });
 
   it('terminates the workers', async () => {

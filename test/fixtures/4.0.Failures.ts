@@ -6,4 +6,6 @@ test(() => shouldFail(async () => {
   // the error should be forwarded to the client
   // and it should create and throw a valid instance of Error (js)
   await API.Methods.fail();
+
+  return 'ok';
 }, 'RPC Call to API.Methods.fail'));
