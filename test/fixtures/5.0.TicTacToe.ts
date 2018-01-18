@@ -12,7 +12,7 @@ enum TicTacToeAction {
   PLACE = 'placeSymbol',
   RESTART = 'restart',
   SYNC = 'sync',
-  SET_SYMBOL = 'setSymbol', 
+  SET_SYMBOL = 'setSymbol',
 }
 interface ITicTacToeState {
   board: GameSymbol[];
@@ -20,12 +20,12 @@ interface ITicTacToeState {
 }
 
 interface IGenericAction {
-  type: TicTacToeAction,
+  type: TicTacToeAction;
   payload?: any;
 }
 
 const initialState: ITicTacToeState = {
-  board:[
+  board: [
     null, null, null,
     null, null, null,
     null, null, null
@@ -35,7 +35,7 @@ const initialState: ITicTacToeState = {
 
 let state = initialState;
 
-function reducer (state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
+function reducer(state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
   const { type, payload } = action;
 
   switch (type) {
@@ -43,11 +43,11 @@ function reducer (state: ITicTacToeState = initialState, action: IGenericAction)
       const { board } = payload as { board: GameSymbol[] };
       return { ...state, board };
     }
-    
+
     case TicTacToeAction.RESTART: {
       return { ...initialState };
     }
-    
+
     case TicTacToeAction.PLACE: {
       const { index } = payload as { index: number };
       return { ...state, board: Object.assign([], state.board, { [index]: state.mySymbol }) };
@@ -55,7 +55,7 @@ function reducer (state: ITicTacToeState = initialState, action: IGenericAction)
 
     case TicTacToeAction.SET_SYMBOL: {
       const { symbol } = payload as { symbol: GameSymbol };
-      return { ...state, mySymbol: symbol}
+      return { ...state, mySymbol: symbol };
     }
 
     default: {
@@ -64,7 +64,7 @@ function reducer (state: ITicTacToeState = initialState, action: IGenericAction)
   }
 }
 
-function handleAction(action: IGenericAction){
+function handleAction(action: IGenericAction) {
   state = reducer(state, action);
 }
 
@@ -80,7 +80,7 @@ test(async () => {
       payload: {
         symbol
       }
-    });  
+    });
   });
 
   API.TicTacToeBoard.onClickPosition((index: number) => {
@@ -90,11 +90,12 @@ test(async () => {
         index
       }
     });
+
   });
 
   assert.equal(state.board, [
     'X', null, null,
     null, null, null,
     null, null, null
-  ], 'Position 0 should have the X symbol')
+  ], 'Position 0 should have the X symbol');
 });

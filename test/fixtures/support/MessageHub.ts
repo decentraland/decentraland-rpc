@@ -41,6 +41,6 @@ export class WSMessageHub extends EventDispatcher {
 
 
 
-export function getWsMessageHub(name: string) {
-  return new WSMessageHub(`ws://${location.host}/test/${name || ''}`);
+export function getWsMessageHub(room: string) {
+  return new WSMessageHub(`ws://${location.host}/test/${room || ''}`);
 }

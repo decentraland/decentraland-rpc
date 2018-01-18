@@ -51,6 +51,9 @@ ScriptingHost.registerPlugin('Debugger', Debugger);
 ScriptingHost.registerPlugin('Profiler', Profiler);
 ScriptingHost.registerPlugin('Runtime', Runtime);
 
-testInWorker('test/out/3.Class.js', async (result) => {
-  assert.equal(await aFuture, true);
-}, true);
+testInWorker('test/out/3.Class.js', {
+  validateResult: async (result) => {
+    assert.equal(await aFuture, true);
+  },
+  log: true
+});
