@@ -1,4 +1,4 @@
-import { testInWorker } from "./support/Helpers";
+import { testInWorker, future } from "./support/Helpers";
 import assert = require('assert');
 import { BasePlugin, ScriptingHost } from "../../lib/host";
 import { Test } from "./support/Commons";
@@ -13,6 +13,8 @@ class TicTacToeBoard extends BasePlugin {
    * are used in the test scenario
    */
 
+  waitForConnection = future();
+
   userDidClickPosition(position: number) {
     this.notify('ClickPosition', position);
   }
@@ -22,11 +24,15 @@ class TicTacToeBoard extends BasePlugin {
   }
 
   userDidRequestResults() {
-    this.notify('RequestState');
+    this.notify('CommandsDidFinish');
   }
 
   getApi() {
-    return {};
+    return {
+      iAmConnected: async (...args) => {
+        this.waitForConnection.resolve(args);
+      }
+    };
   }
 }
 
@@ -45,19 +51,20 @@ describe(file, () => {
     workerO = await ScriptingHost.fromURL(file);
     workerX = await ScriptingHost.fromURL(file);
 
+    workerX.setLogging({ logConsole: true });
+    workerO.setLogging({ logConsole: true });
+
     apiX = workerX.getPluginInstance(TicTacToeBoard);
     apiO = workerO.getPluginInstance(TicTacToeBoard);
 
-    workerX.setLogging({ logConsole: true });
-    workerO.setLogging({ logConsole: true });
-  });
+    // awaits for web socket connections
+    await apiX.waitForConnection;
+    await apiO.waitForConnection;
 
-  it('sets the players', async () => {
     apiX.userDidChooseSymbol('x');
     apiO.userDidChooseSymbol('o');
-  });
 
-  it('clicks some positions', async () => {
+    // clicks some positions
     apiX.userDidClickPosition(0);
     apiO.userDidClickPosition(1);
     apiX.userDidClickPosition(3);
@@ -66,17 +73,15 @@ describe(file, () => {
 
     apiX.userDidRequestResults();
     apiO.userDidRequestResults();
-  });
 
-  it('waits the result', async () => {
+    // waits the result
     const resultX = await (workerX.getPluginInstance(Test).waitForPass());
     const resultO = await (workerO.getPluginInstance(Test).waitForPass());
 
     console.log('X state ', resultX);
     console.log('O state ', resultO);
-  });
 
-  it('terminates the workers', async () => {
+    // terminates the workers
     workerX.terminate();
     workerO.terminate();
   });

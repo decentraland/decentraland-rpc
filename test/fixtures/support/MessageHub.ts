@@ -24,13 +24,13 @@ export class WSMessageHub extends EventDispatcher {
       reject = b;
     });
 
-
     this.sock = new WebSocket(url, protocols);
 
     this.sock.addEventListener('message', message => {
+      console.log('receive', message.data);
       const data = JSON.parse(message.data);
       if (data.event) {
-        super.emit.apply(this, [data.event].concat(data.args || []));
+        super.emit(data.event, ...(data.args || []));
       }
     });
 

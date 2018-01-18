@@ -18,6 +18,15 @@ export function future<T = any>(): IFuture<T> {
 }
 
 
+
+export function wait(ms: number): Promise<void> {
+  return new Promise(ok => {
+    setTimeout(ok, ms);
+  });
+}
+
+
+
 export function test(fn: () => Promise<any>) {
   fn()
     .then((x) => API.Test.pass(x))

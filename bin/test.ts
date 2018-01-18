@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import runner = require('mocha-headless-chrome');
+import * as runner from 'mocha-headless-chrome';
 import { resolve } from 'path';
-import ws = require('ws');
-import http = require('http');
-import url = require('url');
-import express = require('express');
-import fs = require('fs');
+import * as ws from 'ws';
+import * as http from 'http';
+import * as url from 'url';
+import * as express from 'express';
+import * as fs from 'fs';
 
 
 const keepOpen = process.argv.some($ => $ == '--keep-open');
@@ -50,34 +50,21 @@ server.listen(port, function (error) {
   }
 });
 
-const users: { ws: ws, req: http.IncomingMessage }[] = [];
-
 wss.on('connection', function connection(ws, req) {
-  const thisUser = { ws, req };
-
-  users.push(thisUser);
-
   const location = url.parse(req.url, true);
   // You might use location.query.access_token to authenticate or share sessions
   // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
 
-  ws.on('message', function incoming(message) {
-    console.log('[WSS] received: %s', message);
-
-    users.forEach($ => {
-      // forward the message to the connections that shares the same URL
-      if ($.req.url == req.url && $.ws != ws) {
-        $.ws.send(message);
+  ws.on('message', function incoming(data) {
+    console.log('[WSS] received: %s', data);
+    wss.clients.forEach(function each(client) {
+      if (client !== ws && client.readyState === ws.OPEN) {
+        client.send(data);
       }
     });
   });
 
-  ws.on('close', () => {
-    users.splice(users.indexOf(thisUser), 1);
-  });
-
   ws.on('error', (e) => console.log(e));
-
 });
 
 wss.on('error', (e) => console.log(e));

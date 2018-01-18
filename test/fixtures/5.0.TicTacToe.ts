@@ -1,6 +1,6 @@
 import { ScriptingClient, API } from '../../lib/client';
 import assert = require('assert');
-import { test, shouldFail } from './support/ClientHelpers';
+import { test, shouldFail, future, wait } from './support/ClientHelpers';
 import { getWsMessageHub } from './support/MessageHub';
 
 enum GameSymbol {
@@ -14,6 +14,7 @@ enum TicTacToeAction {
   SYNC = 'sync',
   SET_SYMBOL = 'setSymbol',
 }
+
 interface ITicTacToeState {
   board: GameSymbol[];
   mySymbol: GameSymbol;
@@ -39,29 +40,31 @@ function reducer(state: ITicTacToeState = initialState, action: IGenericAction):
   const { type, payload } = action;
 
   switch (type) {
-    case TicTacToeAction.SYNC: {
-      const { board } = payload as { board: GameSymbol[] };
-      return { ...state, board };
-    }
+    case TicTacToeAction.SYNC:
+      return {
+        ...state,
+        board: payload.board
+      };
 
-    case TicTacToeAction.RESTART: {
-      return { ...initialState };
-    }
+    case TicTacToeAction.RESTART:
+      return {
+        ...initialState
+      };
 
-    case TicTacToeAction.PLACE: {
-      const { index, symbol } = payload as { index: number, symbol: GameSymbol };
-      return { ...state, board: Object.assign([], state.board, { [index]: symbol }) };
-    }
+    case TicTacToeAction.PLACE:
+      return {
+        ...state,
+        board: Object.assign([], state.board, { [payload.index]: payload.symbol })
+      };
 
-    case TicTacToeAction.SET_SYMBOL: {
-      const { symbol } = payload as { symbol: GameSymbol };
-      return { ...state, mySymbol: symbol };
-    }
-
-    default: {
-      return { ...state };
-    }
+    case TicTacToeAction.SET_SYMBOL:
+      return {
+        ...state,
+        mySymbol: payload.symbol
+      };
   }
+
+  return state;
 }
 
 function handleAction(action: IGenericAction) {
@@ -70,12 +73,12 @@ function handleAction(action: IGenericAction) {
 
 
 test(async () => {
+  const userFinishesCommands = future();
   const messageBus = getWsMessageHub('tictactoe');
 
-  await messageBus.waitForConnection();
-
-  API.TicTacToeBoard.onRequestState(() => {
+  API.TicTacToeBoard.onCommandsDidFinish(async () => {
     API.Test.pass(state);
+    userFinishesCommands.resolve(1);
   });
 
   API.TicTacToeBoard.onChooseSymbol((symbol: GameSymbol) => {
@@ -101,10 +104,12 @@ test(async () => {
     });
   });
 
+  await messageBus.waitForConnection();
+  await API.TicTacToeBoard.iAmConnected();
 
-  // assert.equal(state.board, [
-  //   'X', null, null,
-  //   null, null, null,
-  //   null, null, null
-  // ], 'Position 0 should have the X symbol');
+  // give some time to the websockets to send messages
+  await wait(300);
+
+  // wait every command to execute
+  await userFinishesCommands;
 });
