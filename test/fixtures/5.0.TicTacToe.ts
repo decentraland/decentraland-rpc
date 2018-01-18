@@ -72,18 +72,24 @@ function handleAction(action: IGenericAction){
 test(async () => {
   const messageBus = new WSMessageHub('tictactoe');
 
-  handleAction({
-    type: TicTacToeAction.SET_SYMBOL,
-    payload: {
-      symbol: GameSymbol.X,
-    }
+  API.TicTacToeBoard.onRequestState(() => API.Test.pass(state));
+
+  API.TicTacToeBoard.onChooseSymbol((symbol: GameSymbol) => {
+    handleAction({
+      type: TicTacToeAction.SET_SYMBOL,
+      payload: {
+        symbol
+      }
+    });  
   });
 
-  handleAction({
-    type: TicTacToeAction.PLACE,
-    payload: {
-      index: 0
-    }
+  API.TicTacToeBoard.onClickPosition((index: number) => {
+    handleAction({
+      type: TicTacToeAction.PLACE,
+      payload: {
+        index
+      }
+    });
   });
 
   assert.equal(state.board, [
