@@ -117,6 +117,10 @@ export interface IServer {
   notify: (method: string, params?: any) => void;
 }
 
+export interface IServerOpts extends ILogOpts {
+
+}
+
 export interface ILogOpts {
   /** All messages will be logged to console */
   logConsole?: boolean;

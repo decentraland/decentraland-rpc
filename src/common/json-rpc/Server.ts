@@ -1,10 +1,6 @@
 import { EventDispatcher, EventDispatcherBinding } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./types";
 
-export interface ServerOpts extends JsonRpc2.ILogOpts {
-
-}
-
 /**
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
@@ -18,7 +14,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     return this._isEnabled;
   }
 
-  constructor(opts: ServerOpts = {}) {
+  constructor(opts: JsonRpc2.IServerOpts = {}) {
     super();
     this.setLogging(opts);
   }
