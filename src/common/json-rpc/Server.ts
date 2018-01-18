@@ -1,5 +1,5 @@
 import { EventDispatcher, EventDispatcherBinding } from "../core/EventDispatcher";
-import * as JsonRpc2 from "./json-rpc";
+import * as JsonRpc2 from "./types";
 
 export interface ServerOpts extends JsonRpc2.ILogOpts {
 
@@ -39,7 +39,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
 
   protected processMessage(from: ClientType, messageStr: string): void {
     this._logMessage(messageStr, 'receive');
-    let request: JsonRpc2.Request;
+    let request: JsonRpc2.IRequest;
 
     // Ensure JSON is not malformed
     try {
@@ -106,13 +106,13 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     }
   }
 
-  private _send(receiver: ClientType, message: JsonRpc2.Response | JsonRpc2.Notification) {
+  private _send(receiver: ClientType, message: JsonRpc2.IResponse | JsonRpc2.INotification) {
     const messageStr = JSON.stringify(message);
     this._logMessage(messageStr, 'send');
     this.sendMessage(receiver, messageStr);
   }
 
-  private _sendError(receiver: ClientType, request: JsonRpc2.Request, errorCode: JsonRpc2.ErrorCode, error?: Error) {
+  private _sendError(receiver: ClientType, request: JsonRpc2.IRequest, errorCode: JsonRpc2.ErrorCode, error?: Error) {
     try {
       this._send(receiver, {
         id: request && request.id || -1,
