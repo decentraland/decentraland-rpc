@@ -39,14 +39,13 @@ server.listen(port, function (error) {
 
     runner(options)
       .then(result => {
-        let json = JSON.stringify(result);
         console.dir(result);
-        keepOpen || process.exit(0);
+        if (!keepOpen) process.exit(result.result.stats.failures);
       })
       .catch(err => {
         console.error(err.message || JSON.stringify(err));
         console.dir(err);
-        keepOpen || process.exit(1);
+        if (!keepOpen) process.exit(1);
       });
   }
 });

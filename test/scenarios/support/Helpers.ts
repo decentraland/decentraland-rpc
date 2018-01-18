@@ -19,18 +19,26 @@ export function future<T = any>(): IFuture<T> {
   return promise;
 }
 
+export interface ITestInWorkerOptions {
+  log?: boolean;
+  validateResult?: (result: any) => void;
+  execute?: (worker: ScriptingHost) => void;
+}
 
-export function testInWorker(file: string, cb?: (result) => void, log = false) {
+
+export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   it(file, async () => {
     const worker = await ScriptingHost.fromURL(file);
 
-    if (log) {
+    if (options.log) {
       worker.setLogging({ logConsole: true });
     }
 
+    options.execute && options.execute(worker);
+
     const result = await (worker.getPluginInstance(Test).waitForPass());
 
-    cb && cb(result);
+    options.validateResult && options.validateResult(result);
 
     worker.terminate();
   });
