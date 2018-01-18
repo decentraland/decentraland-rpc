@@ -10,31 +10,25 @@
     "path": "./test/out"
   },
   {
-    "name": "Scripting host",
-    "kind": "TS",
-    "file": "./src/host/index.ts",
-    "outFile": "./dist/host/index.js",
-    "watch": true
+    "name": "Scripting host & common files",
+    "kind": "TSC",
+    "config": "./src/tsconfig.json"
   },
   {
-    "name": "Scripting client",
-    "kind": "TS",
-    "file": "./src/client/index.ts",
-    "outFile": "./dist/client/index.js",
-    "watch": true
+    "name": "Scripting client files",
+    "kind": "TSC",
+    "config": "./src/client/tsconfig.json"
   },
   {
     "name": "Compile test web workers",
-    "kind": "TS",
+    "kind": "Webpack",
     "file": "./test/fixtures/*.ts",
-    "target": "webworker",
-    "watch": true
+    "target": "webworker"
   },
   {
     "name": "Compile tests web workers",
-    "kind": "TS",
+    "kind": "Webpack",
     "file": "./test/scenarios/index.ts",
-    "target": "web",
-    "watch": true
+    "target": "web"
   }
 ]

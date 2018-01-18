@@ -1,4 +1,4 @@
-import { Client } from "../common/json-rpc/Client";
+import { WebWorkerClient } from "./WebWorkerClient";
 
 if (typeof onmessage == 'undefined' || typeof postMessage == 'undefined') {
   throw new Error('Error: Running scripting client outside WebWorker');
@@ -6,5 +6,5 @@ if (typeof onmessage == 'undefined' || typeof postMessage == 'undefined') {
 
 new Function(`XMLHttpRequest = function () { throw new Error('XMLHttpRequest is disabled. Please use fetch'); };`)();
 
-export const ScriptingClient = new Client();
+export const ScriptingClient = new WebWorkerClient();
 export const API = ScriptingClient.api();

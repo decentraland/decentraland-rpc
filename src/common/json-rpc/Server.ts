@@ -1,5 +1,6 @@
 import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
+import { EventDispatcherBinding } from "../../host/index";
 
 export interface ServerOpts extends JsonRpc2.ILogOpts {
 
@@ -9,10 +10,8 @@ export interface ServerOpts extends JsonRpc2.ILogOpts {
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
  */
-export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServer {
-  protected _worker: Worker;
+export abstract class Server<ClientType = any> extends EventDispatcher implements JsonRpc2.IServer {
   private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map();
-  private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
   private _isEnabled = false;
 
@@ -20,19 +19,13 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
     return this._isEnabled;
   }
 
-  constructor(worker: Worker, opts: ServerOpts = {}) {
+  constructor(opts: ServerOpts = {}) {
     super();
     this.setLogging(opts);
-
-    if (!worker) {
-      throw new TypeError('worker cannot be undefined or null');
-    }
-
-    this._worker = worker;
-
-    worker.addEventListener('message', (me: MessageEvent) => this.processMessage(me.data));
-    worker.addEventListener('error', (me: ErrorEvent) => this.emit('error', me));
   }
+
+  abstract sendMessage(to: ClientType, message: string);
+  abstract getAllClients(): Iterable<ClientType>;
 
   /**
    * Execute this method after configuring the RPC methods and listeners.
@@ -45,7 +38,7 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
     }
   }
 
-  private processMessage(messageStr: string): void {
+  protected processMessage(from: ClientType, messageStr: string): void {
     this._logMessage(messageStr, 'receive');
     let request: JsonRpc2.Request;
 
@@ -53,7 +46,7 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
     try {
       request = JSON.parse(messageStr);
     } catch (e) {
-      return this._sendError(request, JsonRpc2.ErrorCode.ParseError);
+      return this._sendError(from, request, JsonRpc2.ErrorCode.ParseError);
     }
 
     // Ensure method is atleast defined
@@ -67,33 +60,51 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
             if (result instanceof Promise) {
               // Result is a promise, so lets wait for the result and handle accordingly
               result.then((actualResult: any) => {
-                this._send({ id: request.id, result: actualResult || {} });
+                this._send(from, { id: request.id, result: actualResult || {} });
               }).catch((error: Error) => {
-                this._sendError(request, JsonRpc2.ErrorCode.InternalError, error);
+                this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
               });
             } else {
               // Result is not a promise so send immediately
-              this._send({ id: request.id, result: result || {} });
+              this._send(from, { id: request.id, result: result || {} });
             }
           } catch (error) {
-            this._sendError(request, JsonRpc2.ErrorCode.InternalError, error);
+            this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error);
           }
         } else {
-          this._sendError(request, JsonRpc2.ErrorCode.MethodNotFound);
+          this._sendError(from, request, JsonRpc2.ErrorCode.MethodNotFound);
         }
       } else {
         // Message is a notification, so just emit
-        this.emit(request.method, request.params);
+        this.emit(request.method, request.params, from);
       }
     } else {
       // No method property, send InvalidRequest error
-      this._sendError(request, JsonRpc2.ErrorCode.InvalidRequest);
+      this._sendError(from, request, JsonRpc2.ErrorCode.InvalidRequest);
     }
   }
 
+  on(method: 'error', callback: (error) => void, once?: boolean): EventDispatcherBinding;
+  on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding;
+  on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding {
+    return super.on(method, callback, once);
+  }
+
+  once(method: 'error', callback: (error) => void): EventDispatcherBinding;
+  once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding;
+  once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding {
+    return super.once(method, callback);
+  }
+
+  emit(event: 'error', error: any);
+  emit(method: string, params: any, sender?: ClientType): void;
+  emit(method: string, params: any, sender?: ClientType): void {
+    return super.emit(method, params, sender);
+  }
+
+
   /** Set logging for all received and sent messages */
-  public setLogging({ logEmit, logConsole }: JsonRpc2.ILogOpts = {}) {
-    this._emitLog = logEmit;
+  public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
     this._consoleLog = logConsole;
   }
 
@@ -101,21 +112,17 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
     if (this._consoleLog) {
       console.log(`${direction === 'send' ? 'Server > Client' : 'Server < Client'}`, messageStr);
     }
-
-    if (this._emitLog) {
-      this.emit(direction, messageStr);
-    }
   }
 
-  private _send(message: JsonRpc2.Response | JsonRpc2.Notification) {
+  private _send(receiver: ClientType, message: JsonRpc2.Response | JsonRpc2.Notification) {
     const messageStr = JSON.stringify(message);
     this._logMessage(messageStr, 'send');
-    this._worker.postMessage(messageStr);
+    this.sendMessage(receiver, messageStr);
   }
 
-  private _sendError(request: JsonRpc2.Request, errorCode: JsonRpc2.ErrorCode, error?: Error) {
+  private _sendError(receiver: ClientType, request: JsonRpc2.Request, errorCode: JsonRpc2.ErrorCode, error?: Error) {
     try {
-      this._send({
+      this._send(receiver, {
         id: request && request.id || -1,
         error: this._errorFromCode(errorCode, error && error.message || error, request && request.method)
       });
@@ -150,7 +157,16 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
   }
 
   notify(method: string, params?: any): void {
-    this._send({ method, params });
+    // Broadcast message to all clients
+    const clients = this.getAllClients();
+
+    if (clients) {
+      for (let client of clients) {
+        this._send(client, { method, params });
+      }
+    } else {
+      throw new Error('Server does not support broadcasting. No "getAllClients: ClientType" returned null');
+    }
   }
 
   /**

@@ -1,4 +1,4 @@
-import { BasePlugin, ScriptingHost, ExposedAPI } from "../../../dist/host/index";
+import { BasePlugin, ScriptingHost, ExposedAPI } from "../../../dist/host";
 
 const globalBuses: { [key: string]: any } = {};
 

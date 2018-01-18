@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 
+
+// This started as something different as it is right now. It became gulp. damnit
+
+
 import webpack = require('webpack');
 import ProgressPlugin = require('webpack/lib/ProgressPlugin');
 import globPkg = require('glob');
 import { promisify, callbackify } from 'util';
-import { resolve, parse as parsePath, dirname, relative } from 'path';
+import { resolve, parse as parsePath, dirname, relative, basename } from 'path';
 import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader';
 
 import rimraf = require('rimraf');
@@ -12,6 +16,7 @@ import rimraf = require('rimraf');
 const isWatching = process.argv.some($ => $ == '--watch');
 
 import fs = require('fs');
+import { spawn } from 'child_process';
 
 export function findConfigFile(baseDir: string, configFileName: string) {
   let configFilePath = resolve(baseDir, configFileName);
@@ -98,7 +103,51 @@ export async function compile(opt: ICompilerOptions) {
   });
 }
 
+export async function tsc(tsconfig: string) {
+  const tscLocation = require.resolve('typescript/bin/tsc');
 
+  console.log(`
+    Executing "tsc -p ${basename(tsconfig)}" in ${dirname(tsconfig)}
+  `.trim());
+
+  const args = ['-p', basename(tsconfig)];
+
+  if (isWatching)
+    args.push('--watch');
+
+  const childProcess = spawn(tscLocation, args, {
+    cwd: dirname(tsconfig)
+  });
+
+  if (isWatching) {
+    return true;
+  }
+
+  let resolve = (a) => void 0;
+  let reject = (a) => void 0;
+
+  const semaphore = new Promise((ok, err) => {
+    resolve = ok;
+    reject = err;
+  });
+
+  childProcess.stdout.on('data', (data) => {
+    console.log(`tsc stdout: ${data}`);
+  });
+
+  childProcess.stderr.on('data', (data) => {
+    console.log(`tsc stderr: ${data}`);
+  });
+
+  childProcess.on('close', (exitCode) => {
+    if (exitCode)
+      reject(exitCode);
+    else
+      resolve(exitCode);
+  });
+
+  await semaphore;
+}
 
 export async function processFile(opt: { file: string, outFile?: string, watch?: boolean, target?: string }) {
   if (opt.file.endsWith('.json'))
@@ -190,12 +239,14 @@ export async function processJson(file: string) {
     const $ = config[i];
 
     if ($.kind == 'RM') {
-      // delete a folder
-      console.log(`
+      if (!isWatching) {
+        // delete a folder
+        console.log(`
         Deleting folder: ${$.path}
       `.trim());
-      rimraf.sync($.path);
-    } else if ($.kind == 'TS') {
+        rimraf.sync($.path);
+      }
+    } else if ($.kind == 'Webpack') {
       // compile TS
       const files = await glob($.file);
 
@@ -203,6 +254,12 @@ export async function processJson(file: string) {
         const file = files[i];
         await processFile({ ...$, file });
       }
+    } else if ($.kind == 'TSC') {
+      if (!$.config) {
+        throw new Error(`Missing config in: ${JSON.stringify($, null, 2)}`);
+      }
+
+      await tsc($.config);
     } else {
       console.error(`Unknown compilation step ${JSON.stringify($, null, 2)}`);
     }

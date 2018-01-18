@@ -114,9 +114,6 @@ export interface IServer {
 }
 
 export interface ILogOpts {
-  /** All messages will be emmitted and can be handled by client.on('receive', (msg: string) => void) and client.on('send', (msg: string) => any)  */
-  logEmit?: boolean;
-
   /** All messages will be logged to console */
   logConsole?: boolean;
 }

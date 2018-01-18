@@ -11,10 +11,9 @@ export interface ClientOpts extends JsonRpc2.ILogOpts {
  * Creates a RPC Client.
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
-export class Client extends EventDispatcher implements JsonRpc2.IClient {
+export abstract class Client extends EventDispatcher implements JsonRpc2.IClient {
   private _responsePromiseMap: Map<number, { resolve: Function, reject: Function }> = new Map();
   private _nextMessageId: number = 0;
-  private _emitLog: boolean = false;
   private _consoleLog: boolean = false;
   private _requestQueue: string[] = [];
   private _connected = false;
@@ -22,29 +21,15 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
   constructor(opts?: ClientOpts) {
     super();
     this.setLogging(opts);
+  }
 
-    if (typeof onmessage == 'undefined') {
-      throw new TypeError('onmessage cannot be undefined or null');
+  abstract sendMessage(message: string);
+
+  protected didConnect() {
+    if (this._connected == false) {
+      this._connected = true;
+      this._sendQueuedRequests();
     }
-
-    if (typeof postMessage == 'undefined') {
-      throw new TypeError('postMessage cannot be undefined or null');
-    }
-
-    addEventListener('message',
-      (message: MessageEvent) => this.processMessage(message.data)
-    );
-
-    addEventListener('message', () => {
-      if (this._connected == false) {
-        this._connected = true;
-        this._sendQueuedRequests();
-      }
-    }, { once: true });
-
-    addEventListener('error',
-      (err: ErrorEvent) => this.emit('error', err.error)
-    );
   }
 
   public processMessage(messageStr: string) {
@@ -85,8 +70,7 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
   }
 
   /** Set logging for all received and sent messages */
-  public setLogging({ logEmit, logConsole }: JsonRpc2.ILogOpts = {}) {
-    this._emitLog = logEmit;
+  public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
     this._consoleLog = logConsole;
   }
 
@@ -100,7 +84,7 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
       const queue = this._requestQueue.splice(0, this._requestQueue.length);
       for (let messageStr of queue) {
         this._logMessage(messageStr, 'send');
-        postMessage(messageStr);
+        this.sendMessage(messageStr);
       }
     }
   }
@@ -108,10 +92,6 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
   private _logMessage(message: string, direction: 'send' | 'receive') {
     if (this._consoleLog) {
       console.log(`Client ${direction === 'send' ? '>' : '<'}`, message);
-    }
-
-    if (this._emitLog) {
-      this.emit(direction, message);
     }
   }
 

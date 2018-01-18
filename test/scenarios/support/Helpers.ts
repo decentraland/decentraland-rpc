@@ -25,7 +25,7 @@ export function testInWorker(file: string, cb?: (result) => void, log = false) {
     const worker = await ScriptingHost.fromURL(file);
 
     if (log) {
-      worker.setLogging({ logConsole: true, logEmit: true });
+      worker.setLogging({ logConsole: true });
     }
 
     const result = await (worker.getPluginInstance(Test).waitForPass());

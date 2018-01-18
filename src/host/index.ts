@@ -1,5 +1,5 @@
-import { Server } from "../common/json-rpc/Server";
 import { Dictionary } from "../common/core/EventDispatcher";
+import { WebWorkerServer } from "./WebWorkerServer";
 
 export * from "../common/core/EventDispatcher";
 export * from "../common/core/MVCObject";
@@ -37,7 +37,7 @@ function registerPlugin(name: string, api: ScriptingHostPluginConstructor<Script
   RegisteredAPIs[name] = api;
 }
 
-export class ScriptingHost extends Server<ScriptingHostEvents> {
+export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
   apiInstances: Dictionary<any> = {};
 
   constructor(worker: Worker) {
@@ -90,7 +90,7 @@ export class ScriptingHost extends Server<ScriptingHostEvents> {
 
     this.notify('SIGKILL');
 
-    this._worker.terminate();
+    this.worker.terminate();
 
     this.emit('didTerminate');
   }
