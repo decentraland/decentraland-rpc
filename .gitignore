@@ -46,7 +46,7 @@ test/**/*.js
 
 .rpt2_cache
 
-dist
+lib
 test/out
 
 bin/**/*.js

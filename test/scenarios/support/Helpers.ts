@@ -1,4 +1,4 @@
-import { ScriptingHost, BasePlugin, ExposedAPI } from '../../../dist/host';
+import { ScriptingHost, BasePlugin, ExposedAPI } from '../../../lib/host';
 import assert = require('assert');
 import { Test } from './Commons';
 

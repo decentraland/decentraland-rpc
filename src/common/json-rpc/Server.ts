@@ -1,6 +1,5 @@
-import { EventDispatcher } from "../core/EventDispatcher";
+import { EventDispatcher, EventDispatcherBinding } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
-import { EventDispatcherBinding } from "../../host/index";
 
 export interface ServerOpts extends JsonRpc2.ILogOpts {
 
@@ -95,13 +94,6 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding {
     return super.once(method, callback);
   }
-
-  emit(event: 'error', error: any);
-  emit(method: string, params: any, sender?: ClientType): void;
-  emit(method: string, params: any, sender?: ClientType): void {
-    return super.emit(method, params, sender);
-  }
-
 
   /** Set logging for all received and sent messages */
   public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {

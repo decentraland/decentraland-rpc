@@ -1,8 +1,8 @@
 [
   {
-    "name": "Delete dist folder",
+    "name": "Delete lib folder",
     "kind": "RM",
-    "path": "./dist"
+    "path": "./lib"
   },
   {
     "name": "Delete out folder",

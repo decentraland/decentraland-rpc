@@ -51,9 +51,7 @@ server.listen(port, function (error) {
   }
 });
 
-
 const users: { ws: ws, req: http.IncomingMessage }[] = [];
-
 
 wss.on('connection', function connection(ws, req) {
   const thisUser = { ws, req };
@@ -69,7 +67,7 @@ wss.on('connection', function connection(ws, req) {
 
     users.forEach($ => {
       // forward the message to the connections that shares the same URL
-      if ($.req.url == req.url) {
+      if ($.req.url == req.url && $.ws != ws) {
         $.ws.send(message);
       }
     });

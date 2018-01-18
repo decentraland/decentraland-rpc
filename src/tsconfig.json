@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "declarationDir": "../dist",
-    "outDir": "../dist",
+    "declarationDir": "../lib",
+    "outDir": "../lib",
     "module": "es2015",
     "target": "es2015",
     "emitDecoratorMetadata": true,

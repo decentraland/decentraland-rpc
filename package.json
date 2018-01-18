@@ -2,8 +2,8 @@
   "name": "dcl-scripting",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/client/index.js",
-  "typings": "dist/client/index.d.ts",
+  "main": "lib/client/index.js",
+  "typings": "lib/client/index.d.ts",
   "scripts": {
     "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
     "watch": "npm run build:cli && ./bin/compile.js compiler.cfg.json --watch",
@@ -34,12 +34,11 @@
     "mocha-headless-chrome": "^1.7.1",
     "rimraf": "^2.6.2",
     "typescript": "^2.6.2",
-    "ws": "^4.0.0"
-  },
-  "dependencies": {
+    "ws": "^4.0.0",
     "@types/puppeteer": "^0.13.9",
     "@types/webpack": "^3.8.2",
     "awesome-typescript-loader": "^3.4.1",
     "webpack": "^3.10.0"
-  }
+  },
+  "dependencies": {}
 }

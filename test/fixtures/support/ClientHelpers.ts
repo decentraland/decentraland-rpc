@@ -1,4 +1,4 @@
-import { API } from '../../../dist/client';
+import { API } from '../../../lib/client';
 
 export function test(fn: () => Promise<any>) {
   fn()

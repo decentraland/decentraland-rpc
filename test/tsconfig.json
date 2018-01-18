@@ -13,5 +13,8 @@
       "es2015.promise",
       "dom"
     ]
-  }
+  },
+  "exclude": [
+    "../src"
+  ]
 }

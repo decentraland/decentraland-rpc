@@ -1,4 +1,4 @@
-import { BasePlugin, ExposedAPI, ScriptingHost } from "../../../dist/host";
+import { BasePlugin, ExposedAPI, ScriptingHost } from "../../../lib/host";
 import { future } from "./Helpers";
 
 export class Logger extends BasePlugin {

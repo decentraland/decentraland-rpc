@@ -1,4 +1,4 @@
-import { ScriptingClient } from '../../dist/client';
+import { ScriptingClient } from '../../lib/client';
 
 const x = async () => {
   const data = await ScriptingClient.call('MethodX', 'a worker generated string');

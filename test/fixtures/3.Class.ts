@@ -1,4 +1,4 @@
-import { ScriptingClient, API } from '../../dist/client';
+import { ScriptingClient, API } from '../../lib/client';
 import { test } from './support/ClientHelpers';
 
 test(async () => {

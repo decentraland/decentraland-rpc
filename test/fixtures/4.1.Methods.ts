@@ -1,4 +1,4 @@
-import { ScriptingClient, API } from '../../dist/client';
+import { ScriptingClient, API } from '../../lib/client';
 import assert = require('assert');
 import { test, shouldFail } from './support/ClientHelpers';
 

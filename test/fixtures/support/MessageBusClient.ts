@@ -1,5 +1,5 @@
-import { EventDispatcher } from "../../../dist/host";
-import { ScriptingClient } from '../../../dist/client';
+import { EventDispatcher } from "../../../lib/common/core/EventDispatcher";
+import { ScriptingClient } from '../../../lib/client';
 
 export interface IMessageBusOptions {
 }

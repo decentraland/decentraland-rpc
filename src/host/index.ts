@@ -1,9 +1,6 @@
 import { Dictionary } from "../common/core/EventDispatcher";
 import { WebWorkerServer } from "./WebWorkerServer";
 
-export * from "../common/core/EventDispatcher";
-export * from "../common/core/MVCObject";
-
 export interface ExposedAPI {
   [method: string]: (() => Promise<any>) | ((arg) => Promise<any>);
 }
