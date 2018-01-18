@@ -3,9 +3,9 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
-import { future } from './Helpers';
+import { future } from './support/Helpers';
 
-it('1.Echo', async () => {
+it('test/out/1.Echo.js', async () => {
   const worker = await ScriptingHost.fromURL('test/out/1.Echo.js');
 
   const randomNumber = Math.random();
@@ -24,4 +24,6 @@ it('1.Echo', async () => {
   worker.enable();
 
   assert.equal(await aFuture, randomNumber, 'exchanged numbers must match');
+
+  worker.terminate();
 });

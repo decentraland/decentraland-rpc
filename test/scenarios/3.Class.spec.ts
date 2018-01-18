@@ -2,7 +2,7 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
-import { future } from './Helpers';
+import { future, testInWorker } from './support/Helpers';
 
 const aFuture = future();
 
@@ -47,15 +47,10 @@ class Runtime extends BasePlugin {
     };
   }
 }
+ScriptingHost.registerPlugin('Debugger', Debugger);
+ScriptingHost.registerPlugin('Profiler', Profiler);
+ScriptingHost.registerPlugin('Runtime', Runtime);
 
-it('3.Class (with scripting host plugins)', async () => {
-  ScriptingHost.registerPlugin('Debugger', Debugger);
-  ScriptingHost.registerPlugin('Profiler', Profiler);
-  ScriptingHost.registerPlugin('Runtime', Runtime);
-
-  const worker = await ScriptingHost.fromURL('test/out/3.Class.js');
-
-  // worker.setLogging({ logConsole: true, logEmit: true });
-
+testInWorker('test/out/3.Class.js', async (result) => {
   assert.equal(await aFuture, true);
-});
+}, true);

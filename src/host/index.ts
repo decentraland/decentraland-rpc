@@ -1,6 +1,9 @@
 import { Server } from "../common/json-rpc/Server";
 import { Dictionary } from "../common/core/EventDispatcher";
 
+export * from "../common/core/EventDispatcher";
+export * from "../common/core/MVCObject";
+
 export interface ExposedAPI {
   [method: string]: (() => Promise<any>) | ((arg) => Promise<any>);
 }

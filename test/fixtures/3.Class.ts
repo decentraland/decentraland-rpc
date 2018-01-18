@@ -1,6 +1,7 @@
 import { ScriptingClient, API } from '../../dist/client';
+import { test } from './support/ClientHelpers';
 
-const x = async () => {
+test(async () => {
   await Promise.all([
     API.Runtime.enable(),
     API.Debugger.enable(),
@@ -13,7 +14,4 @@ const x = async () => {
   await API.Profiler.start();
   await mutex;
   await API.Profiler.stop();
-};
-
-x()
-  .catch(x => ScriptingClient.notify('Error', [x.toString(), x]));
+});

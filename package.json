@@ -23,15 +23,18 @@
   },
   "homepage": "https://github.com/decentraland/script#readme",
   "devDependencies": {
+    "@types/express": "^4.11.0",
     "@types/glob": "^5.0.34",
     "@types/mocha": "^2.2.46",
     "@types/rimraf": "^2.0.2",
+    "@types/ws": "^4.0.0",
     "assert": "^1.4.1",
     "express": "^4.16.2",
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
     "rimraf": "^2.6.2",
-    "typescript": "^2.6.2"
+    "typescript": "^2.6.2",
+    "ws": "^4.0.0"
   },
   "dependencies": {
     "@types/puppeteer": "^0.13.9",

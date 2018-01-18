@@ -2,10 +2,11 @@
 
 import { ScriptingHost, BasePlugin, ExposedAPI } from '../../dist/host';
 import assert = require('assert');
-import { future } from './Helpers';
+import { future } from './support/Helpers';
+import { Test } from './support/Commons';
 
-it('2.Debugger', async () => {
-  const worker = await ScriptingHost.fromURL('test/out/2.Debugger.js');
+it('test/out/2.Proxy.js', async () => {
+  const worker = await ScriptingHost.fromURL('test/out/2.Proxy.js');
 
   let aFuture = future();
 
@@ -15,19 +16,19 @@ it('2.Debugger', async () => {
 
   const enable = () => { };
 
-  api.Debugger.expose({ enable });
-  api.Profiler.expose({ enable });
+  api.xDebugger.expose({ enable });
+  api.xProfiler.expose({ enable });
 
-  api.Runtime.expose({
+  api.xRuntime.expose({
     enable,
     run() { }
   });
 
-  api.Profiler.expose({
+  api.xProfiler.expose({
     enable,
     start() {
       setTimeout(() => {
-        api.Runtime.emitExecutionContextDestroyed();
+        api.xRuntime.emitExecutionContextDestroyed();
       }, 16);
     },
     stop() {
@@ -39,4 +40,8 @@ it('2.Debugger', async () => {
   worker.enable();
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.');
+
+  await (worker.getPluginInstance(Test).waitForPass());
+
+  worker.terminate();
 });

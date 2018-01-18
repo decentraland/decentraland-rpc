@@ -1,20 +1,20 @@
-import { BasePlugin, ExposedAPI, ScriptingHost } from "../../dist/host";
+import { BasePlugin, ExposedAPI, ScriptingHost } from "../../../dist/host";
 import { future } from "./Helpers";
 
 export class Logger extends BasePlugin {
   getApi(): ExposedAPI {
     return {
-      async error(...args) {
-        console.error.apply(console, args);
+      async error(message) {
+        console.error.call(console, message);
       },
-      async log(...args) {
-        console.log.apply(console, args);
+      async log(message) {
+        console.log.call(console, message);
       },
-      async warn(...args) {
-        console.warn.apply(console, args);
+      async warn(message) {
+        console.warn.call(console, message);
       },
-      async info(...args) {
-        console.info.apply(console, args);
+      async info(message) {
+        console.info.call(console, message);
       }
     };
   }
@@ -66,29 +66,27 @@ export class Methods extends BasePlugin {
 
 ScriptingHost.registerPlugin('Methods', Methods);
 
-
 export class Test extends BasePlugin {
-  future = future<{ pass: boolean, args: any[] }>();
+  future = future<{ pass: boolean, arg: any }>();
 
   async waitForPass() {
     const result = await this.future;
 
     if (!result.pass) {
-      if (result.args.length == 1) {
-        throw Object.assign(new Error(), result.args[0]);
-      }
-      throw result.args;
+      throw Object.assign(new Error('WebWorker test failed. The worker did not report error data.'), result.arg || {});
     }
+
+    return result.arg;
   }
 
   getApi(): ExposedAPI {
     return {
-      fail: async (...args) => {
-        this.future.resolve({ pass: false, args: args });
+      fail: async (arg) => {
+        this.future.resolve({ pass: false, arg });
       },
 
-      pass: async (...args) => {
-        this.future.resolve({ pass: true, args: args });
+      pass: async (arg) => {
+        this.future.resolve({ pass: true, arg });
       }
     };
   }
