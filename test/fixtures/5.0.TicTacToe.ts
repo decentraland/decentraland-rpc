@@ -3,72 +3,92 @@ import assert = require('assert');
 import { test, shouldFail } from './support/ClientHelpers';
 import { WSMessageHub } from './support/MessageHub';
 
-type GameSymbol = 'x' | 'o';
+enum GameSymbol {
+  X = 'x',
+  O = 'o'
+}
 
-class TicTacToe extends WSMessageHub {
-  board: GameSymbol[] = [
+enum TicTacToeAction {
+  PLACE = 'placeSymbol',
+  RESTART = 'restart',
+  SYNC = 'sync',
+  SET_SYMBOL = 'setSymbol', 
+}
+interface ITicTacToeState {
+  board: GameSymbol[];
+  mySymbol: GameSymbol;
+}
+
+interface IGenericAction {
+  type: TicTacToeAction,
+  payload?: any;
+}
+
+const initialState: ITicTacToeState = {
+  board:[
     null, null, null,
     null, null, null,
-    null, null, null,
-  ];
+    null, null, null
+  ],
+  mySymbol: null
+};
 
-  mySymbol: GameSymbol = 'x';
+let state = initialState;
 
-  constructor(url: string) {
-    super(url);
+function reducer (state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
+  const { type, payload } = action;
 
-    this.on('placeSymbol', (symbol: GameSymbol, index: number) => {
-      this.board[index] = symbol;
-    });
+  switch (type) {
+    case TicTacToeAction.SYNC: {
+      const { board } = payload as { board: GameSymbol[] };
+      return { ...state, board };
+    }
+    
+    case TicTacToeAction.RESTART: {
+      return { ...initialState };
+    }
+    
+    case TicTacToeAction.PLACE: {
+      const { index } = payload as { index: number };
+      return { ...state, board: Object.assign([], state.board, { [index]: state.mySymbol }) };
+    }
 
-    this.on('restart', () => {
-      this.board = this.board.map(() => null);
-    });
+    case TicTacToeAction.SET_SYMBOL: {
+      const { symbol } = payload as { symbol: GameSymbol };
+      return { ...state, mySymbol: symbol}
+    }
 
-    this.on('sync', (newBoard: GameSymbol[]) => {
-      this.board = newBoard;
-    });
-
-    this.on('otherUserDidJoin', () => {
-      this.sendCurrentState();
-    });
-
-    // Notify that I joined
-    this.emit('otherUserDidJoin');
-  }
-
-  sendCurrentState() {
-    this.emit('sync', this.board);
-  }
-
-  placeSymbol(position: number) {
-    this.emit('placeSymbol', this.mySymbol);
-  }
-
-  setSymbol(symbol: GameSymbol) {
-    this.mySymbol = symbol;
-  }
-
-  getCurrentState() {
-    return this.board;
-  }
-
-  reset() {
-    this.board = [
-      null, null, null,
-      null, null, null,
-      null, null, null
-    ];
-    this.sendCurrentState();
+    default: {
+      return { ...state };
+    }
   }
 }
 
-
+function handleAction(action: IGenericAction){
+  state = reducer(state, action);
+}
 
 
 test(async () => {
-  const messageBus = new TicTacToe('tictactoe');
+  const messageBus = new WSMessageHub('tictactoe');
 
+  handleAction({
+    type: TicTacToeAction.SET_SYMBOL,
+    payload: {
+      symbol: GameSymbol.X,
+    }
+  });
 
+  handleAction({
+    type: TicTacToeAction.PLACE,
+    payload: {
+      index: 0
+    }
+  });
 
+  assert.equal(state.board, [
+    'X', null, null,
+    null, null, null,
+    null, null, null
+  ], 'Position 0 should have the X symbol')
 });
