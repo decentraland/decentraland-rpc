@@ -11,7 +11,7 @@
  * Request object representation of a rpc call.
  * Server always replies with a Response object having the same id.
  */
-export interface Request extends Notification {
+export interface IRequest extends INotification {
   /** An identifier established by the Client */
   id: number;
 }
@@ -20,7 +20,7 @@ export interface Request extends Notification {
  * Client can send a request with no expectation of a response.
  * Server can send a notification without an explicit request by a client.
 */
-export interface Notification {
+export interface INotification {
   /** Name of the method to be invoked. */
   method: string;
 
@@ -36,7 +36,7 @@ export interface Notification {
  * Response will always contain a result property unless an error occured.
  * In which case, an error property is present.
  */
-export interface Response {
+export interface IResponse {
   /** An identifier established by the Client. */
   id: number;
 
@@ -95,6 +95,10 @@ export interface IClient {
 
   /** Sends a notification to the Server. */
   notify: (method: string, params?: any) => void;
+}
+
+export interface IClientOpts extends ILogOpts {
+
 }
 
 /** A JsonRPC Server that abstracts the transportation of messages to and from the Client */

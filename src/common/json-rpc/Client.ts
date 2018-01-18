@@ -1,11 +1,5 @@
 import { EventDispatcher } from "../core/EventDispatcher";
-import * as JsonRpc2 from "./json-rpc";
-
-export { JsonRpc2 };
-
-export interface ClientOpts extends JsonRpc2.ILogOpts {
-
-}
+import * as JsonRpc2 from "./types";
 
 /**
  * Creates a RPC Client.
@@ -18,7 +12,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   private _requestQueue: string[] = [];
   private _connected = false;
 
-  constructor(opts?: ClientOpts) {
+  constructor(opts?: JsonRpc2.IClientOpts) {
     super();
     this.setLogging(opts);
   }
@@ -34,7 +28,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
   public processMessage(messageStr: string) {
     this._logMessage(messageStr, 'receive');
-    let message: JsonRpc2.Response & JsonRpc2.Notification;
+    let message: JsonRpc2.IResponse & JsonRpc2.INotification;
 
     // Ensure JSON is not malformed
     try {
@@ -74,7 +68,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     this._consoleLog = logConsole;
   }
 
-  private _send(message: JsonRpc2.Notification | JsonRpc2.Request) {
+  private _send(message: JsonRpc2.INotification | JsonRpc2.IRequest) {
     this._requestQueue.push(JSON.stringify(message));
     this._sendQueuedRequests();
   }
@@ -97,7 +91,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
   call(method: string, params?: any): Promise<any> {
     const id = ++this._nextMessageId;
-    const message: JsonRpc2.Request = { id, method, params };
+    const message: JsonRpc2.IRequest = { id, method, params };
 
     return new Promise((resolve, reject) => {
       try {
