@@ -2,7 +2,7 @@ import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./json-rpc";
 
 export interface ServerOpts extends JsonRpc2.ILogOpts {
-  exposedAPI?: any;
+
 }
 
 /**
@@ -99,7 +99,7 @@ export class Server<T = {}> extends EventDispatcher<T> implements JsonRpc2.IServ
 
   private _logMessage(messageStr: string, direction: 'send' | 'receive') {
     if (this._consoleLog) {
-      console.log(`Server ${direction === 'send' ? '>' : '<'}`, messageStr);
+      console.log(`${direction === 'send' ? 'Server > Client' : 'Server < Client'}`, messageStr);
     }
 
     if (this._emitLog) {

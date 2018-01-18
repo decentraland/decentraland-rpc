@@ -43,7 +43,7 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
     }, { once: true });
 
     addEventListener('error',
-      (err: ErrorEvent) => this.emit('error', err)
+      (err: ErrorEvent) => this.emit('error', err.error)
     );
   }
 
@@ -68,9 +68,8 @@ export class Client extends EventDispatcher implements JsonRpc2.IClient {
         if (message.result) {
           promise.resolve(message.result);
         } else if (message.error) {
-          const error = Object.assign(new Error(message.error.message), message.error);
-
-          promise.reject(message.error);
+          const error = Object.assign(new Error('Remote error'), message.error);
+          promise.reject(error);
         } else {
           this.emit('error', new Error(`Response must have result or error: ${messageStr}`));
         }
