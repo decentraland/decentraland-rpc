@@ -23,10 +23,6 @@ class TicTacToeBoard extends BasePlugin {
     this.options.notify('ChooseSymbol', { symbol });
   }
 
-  userDidRequestResults() {
-    this.options.notify('CommandsDidFinish');
-  }
-
   @BasePlugin.expose async iAmConnected(...args) {
     this.waitForConnection.resolve(args);
   }
@@ -34,20 +30,18 @@ class TicTacToeBoard extends BasePlugin {
 
 ScriptingHost.registerPlugin('TicTacToeBoard', TicTacToeBoard);
 
-const file = 'test/out/5.0.TicTacToe.js';
-
-describe(file, function () {
-  this.timeout(30000);
+describe('TicTacToe', function () {
+  this.timeout(6000);
   let numberOfGames = 0;
 
-  function randomizeGame() {
+  function randomizeGame(file) {
     let workerX: ScriptingHost = null;
     let workerO: ScriptingHost = null;
 
     let apiX: TicTacToeBoard = null;
     let apiO: TicTacToeBoard = null;
 
-    it(`randomized game ${numberOfGames++}`, async function () {
+    it(`randomized game ${numberOfGames++} ${file}`, async function () {
       workerO = await ScriptingHost.fromURL(file);
       workerX = await ScriptingHost.fromURL(file);
 
@@ -65,14 +59,14 @@ describe(file, function () {
       apiO.userDidChooseSymbol('o');
 
       // clicks some positions
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 30; i++) {
         if (Math.random() > 0.5)
-          apiX.userDidClickPosition(i);
+          apiX.userDidClickPosition(i % 9);
         else
-          apiO.userDidClickPosition(i);
+          apiO.userDidClickPosition(i % 9);
 
         // Let the event system exchange the information between workers
-        await wait(50);
+        await wait(20);
       }
 
       // waits the result
@@ -90,8 +84,13 @@ describe(file, function () {
     });
   }
 
-  randomizeGame();
-  randomizeGame();
-  randomizeGame();
-  randomizeGame();
+  randomizeGame('test/out/5.0.TicTacToe.Redux.js');
+  randomizeGame('test/out/5.0.TicTacToe.Redux.js');
+  randomizeGame('test/out/5.0.TicTacToe.Redux.js');
+  randomizeGame('test/out/5.0.TicTacToe.Redux.js');
+
+  randomizeGame('test/out/5.1.TicTacToe.Class.js');
+  randomizeGame('test/out/5.1.TicTacToe.Class.js');
+  randomizeGame('test/out/5.1.TicTacToe.Class.js');
+  randomizeGame('test/out/5.1.TicTacToe.Class.js');
 });

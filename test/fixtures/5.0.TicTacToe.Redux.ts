@@ -11,7 +11,6 @@ const TicTacToeBoard = getPlugin('TicTacToeBoard') as {
   iAmConnected(): Promise<void>;
 };
 
-
 type GameSymbol = 'x' | 'o';
 
 enum TicTacToeAction {
@@ -116,8 +115,6 @@ test(async () => {
   });
 
   messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
-    console.log('i am', state.mySymbol, 'set', symbol, 'at', index);
-
     handleAction({
       type: TicTacToeAction.PLACE,
       payload: {
