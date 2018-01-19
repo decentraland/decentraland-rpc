@@ -1,12 +1,18 @@
-import { ScriptingClient } from '../../lib/client';
+import { ScriptingClient, getPlugin } from '../../lib/client';
 import assert = require('assert');
 import { test, shouldFail, future, wait } from './support/ClientHelpers';
-import { getWsMessageHub } from './support/MessageHub';
+import { MessageBusClient } from './support/MessageBusClient';
+import { Test } from './support/ClientCommons';
 
-enum GameSymbol {
-  X = 'x',
-  O = 'o'
-}
+const TicTacToeBoard = getPlugin('TicTacToeBoard') as {
+  onCommandsDidFinish(cb: () => void);
+  onChooseSymbol(cb: (x: { symbol: GameSymbol }) => void);
+  onClickPosition(cb: (x: { position: number }) => void);
+  iAmConnected(): Promise<void>;
+};
+
+
+type GameSymbol = 'x' | 'o';
 
 enum TicTacToeAction {
   PLACE = 'placeSymbol',
@@ -71,17 +77,32 @@ function handleAction(action: IGenericAction) {
   state = reducer(state, action);
 }
 
+const winingCombinations = [
+  [0, 1, 2], // 1 row
+  [3, 4, 5], // 2 row
+  [6, 7, 8], // 3 row
+
+  [0, 3, 6], // 1 col
+  [1, 4, 7], // 2 col
+  [2, 5, 8], // 3 col
+
+  [0, 4, 8], // nw - se
+  [6, 4, 2] // sw - ne
+];
+
+const getWinner = () =>
+  ['x', 'o'].find($ =>
+    winingCombinations.some(combination =>
+      combination.every(position => state.board[position] == $)
+    )
+  );
+
 
 test(async () => {
-  const userFinishesCommands = future();
-  const messageBus = getWsMessageHub('tictactoe');
+  const futureWinner = future();
+  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com');
 
-  ScriptingClient.on('TicTacToeBoard.CommandsDidFinish', () => {
-    ScriptingClient.call('Test.pass', state);
-    userFinishesCommands.resolve(1);
-  });
-
-  ScriptingClient.on('TicTacToeBoard.ChooseSymbol', ({ symbol }: { symbol: GameSymbol }) => {
+  TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
     handleAction({
       type: TicTacToeAction.SET_SYMBOL,
       payload: {
@@ -90,11 +111,13 @@ test(async () => {
     });
   });
 
-  ScriptingClient.on('TicTacToeBoard.ClickPosition', ({ position }: { position: number }) => {
+  TicTacToeBoard.onClickPosition(({ position }: { position: number }) => {
     messageBus.emit('set_at', position, state.mySymbol);
   });
 
   messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
+    console.log('i am', state.mySymbol, 'set', symbol, 'at', index);
+
     handleAction({
       type: TicTacToeAction.PLACE,
       payload: {
@@ -102,14 +125,17 @@ test(async () => {
         symbol
       }
     });
+
+    const winner = getWinner();
+
+    if (winner != null) {
+      Test.pass(winner);
+      futureWinner.resolve(winner);
+    }
   });
 
-  await messageBus.waitForConnection();
-  await ScriptingClient.call('TicTacToeBoard.iAmConnected');
-
-  // give some time to the websockets to send messages
-  await wait(300);
+  await TicTacToeBoard.iAmConnected();
 
   // wait every command to execute
-  await userFinishesCommands;
+  console.log('the winner is', await futureWinner);
 });

@@ -10,6 +10,12 @@ export type ITestInWorkerOptions = {
   execute?: (worker: ScriptingHost) => void;
 };
 
+export function wait(ms: number): Promise<void> {
+  return new Promise(ok => {
+    setTimeout(ok, ms);
+  });
+}
+
 export function future<T = any>(): IFuture<T> {
   let resolver: (x: T) => void = (x: T) => { throw new Error("Error initilizing mutex"); };
   let rejecter: (x: Error) => void = (x: Error) => { throw x; };

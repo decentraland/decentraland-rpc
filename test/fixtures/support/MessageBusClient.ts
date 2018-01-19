@@ -1,27 +1,42 @@
 import { EventDispatcher } from "../../../lib/common/core/EventDispatcher";
-import { ScriptingClient } from '../../../lib/client';
+import { ScriptingClient, getPlugin } from '../../../lib/client';
 
 export interface IMessageBusOptions {
 }
 
-export class MessageBusClient extends EventDispatcher<any> {
-  private _busIdentifier = `MessageBus.${this.id}.message`;
+export interface IMessage {
+  event: string;
+  args: any[];
+  sender: string;
+}
 
-  private constructor(protected id: string, protected _localId: string) {
+const MessageBusApi = getPlugin('MessageBus') as {
+  getChannel(channelName: string, uid: string, options: IMessageBusOptions): Promise<{ id: string }>;
+  [key: string]: Function;
+};
+
+export class MessageBusClient<T = any> extends EventDispatcher<T> {
+  private broadcastIdentifier = `Broadcast_${this.id}`;
+
+  private constructor(protected id: string, protected busClientId: string) {
     super();
-    ScriptingClient.on(this._busIdentifier, (data) => {
-      this.emit(data.name, data.payload);
+
+    MessageBusApi[`on${this.broadcastIdentifier}`]((message: IMessage) => {
+      if (this.busClientId != message.sender) {
+        super.emit(message.event, ...message.args);
+      }
     });
   }
 
-  notify(name: string, payload?: any) {
-    ScriptingClient.notify(this._busIdentifier, { name, payload, sender: this._localId });
+  emit(event: string, ...args) {
+    MessageBusApi[this.broadcastIdentifier]({ event, args, sender: this.busClientId } as IMessage);
+    super.emit(event, ...args);
   }
 
-  static async aquireChannel(name: string, options: IMessageBusOptions = {}) {
-    const busId = Math.random().toString();
+  static async acquireChannel(channelName: string, options: IMessageBusOptions = {}) {
+    const busId = Math.random().toString(36);
 
-    const bus = await ScriptingClient.call('MessageBus.joinChannel', { name, id: busId, options });
+    const bus = await MessageBusApi.getChannel(channelName, busId, options);
 
     return new MessageBusClient(bus.id, busId);
   }

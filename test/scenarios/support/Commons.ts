@@ -1,5 +1,6 @@
 import { BasePlugin, ExposedAPI, ScriptingHost, exposeMethod } from "../../../lib/host";
 import { future } from "./Helpers";
+import './MessageBusManager';
 
 export class Logger extends BasePlugin {
   @exposeMethod

@@ -1,4 +1,4 @@
-import { testInWorker, future } from "./support/Helpers";
+import { testInWorker, future, wait } from "./support/Helpers";
 import assert = require('assert');
 import { BasePlugin, ScriptingHost } from "../../lib/host";
 import { Test } from "./support/Commons";
@@ -36,49 +36,62 @@ ScriptingHost.registerPlugin('TicTacToeBoard', TicTacToeBoard);
 
 const file = 'test/out/5.0.TicTacToe.js';
 
-describe(file, () => {
-  let workerX: ScriptingHost = null;
-  let workerO: ScriptingHost = null;
+describe(file, function () {
+  this.timeout(30000);
+  let numberOfGames = 0;
 
-  let apiX: TicTacToeBoard = null;
-  let apiO: TicTacToeBoard = null;
+  function randomizeGame() {
+    let workerX: ScriptingHost = null;
+    let workerO: ScriptingHost = null;
 
-  it('starts the workers', async () => {
-    workerO = await ScriptingHost.fromURL(file);
-    workerX = await ScriptingHost.fromURL(file);
+    let apiX: TicTacToeBoard = null;
+    let apiO: TicTacToeBoard = null;
 
-    workerX.setLogging({ logConsole: true });
-    workerO.setLogging({ logConsole: true });
+    it(`randomized game ${numberOfGames++}`, async function () {
+      workerO = await ScriptingHost.fromURL(file);
+      workerX = await ScriptingHost.fromURL(file);
 
-    apiX = workerX.getPluginInstance(TicTacToeBoard);
-    apiO = workerO.getPluginInstance(TicTacToeBoard);
+      // workerX.setLogging({ logConsole: true });
+      // workerO.setLogging({ logConsole: true });
 
-    // awaits for web socket connections
-    await apiX.waitForConnection;
-    await apiO.waitForConnection;
+      apiX = workerX.getPluginInstance(TicTacToeBoard);
+      apiO = workerO.getPluginInstance(TicTacToeBoard);
 
-    apiX.userDidChooseSymbol('x');
-    apiO.userDidChooseSymbol('o');
+      // awaits for web socket connections
+      await apiX.waitForConnection;
+      await apiO.waitForConnection;
 
-    // clicks some positions
-    apiX.userDidClickPosition(0);
-    apiO.userDidClickPosition(1);
-    apiX.userDidClickPosition(3);
-    apiO.userDidClickPosition(8);
-    apiX.userDidClickPosition(6);
+      apiX.userDidChooseSymbol('x');
+      apiO.userDidChooseSymbol('o');
 
-    apiX.userDidRequestResults();
-    apiO.userDidRequestResults();
+      // clicks some positions
+      for (let i = 0; i < 8; i++) {
+        if (Math.random() > 0.5)
+          apiX.userDidClickPosition(i);
+        else
+          apiO.userDidClickPosition(i);
 
-    // waits the result
-    const resultX = await (workerX.getPluginInstance(Test).waitForPass());
-    const resultO = await (workerO.getPluginInstance(Test).waitForPass());
+        // Let the event system exchange the information between workers
+        await wait(50);
+      }
 
-    console.log('X state ', resultX);
-    console.log('O state ', resultO);
+      // waits the result
+      const winnerX = await (workerX.getPluginInstance(Test).waitForPass());
+      const winnerO = await (workerO.getPluginInstance(Test).waitForPass());
 
-    // terminates the workers
-    workerX.terminate();
-    workerO.terminate();
-  });
+      console.log('winner X', winnerX);
+      console.log('winner O', winnerO);
+
+      assert.deepEqual(winnerX, winnerO);
+
+      // terminates the workers
+      workerX.terminate();
+      workerO.terminate();
+    });
+  }
+
+  randomizeGame();
+  randomizeGame();
+  randomizeGame();
+  randomizeGame();
 });

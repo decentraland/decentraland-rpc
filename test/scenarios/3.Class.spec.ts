@@ -44,6 +44,7 @@ class Runtime extends BasePlugin {
     return 1;
   }
 }
+
 ScriptingHost.registerPlugin('Debugger', Debugger);
 ScriptingHost.registerPlugin('Profiler', Profiler);
 ScriptingHost.registerPlugin('Runtime', Runtime);
