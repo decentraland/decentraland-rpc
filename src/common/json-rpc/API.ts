@@ -26,10 +26,14 @@ export function getApi<T = any>(rpcClient: Client, _prefix: string = ''): T {
       } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
         const method = prop.substr(2);
         target[prop] = (handler: Function) => rpcClient.on(`${prefix}${method}`, (params) => {
-          if (params && (params instanceof Array)) {
-            handler.apply(null, params);
-          } else {
-            handler.call(null, params);
+          try {
+            if (params && (params instanceof Array)) {
+              handler.apply(null, params);
+            } else {
+              handler.call(null, params);
+            }
+          } catch (e) {
+            rpcClient.emit('error', e);
           }
         });
       } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {

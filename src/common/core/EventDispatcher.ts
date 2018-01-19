@@ -185,6 +185,8 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
         }
       }
     } else if (event === 'error') {
+      console.error('EventDispatcher: Unhandled error event', arguments);
+
       if (arguments[1] instanceof Error) {
         throw arguments[1];
       }
@@ -192,8 +194,6 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       if (typeof arguments[1] == 'string') {
         throw new Error(arguments[1]);
       }
-
-      console.error(arguments);
 
       throw arguments[1];
     }

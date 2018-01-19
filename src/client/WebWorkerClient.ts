@@ -13,7 +13,13 @@ export class WebWorkerClient extends Client {
     }
 
     addEventListener('message',
-      (message: MessageEvent) => this.processMessage(message.data)
+      (message: MessageEvent) => {
+        try {
+          this.processMessage(message.data);
+        } catch (e) {
+          this.emit('error', e);
+        }
+      }
     );
 
     addEventListener('message',
