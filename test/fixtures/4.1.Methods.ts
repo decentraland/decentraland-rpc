@@ -1,22 +1,26 @@
-import { ScriptingClient, API } from '../../lib/client';
+import { ScriptingClient } from '../../lib/client';
 import assert = require('assert');
 import { test, shouldFail } from './support/ClientHelpers';
+import { Methods } from './support/ClientCommons';
 
 test(async () => {
-
-  assert.equal(await API.Methods.enable(), 1);
-  assert.equal(typeof (await API.Methods.getRandomNumber()), 'number');
-  assert(await API.Methods.getRandomNumber() > 0);
+  assert.equal(await Methods.enable(), 1);
+  assert.equal(typeof (await Methods.getRandomNumber()), 'number');
+  assert(await Methods.getRandomNumber() > 0);
 
   const sentObject = {
-    x: await API.Methods.getRandomNumber()
+    x: await Methods.getRandomNumber()
   };
 
-  assert.deepEqual(await API.Methods.receiveObject(sentObject), { received: sentObject });
+  assert.deepEqual(await Methods.receiveObject(sentObject), { received: sentObject });
 
-  await API.Methods.failsWithoutParams(1);
-  await API.Methods.failsWithParams();
+  await Methods.failsWithoutParams(1);
+  await Methods.failsWithParams();
 
-  await shouldFail(() => API.Methods.failsWithoutParams(), 'failsWithoutParams');
-  await shouldFail(() => API.Methods.failsWithParams(1), 'failsWithParams');
+  await shouldFail(() => Methods.failsWithoutParams(), 'failsWithoutParams');
+  await shouldFail(() => Methods.failsWithParams(1), 'failsWithParams');
+
+  const sentElements = [1, true, null, false, "xxx", { a: null }];
+
+  assert.deepEqual(await Methods.bounce(...sentElements), sentElements);
 });

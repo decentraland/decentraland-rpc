@@ -26,7 +26,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
    * Execute this method after configuring the RPC methods and listeners.
    * It will send an empty notification to the client, then it (the client) will send all the enqueued messages.
    */
-  enable() {
+  protected enable() {
     if (!this._isEnabled) {
       this._isEnabled = true;
       this.notify('RPC.Enabled');
@@ -157,11 +157,15 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   }
 
   notify(method: string): void;
-  notify(method: string, params: any[]): void;
+  notify(method: string, params: string): never;
+  notify(method: string, params: number): never;
+  notify(method: string, params: boolean): never;
+  notify(method: string, params: null): never;
+  notify<T>(method: string, params: Iterable<T>): void;
   notify(method: string, params: { [key: string]: any }): void;
-  notify(method: string, params?: any[]): void {
+  notify(method: string, params?: any): void {
     if (typeof params != 'undefined' && typeof params != 'object') {
-      throw new Error('Params must be structured data (Array | Object)');
+      throw new Error(`Server#notify Params must be structured data (Array | Object) got ${JSON.stringify(params)}`);
     }
     // Broadcast message to all clients
     const clients = this.getAllClients();
@@ -171,62 +175,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
         this._send(client, { method, params });
       }
     } else {
-      throw new Error('Server does not support broadcasting. No "getAllClients: ClientType" returned null');
+      throw new Error('Server does not support broadcasting. No "getAllClients: ClientType[]" returned null');
     }
-  }
-
-  /**
-   * Builds an ES6 Proxy where api.domain.expose(module) exposes all the functions in the module over RPC
-   * api.domain.emit{method} calls will send {method} notifications to the client
-   * The api object leads itself to a very clean interface i.e `await api.Domain.func(params)` calls
-   * This allows the consumer to abstract all the internal details of marshalling the message from function call to a string
-   */
-  api(prefix?: string): any {
-    if (!Proxy) {
-      throw new Error('api() requires ES6 Proxy. Please use an ES6 compatible engine');
-    }
-
-    return new Proxy({}, {
-      get: (target: any, prop: string) => {
-        if (target[prop]) {
-          return target[prop];
-        }
-
-        if (prop === '__proto__' || prop === 'prototype') {
-          return Object.prototype;
-        } else if (prefix === void 0) {
-          target[prop] = this.api(`${prop}.`);
-        } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
-          const method = prop.substr(2);
-
-          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, (params) => {
-            if (params && (params instanceof Array)) {
-              handler.apply(null, params);
-            } else {
-              handler.call(null, params);
-            }
-          });
-        } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
-          const method = prop.substr(4);
-          target[prop] = (...args) => this.notify(`${prefix}${method}`, args);
-        } else if (prop === 'expose') {
-          target[prop] = (module: any) => {
-            if (!module || typeof module !== 'object') {
-              throw new Error('Expected an iterable object to expose functions');
-            }
-
-            for (let funcName in module) {
-              if (typeof module[funcName] === 'function') {
-                this.expose(`${prefix}${funcName}`, module[funcName].bind(module));
-              }
-            }
-          };
-        } else {
-          return undefined;
-        }
-
-        return target[prop];
-      }
-    });
   }
 }

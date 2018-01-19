@@ -21,8 +21,6 @@ it('test/out/1.Echo.js', async () => {
     aFuture.resolve(data.number);
   });
 
-  worker.enable();
-
   assert.equal(await aFuture, randomNumber, 'exchanged numbers must match');
 
   worker.terminate();

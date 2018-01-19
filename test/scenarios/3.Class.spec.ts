@@ -1,50 +1,47 @@
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ScriptingHost, BasePlugin, ExposedAPI } from '../../lib/host';
+import { ScriptingHost, BasePlugin, ExposedAPI, exposeMethod } from '../../lib/host';
 import assert = require('assert');
 import { future, testInWorker } from './support/Helpers';
 
 const aFuture = future();
 
 class Debugger extends BasePlugin {
-  getApi(): ExposedAPI {
-    return {
-      async enable() {
-        return 1;
-      }
-    };
+  @exposeMethod
+  async enable() {
+    return 1;
   }
 }
 
 class Profiler extends BasePlugin {
-  getApi(): ExposedAPI {
-    return {
-      enable: async () => {
-        return 1;
-      },
-      start: async () => {
-        setTimeout(() => {
-          this.notify('ExecutionContextDestroyed');
-        }, 16);
-      },
-      stop: async () => {
-        aFuture.resolve(true);
-        return { data: "noice!" };
-      }
-    };
+  @exposeMethod
+  async enable() {
+    return 1;
+  }
+
+  @exposeMethod
+  async start() {
+    setTimeout(() => {
+      this.options.notify('ExecutionContextDestroyed');
+    }, 16);
+  }
+
+  @exposeMethod
+  async stop() {
+    aFuture.resolve(true);
+    return { data: "noice!" };
   }
 }
 
 class Runtime extends BasePlugin {
-  getApi() {
-    return {
-      async enable() {
-        return 1;
-      },
-      async run() {
-        return 1;
-      }
-    };
+  @exposeMethod
+  async enable() {
+    return 1;
+  }
+
+  @exposeMethod
+  async run() {
+    return 1;
   }
 }
 ScriptingHost.registerPlugin('Debugger', Debugger);

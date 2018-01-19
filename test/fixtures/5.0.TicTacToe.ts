@@ -1,4 +1,4 @@
-import { ScriptingClient, API } from '../../lib/client';
+import { ScriptingClient } from '../../lib/client';
 import assert = require('assert');
 import { test, shouldFail, future, wait } from './support/ClientHelpers';
 import { getWsMessageHub } from './support/MessageHub';
@@ -76,12 +76,12 @@ test(async () => {
   const userFinishesCommands = future();
   const messageBus = getWsMessageHub('tictactoe');
 
-  API.TicTacToeBoard.onCommandsDidFinish(async () => {
-    API.Test.pass(state);
+  ScriptingClient.on('TicTacToeBoard.CommandsDidFinish', () => {
+    ScriptingClient.call('Test.pass', state);
     userFinishesCommands.resolve(1);
   });
 
-  API.TicTacToeBoard.onChooseSymbol((symbol: GameSymbol) => {
+  ScriptingClient.on('TicTacToeBoard.ChooseSymbol', ({ symbol }: { symbol: GameSymbol }) => {
     handleAction({
       type: TicTacToeAction.SET_SYMBOL,
       payload: {
@@ -90,8 +90,8 @@ test(async () => {
     });
   });
 
-  API.TicTacToeBoard.onClickPosition((index: number) => {
-    messageBus.emit('set_at', index, state.mySymbol);
+  ScriptingClient.on('TicTacToeBoard.ClickPosition', ({ position }: { position: number }) => {
+    messageBus.emit('set_at', position, state.mySymbol);
   });
 
   messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
@@ -105,7 +105,7 @@ test(async () => {
   });
 
   await messageBus.waitForConnection();
-  await API.TicTacToeBoard.iAmConnected();
+  await ScriptingClient.call('TicTacToeBoard.iAmConnected');
 
   // give some time to the websockets to send messages
   await wait(300);

@@ -5,13 +5,20 @@ export interface ExposedAPI {
   [method: string]: (() => Promise<any>) | ((arg) => Promise<any>);
 }
 
+export interface IPluginOptions {
+  pluginName: string;
+  on(event: string, handler: Function): void;
+  notify(event: string, params?: any): void;
+  expose(method: string, handler: <T>(params: any) => Promise<T>): void;
+}
+
+
 export interface ScriptingHostPlugin {
-  getApi(): ExposedAPI;
   terminate(): void;
 }
 
 export interface ScriptingHostPluginConstructor<T> {
-  new(api: any, permissons: any, metadata: any): T;
+  new(options: IPluginOptions): T;
 }
 
 export interface ScriptingHostEvents {
@@ -44,17 +51,14 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
 
     if (plugins.length) {
       plugins.forEach(pluginName => {
-        const api = this.api()[pluginName];
-
-        const instance = new RegisteredAPIs[pluginName](api, null, null);
+        const instance = new RegisteredAPIs[pluginName]({
+          pluginName,
+          on: (event: string, handler: (params) => void) => this.on(`${pluginName}.${event}`, handler),
+          notify: (event: string, params?: any) => this.notify(`${pluginName}.${event}`, params),
+          expose: (event: string, handler: <T>(params) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
+        });
 
         this.apiInstances[pluginName] = instance;
-
-        const exposedApi = instance.getApi();
-
-        if (exposedApi && typeof exposedApi == 'object') {
-          api.expose(exposedApi);
-        }
       });
     }
 
@@ -104,20 +108,25 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
   }
 }
 
+export type ExposableMethod = (...args) => Promise<any>;
+
+export function exposeMethod(target: BasePlugin, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<ExposableMethod>) {
+  target._exposedMethodsSet = target._exposedMethodsSet || new Set();
+  target._exposedMethodsSet.add(propertyKey.toString());
+}
+
 export abstract class BasePlugin implements ScriptingHostPlugin {
-  abstract getApi(): ExposedAPI;
+  _exposedMethodsSet: Set<string>;
 
   terminate(): void { /* noop */ }
 
-  notify(method: string, params?: any) {
-    if (typeof params == 'undefined') {
-      this.api['emit' + method]();
-    } else {
-      this.api['emit' + method](params);
+  constructor(protected options: IPluginOptions) {
+    if (this._exposedMethodsSet) {
+      this._exposedMethodsSet.forEach($ => {
+        this.options.expose($, this[$].bind(this));
+      });
     }
   }
 
-  constructor(protected api: any, protected permissons: any, protected metadata: any) {
-
-  }
+  static expose = exposeMethod;
 }

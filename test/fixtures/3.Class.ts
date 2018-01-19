@@ -1,17 +1,35 @@
-import { ScriptingClient, API } from '../../lib/client';
+import { ScriptingClient, getPlugin } from '../../lib/client';
 import { test } from './support/ClientHelpers';
 
 test(async () => {
+
+
+  const Runtime = getPlugin('Runtime') as {
+    enable(): Promise<any>;
+    run(): Promise<any>;
+  };
+
+  const Debugger = getPlugin('Debugger') as {
+    enable(): Promise<any>;
+  };
+
+  const Profiler = getPlugin('Profiler') as {
+    enable(): Promise<any>;
+    start(): Promise<any>;
+    onExecutionContextDestroyed(callback);
+    stop(): Promise<any>;
+  };
+
   await Promise.all([
-    API.Runtime.enable(),
-    API.Debugger.enable(),
-    API.Profiler.enable(),
-    API.Runtime.run(),
+    Runtime.enable(),
+    Debugger.enable(),
+    Profiler.enable(),
+    Runtime.run(),
   ]);
 
-  const mutex = new Promise((resolve) => API.Profiler.onExecutionContextDestroyed(resolve));
+  const mutex = new Promise((resolve) => Profiler.onExecutionContextDestroyed(resolve));
 
-  await API.Profiler.start();
+  await Profiler.start();
   await mutex;
-  await API.Profiler.stop();
+  await Profiler.stop();
 });

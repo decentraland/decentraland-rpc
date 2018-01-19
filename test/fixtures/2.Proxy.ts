@@ -1,15 +1,32 @@
-import { ScriptingClient, API } from '../../lib/client';
+import { ScriptingClient, getPlugin } from '../../lib/client';
 import { test } from './support/ClientHelpers';
 
 test(async () => {
+
+  const xRuntime = getPlugin('xRuntime') as {
+    enable(): Promise<any>;
+    onExecutionContextDestroyed(callback);
+    run(): Promise<any>;
+  };
+
+  const xDebugger = getPlugin('xDebugger') as {
+    enable(): Promise<any>;
+  };
+
+  const xProfiler = getPlugin('xProfiler') as {
+    enable(): Promise<any>;
+    start(): Promise<any>;
+    stop(): Promise<any>;
+  };
+
   await Promise.all([
-    API.xRuntime.enable(),
-    API.xDebugger.enable(),
-    API.xProfiler.enable(),
-    API.xRuntime.run(),
+    xRuntime.enable(),
+    xDebugger.enable(),
+    xProfiler.enable(),
+    xRuntime.run(),
   ]);
 
-  await API.xProfiler.start();
-  await new Promise((resolve) => API.xRuntime.onExecutionContextDestroyed(resolve));
-  await API.xProfiler.stop();
+  await xProfiler.start();
+  await new Promise((resolve) => xRuntime.onExecutionContextDestroyed(resolve));
+  await xProfiler.stop();
 });

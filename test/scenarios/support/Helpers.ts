@@ -4,6 +4,12 @@ import { Test } from './Commons';
 
 export type IFuture<T> = Promise<T> & { resolve?: (x: T) => void, reject?: (x: Error) => void };
 
+export type ITestInWorkerOptions = {
+  log?: boolean;
+  validateResult?: (result: any) => void;
+  execute?: (worker: ScriptingHost) => void;
+};
+
 export function future<T = any>(): IFuture<T> {
   let resolver: (x: T) => void = (x: T) => { throw new Error("Error initilizing mutex"); };
   let rejecter: (x: Error) => void = (x: Error) => { throw x; };
@@ -18,13 +24,6 @@ export function future<T = any>(): IFuture<T> {
 
   return promise;
 }
-
-export interface ITestInWorkerOptions {
-  log?: boolean;
-  validateResult?: (result: any) => void;
-  execute?: (worker: ScriptingHost) => void;
-}
-
 
 export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   it(file, async () => {

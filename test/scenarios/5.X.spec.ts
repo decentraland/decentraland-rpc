@@ -16,23 +16,19 @@ class TicTacToeBoard extends BasePlugin {
   waitForConnection = future();
 
   userDidClickPosition(position: number) {
-    this.notify('ClickPosition', position);
+    this.options.notify('ClickPosition', { position });
   }
 
   userDidChooseSymbol(symbol: 'x' | 'o') {
-    this.notify('ChooseSymbol', symbol);
+    this.options.notify('ChooseSymbol', { symbol });
   }
 
   userDidRequestResults() {
-    this.notify('CommandsDidFinish');
+    this.options.notify('CommandsDidFinish');
   }
 
-  getApi() {
-    return {
-      iAmConnected: async (...args) => {
-        this.waitForConnection.resolve(args);
-      }
-    };
+  @BasePlugin.expose async iAmConnected(...args) {
+    this.waitForConnection.resolve(args);
   }
 }
 

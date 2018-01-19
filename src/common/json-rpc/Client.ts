@@ -90,11 +90,15 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   }
 
   call(method: string): Promise<any>;
-  call(method: string, params: any[]): Promise<any>;
+  call(method: string, params: string): never;
+  call(method: string, params: number): never;
+  call(method: string, params: boolean): never;
+  call(method: string, params: null): never;
+  call<T>(method: string, params: Iterable<T>): Promise<any>;
   call(method: string, params: { [key: string]: any }): Promise<any>;
   call(method: string, params?: any) {
     if (typeof params != 'undefined' && typeof params != 'object') {
-      throw new Error('Params must be structured data (Array | Object)');
+      throw new Error('Client#call Params must be structured data (Array | Object) got ${JSON.stringify(params)}');
     }
 
     const id = ++this._nextMessageId;
@@ -111,58 +115,17 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   }
 
   notify(method: string): void;
-  notify(method: string, params: any[]): void;
+  notify(method: string, params: string): never;
+  notify(method: string, params: number): never;
+  notify(method: string, params: boolean): never;
+  notify(method: string, params: null): never;
+  notify<T>(method: string, params: Iterable<T>): void;
   notify(method: string, params: { [key: string]: any }): void;
-  notify(method: string, params?: any[]): void {
+  notify(method: string, params?: any): void {
     if (typeof params != 'undefined' && typeof params != 'object') {
-      throw new Error('Params must be structured data (Array | Object)');
+      throw new Error(`Client#notify Params must be structured data (Array | Object) got ${JSON.stringify(params)}`);
     }
 
     this._send({ method, params });
-  }
-
-  /**
-   * Builds an ES6 Proxy where api.domain.method(params) transates into client.send('{domain}.{method}', params) calls
-   * api.domain.on{method} will add event handlers for {method} events
-   * api.domain.emit{method} will send {method} notifications to the server
-   * The api object leads itself to a very clean interface i.e `await api.Domain.func(params)` calls
-   * This allows the consumer to abstract all the internal details of marshalling the message from function call to a string
-   * Calling client.api('') will return an unprefixed client. e.g api.hello() is equivalient to client.send('hello')
-   */
-  api(prefix?: string): any {
-    if (!Proxy) {
-      throw new Error('api() requires ES6 Proxy. Please use an ES6 compatible engine');
-    }
-
-    return new Proxy({}, {
-      get: (target: any, prop: string) => {
-        if (target[prop]) {
-          return target[prop];
-        }
-        // Special handling for prototype so console intellisense works on noice objects
-        if (prop === '__proto__' || prop === 'prototype') {
-          return Object.prototype;
-        } else if (prefix === void 0) { // Prefix is undefined. Create domain prefix
-          target[prop] = this.api(`${prop}.`);
-        } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
-          const method = prop.substr(2);
-          target[prop] = (handler: Function) => this.on(`${prefix}${method}`, (params) => {
-            if (params && (params instanceof Array)) {
-              handler.apply(null, params);
-            } else {
-              handler.call(null, params);
-            }
-          });
-        } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
-          const method = prop.substr(4);
-          target[prop] = (...args) => this.notify(`${prefix}${method}`, args);
-        } else {
-          const method = prop;
-          target[prop] = (...args) => this.call(`${prefix}${method}`, args);
-        }
-
-        return target[prop];
-      }
-    });
   }
 }

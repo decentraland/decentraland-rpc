@@ -1,4 +1,4 @@
-import { API } from '../../../lib/client';
+import { Test } from './ClientCommons';
 
 export type IFuture<T> = Promise<T> & { resolve?: (x: T) => void, reject?: (x: Error) => void };
 
@@ -25,14 +25,26 @@ export function wait(ms: number): Promise<void> {
   });
 }
 
-
-
 export function test(fn: () => Promise<any>) {
   fn()
-    .then((x) => API.Test.pass(x))
+    .then((x) => Test.pass(x))
+    .catch(x => {
+      console.error('Test failed');
+      console.error(x);
+      return Test.fail(x);
+    });
+}
+
+export function testToFail(fn: () => Promise<any>) {
+  fn()
+    .then((x) => {
+      console.error('Test did not fail');
+      console.error(x);
+      return Test.fail(x);
+    })
     .catch(x => {
       console.log(x);
-      return API.Test.fail(x.data);
+      return Test.pass(x);
     });
 }
 

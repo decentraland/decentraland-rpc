@@ -12,32 +12,23 @@ it('test/out/2.Proxy.js', async () => {
 
   // worker.setLogging({ logConsole: true, logEmit: true });
 
-  const api = worker.api();
+  const enable = async () => { };
 
-  const enable = () => { };
+  worker.expose('xDebugger.enable', enable);
 
-  api.xDebugger.expose({ enable });
-  api.xProfiler.expose({ enable });
-
-  api.xRuntime.expose({
-    enable,
-    run() { }
+  worker.expose('xProfiler.enable', enable);
+  worker.expose('xProfiler.start', async () => {
+    setTimeout(() => {
+      worker.notify('xRuntime.ExecutionContextDestroyed');
+    }, 16);
+  });
+  worker.expose('xProfiler.stop', async () => {
+    aFuture.resolve(333);
+    return { data: "noice!" };
   });
 
-  api.xProfiler.expose({
-    enable,
-    start() {
-      setTimeout(() => {
-        api.xRuntime.emitExecutionContextDestroyed();
-      }, 16);
-    },
-    stop() {
-      aFuture.resolve(333);
-      return { data: "noice!" };
-    }
-  });
-
-  worker.enable();
+  worker.expose('xRuntime.enable', enable);
+  worker.expose('xRuntime.run', enable);
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.');
 
