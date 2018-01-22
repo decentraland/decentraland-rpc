@@ -18,7 +18,12 @@
     "stripInternal": true,
     "strict": true,
     "removeComments": true,
-    "pretty": true
+    "pretty": true,
+    "plugins": [
+      {
+        "name": "tslint-language-service"
+      }
+    ]
   },
   "exclude": [
     "node_modules"

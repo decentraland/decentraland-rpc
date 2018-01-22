@@ -1,7 +1,7 @@
-import { getPlugin } from '../../lib/client';
-import { test, future } from './support/ClientHelpers';
-import { MessageBusClient } from './support/MessageBusClient';
-import { Test } from './support/ClientCommons';
+import { getPlugin } from '../../lib/client'
+import { test, future } from './support/ClientHelpers'
+import { MessageBusClient } from './support/MessageBusClient'
+import { Test } from './support/ClientCommons'
 
 const winingCombinations = [
   [0, 1, 2], // 1 row
@@ -14,71 +14,66 @@ const winingCombinations = [
 
   [0, 4, 8], // nw - se
   [6, 4, 2] // sw - ne
-];
+]
 
-const TicTacToeBoard = getPlugin('TicTacToeBoard') as {
-  onCommandsDidFinish(cb: () => void): void;
-  onChooseSymbol(cb: (x: { symbol: GameSymbol }) => void): void;
-  onClickPosition(cb: (x: { position: number }) => void): void;
-  iAmConnected(): Promise<void>;
-};
+const TicTacToeBoard = getPlugin('TicTacToeBoard')
 
-type GameSymbol = 'x' | 'o' | null;
+type GameSymbol = 'x' | 'o' | null
 
 class Game {
-  mySymbol: GameSymbol = null;
+  mySymbol: GameSymbol = null
 
   board: GameSymbol[] = [
     null, null, null,
     null, null, null,
     null, null, null
-  ];
+  ]
 
   getWinner() {
     return ['x', 'o'].find($ =>
       winingCombinations.some(combination =>
-        combination.every(position => this.board[position] == $)
+        combination.every(position => this.board[position] === $)
       )
-    );
+    )
   }
 
   selectMySymbol(symbol: GameSymbol) {
-    this.mySymbol = symbol;
+    this.mySymbol = symbol
   }
 
   setAt(position: number, symbol: GameSymbol) {
-    this.board[position] = symbol;
+    this.board[position] = symbol
   }
 }
 
 test(async () => {
-  const futureWinner = future();
+  const futureWinner = future()
 
-  const game = new Game();
+  const game = new Game()
 
-  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe2.signaling.com');
+  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe2.signaling.com')
 
-  TicTacToeBoard.onChooseSymbol(({ symbol }) => {
-    game.selectMySymbol(symbol);
-  });
+  TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
+    game.selectMySymbol(symbol)
+  })
 
-  TicTacToeBoard.onClickPosition(({ position }) => {
-    messageBus.emit('set_at', position, game.mySymbol);
-  });
+  TicTacToeBoard.onClickPosition(({ position }: { position: number }) => {
+    messageBus.emit('set_at', position, game.mySymbol)
+  })
 
   messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
-    game.setAt(index, symbol);
+    game.setAt(index, symbol)
 
-    const winner = game.getWinner();
+    const winner = game.getWinner()
 
-    if (winner != null) {
-      Test.pass(winner);
-      futureWinner.resolve(winner);
+    if (winner !== undefined) {
+      Test.pass(winner)
+      futureWinner.resolve(winner)
     }
-  });
+  })
 
-  await TicTacToeBoard.iAmConnected();
+  await TicTacToeBoard.iAmConnected()
 
   // wait every command to execute
-  console.log('class the winner is', await futureWinner);
-});
+  console.log('class the winner is', await futureWinner)
+})

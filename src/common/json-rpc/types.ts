@@ -8,27 +8,27 @@
  */
 
 /**
+ * Client can send a request with no expectation of a response.
+ * Server can send a notification without an explicit request by a client.
+ */
+export interface INotification {
+  /** Name of the method to be invoked. */
+  method: string
+
+  /** Parameter values to be used during the invocation of the method. */
+  params?: any
+
+  /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
+  jsonrpc?: '2.0'
+}
+
+/**
  * Request object representation of a rpc call.
  * Server always replies with a Response object having the same id.
  */
 export interface IRequest extends INotification {
   /** An identifier established by the Client */
-  id: number;
-}
-
-/**
- * Client can send a request with no expectation of a response.
- * Server can send a notification without an explicit request by a client.
-*/
-export interface INotification {
-  /** Name of the method to be invoked. */
-  method: string;
-
-  /** Parameter values to be used during the invocation of the method. */
-  params?: any;
-
-  /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
-  jsonrpc?: '2.0';
+  id: number
 }
 
 /**
@@ -38,16 +38,16 @@ export interface INotification {
  */
 export interface IResponse {
   /** An identifier established by the Client. */
-  id: number;
+  id: number
 
   /** Result object from the Server if method invocation was successful. */
-  result?: any;
+  result?: any
 
   /** Error object from Server if method invocation resulted in an error. */
-  error?: IError;
+  error?: IError
 
   /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
-  jsonrpc?: '2.0';
+  jsonrpc?: '2.0'
 }
 
 /**
@@ -55,13 +55,13 @@ export interface IResponse {
  */
 export interface IError {
   /** Indicates the error type that occurred. */
-  code: ErrorCode;
+  code: ErrorCode
 
   /** A short description of the error. */
-  message: string;
+  message: string
 
   /** Additional information about the error */
-  data?: any;
+  data?: any
 }/*
   /** Error codes are same as xml-rpc codes. See http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php */
 export const enum ErrorCode {
@@ -83,23 +83,28 @@ export const enum ErrorCode {
   /** -32000 to -32099: Reserved for implementation-defined Server errors.  */
 }
 
-export type PromiseOrNot<T> = Promise<T> | T;
+export type PromiseOrNot<T> = Promise<T> | T
 
 export type Resolvable<T = any> = {
   resolve(arg: T): void;
   reject(arg: Error): void;
-};
+}
+
+export interface ILogOpts {
+  /** All messages will be logged to console */
+  logConsole?: boolean
+}
 
 /** A JsonRPC Client that abstracts the transportation of messages to and from the Server. */
 export interface IClient {
   /** Creates a Request object and sends to the Server. Returns the Response from the Server as a Promise. */
-  call: (method: string, params: any) => Promise<any>;
+  call: (method: string, params: any) => Promise<any>
 
   /** Invokes the handler function when Server sends a notification. */
-  on: (method: string, handler: (params: any) => void) => void;
+  on: (method: string, handler: (params: any) => void) => void
 
   /** Sends a notification to the Server. */
-  notify: (method: string, params?: any) => void;
+  notify: (method: string, params?: any) => void
 }
 
 export interface IClientOpts extends ILogOpts {
@@ -113,21 +118,15 @@ export interface IServer {
    * If handler function returns a Promise, then it waits for the promise to be resolved or rejected before returning.
    * It also wraps the handler in a trycatch so it can send an error response when an exception is thrown.
    */
-  expose: (method: string, handler: (params: any) => Promise<any>) => void;
+  expose: (method: string, handler: (params: any) => Promise<any>) => void
 
   /** Invokes the handler function when Client sends a notification. */
-  on: (method: string, handler: (params: any) => void) => void;
+  on: (method: string, handler: (params: any) => void) => void
 
   /** Sends a notification to the Client. */
-  notify: (method: string, params?: any) => void;
+  notify: (method: string, params?: any) => void
 }
 
 export interface IServerOpts extends ILogOpts {
 
 }
-
-export interface ILogOpts {
-  /** All messages will be logged to console */
-  logConsole?: boolean;
-}
-

@@ -9,7 +9,9 @@
     "watch": "npm run build:cli && ./bin/compile.js compiler.cfg.json --watch",
     "build": "npm run build:cli && ./bin/compile.js compiler.cfg.json",
     "test": "npm run build && node ./bin/test.js",
-    "test:local": "npm run build && (npm run watch & node ./bin/test.js --keep-open)"
+    "test:local": "npm run build && (npm run watch & node ./bin/test.js --keep-open)",
+    "lint:fix": "tslint --project tsconfig.json --fix",
+    "lint": "tslint --project tsconfig.json"
   },
   "repository": {
     "type": "git",
@@ -36,6 +38,9 @@
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
     "rimraf": "^2.6.2",
+    "tslint": "^5.9.1",
+    "tslint-config-standard": "^7.0.0",
+    "tslint-language-service": "^0.9.8",
     "typescript": "^2.7.0-rc",
     "webpack": "^3.10.0",
     "ws": "^4.0.0"

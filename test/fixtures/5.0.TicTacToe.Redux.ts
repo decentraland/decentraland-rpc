@@ -1,32 +1,27 @@
-import { getPlugin } from '../../lib/client';
-import { test, future } from './support/ClientHelpers';
-import { MessageBusClient } from './support/MessageBusClient';
-import { Test } from './support/ClientCommons';
+import { getPlugin } from '../../lib/client'
+import { test, future } from './support/ClientHelpers'
+import { MessageBusClient } from './support/MessageBusClient'
+import { Test } from './support/ClientCommons'
 
-const TicTacToeBoard = getPlugin('TicTacToeBoard') as {
-  onCommandsDidFinish(cb: () => void): void;
-  onChooseSymbol(cb: (x: { symbol: GameSymbol }) => void): void;
-  onClickPosition(cb: (x: { position: number }) => void): void;
-  iAmConnected(): Promise<void>;
-};
+const TicTacToeBoard = getPlugin('TicTacToeBoard')
 
-type GameSymbol = 'x' | 'o' | null;
+type GameSymbol = 'x' | 'o' | null
 
 enum TicTacToeAction {
   PLACE = 'placeSymbol',
   RESTART = 'restart',
   SYNC = 'sync',
-  SET_SYMBOL = 'setSymbol',
+  SET_SYMBOL = 'setSymbol'
 }
 
 interface ITicTacToeState {
-  board: GameSymbol[];
-  mySymbol: GameSymbol;
+  board: GameSymbol[]
+  mySymbol: GameSymbol
 }
 
 interface IGenericAction {
-  type: TicTacToeAction;
-  payload?: any;
+  type: TicTacToeAction
+  payload?: any
 }
 
 const initialState: ITicTacToeState = {
@@ -36,43 +31,43 @@ const initialState: ITicTacToeState = {
     null, null, null
   ],
   mySymbol: null
-};
+}
 
-let state = initialState;
+let state = initialState
 
 function reducer(state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
-  const { type, payload } = action;
+  const { type, payload } = action
 
   switch (type) {
     case TicTacToeAction.SYNC:
       return {
         ...state,
         board: payload.board
-      };
+      }
 
     case TicTacToeAction.RESTART:
       return {
         ...initialState
-      };
+      }
 
     case TicTacToeAction.PLACE:
       return {
         ...state,
         board: Object.assign([], state.board, { [payload.index]: payload.symbol })
-      };
+      }
 
     case TicTacToeAction.SET_SYMBOL:
       return {
         ...state,
         mySymbol: payload.symbol
-      };
+      }
   }
 
-  return state;
+  return state
 }
 
 function handleAction(action: IGenericAction) {
-  state = reducer(state, action);
+  state = reducer(state, action)
 }
 
 const winingCombinations = [
@@ -86,19 +81,18 @@ const winingCombinations = [
 
   [0, 4, 8], // nw - se
   [6, 4, 2] // sw - ne
-];
+]
 
 const getWinner = () =>
   ['x', 'o'].find($ =>
     winingCombinations.some(combination =>
-      combination.every(position => state.board[position] == $)
+      combination.every(position => state.board[position] === $)
     )
-  );
-
+  )
 
 test(async () => {
-  const futureWinner = future();
-  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com');
+  const futureWinner = future()
+  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com')
 
   TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
     handleAction({
@@ -106,12 +100,12 @@ test(async () => {
       payload: {
         symbol
       }
-    });
-  });
+    })
+  })
 
   TicTacToeBoard.onClickPosition(({ position }: { position: number }) => {
-    messageBus.emit('set_at', position, state.mySymbol);
-  });
+    messageBus.emit('set_at', position, state.mySymbol)
+  })
 
   messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
     handleAction({
@@ -120,18 +114,18 @@ test(async () => {
         index,
         symbol
       }
-    });
+    })
 
-    const winner = getWinner();
+    const winner = getWinner()
 
-    if (winner != null) {
-      Test.pass(winner);
-      futureWinner.resolve(winner);
+    if (winner !== undefined) {
+      Test.pass(winner)
+      futureWinner.resolve(winner)
     }
-  });
+  })
 
-  await TicTacToeBoard.iAmConnected();
+  await TicTacToeBoard.iAmConnected()
 
   // wait every command to execute
-  console.log('the winner is', await futureWinner);
-});
+  console.log('the winner is', await futureWinner)
+})
