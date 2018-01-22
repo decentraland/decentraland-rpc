@@ -1,12 +1,10 @@
 #!/usr/bin/env node
-
-
-import * as runner from 'mocha-headless-chrome';
 import { resolve } from 'path';
 import * as ws from 'ws';
 import * as http from 'http';
 import * as express from 'express';
 
+const runner: (a: any) => Promise<any> = require('mocha-headless-chrome');
 
 const keepOpen = process.argv.some($ => $ == '--keep-open');
 const app = express();
@@ -37,7 +35,7 @@ server.listen(port, function (error: any) {
     };
 
     runner(options)
-      .then((result: any) => {
+      .then(result => {
         console.dir(result);
         if (!keepOpen) process.exit(result.result.stats.failures);
       })

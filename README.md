@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/decentraland/script/tree/master.svg?style=svg)](https://circleci.com/gh/decentraland/script/tree/master)  
+[![CircleCI](https://circleci.com/gh/decentraland/script/tree/master.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/script/tree/master)
 
 This repository contains a WIP version of the
 
