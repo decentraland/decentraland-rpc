@@ -1,4 +1,4 @@
-import { ScriptingClient, getPlugin } from '../../lib/client';
+import { getPlugin } from '../../lib/client';
 import { test } from './support/ClientHelpers';
 
 test(async () => {
@@ -16,7 +16,7 @@ test(async () => {
   const Profiler = getPlugin('Profiler') as {
     enable(): Promise<any>;
     start(): Promise<any>;
-    onExecutionContextDestroyed(callback);
+    onExecutionContextDestroyed(callback: Function): void;
     stop(): Promise<any>;
   };
 

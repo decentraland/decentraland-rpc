@@ -1,8 +1,8 @@
 
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ScriptingHost, BasePlugin, ExposedAPI } from '../../lib/host';
-import assert = require('assert');
+import { ScriptingHost } from '../../lib/host';
+import * as assert from 'assert';
 import { future } from './support/Helpers';
 
 it('test/out/1.Echo.js', async () => {

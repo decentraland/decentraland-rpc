@@ -1,12 +1,12 @@
-import { ScriptingClient, getPlugin } from '../../../lib/client';
+import { getPlugin } from '../../../lib/client';
 
 export const Methods = getPlugin('Methods') as {
   fail(): Promise<void>;
   enable(): Promise<void>;
   getRandomNumber(): Promise<number>;
   receiveObject<T>(object: T): Promise<{ received: T }>;
-  failsWithoutParams(...args): Promise<any>;
-  failsWithParams(...args): Promise<any>;
+  failsWithoutParams(...args: any[]): Promise<any>;
+  failsWithParams(...args: any[]): Promise<any>;
   fail(): Promise<void>;
 
   setValue(key: string, value: any): Promise<void>;

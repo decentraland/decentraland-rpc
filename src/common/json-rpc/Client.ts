@@ -1,12 +1,13 @@
 import { EventDispatcher } from "../core/EventDispatcher";
 import * as JsonRpc2 from "./types";
 
+
 /**
  * Creates a RPC Client.
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
 export abstract class Client extends EventDispatcher implements JsonRpc2.IClient {
-  private _responsePromiseMap: Map<number, { resolve: Function, reject: Function }> = new Map();
+  private _responsePromiseMap: Map<number, JsonRpc2.Resolvable> = new Map();
   private _nextMessageId: number = 0;
   private _consoleLog: boolean = false;
   private _requestQueue: string[] = [];
@@ -17,7 +18,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     this.setLogging(opts);
   }
 
-  abstract sendMessage(message: string);
+  abstract sendMessage(message: string): void;
 
   protected didConnect() {
     if (this._connected == false) {
@@ -43,7 +44,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     } else if (message.id) {
       if (this._responsePromiseMap.has(message.id)) {
         // Resolve promise from pending message
-        const promise = this._responsePromiseMap.get(message.id);
+        const promise = this._responsePromiseMap.get(message.id) as JsonRpc2.Resolvable;
         if (message.result) {
           promise.resolve(message.result);
         } else if (message.error) {

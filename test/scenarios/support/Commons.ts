@@ -1,22 +1,22 @@
-import { BasePlugin, ExposedAPI, ScriptingHost, exposeMethod } from "../../../lib/host";
+import { BasePlugin, ScriptingHost, exposeMethod } from "../../../lib/host";
 import { future } from "./Helpers";
 import './MessageBusManager';
 
 export class Logger extends BasePlugin {
   @exposeMethod
-  async error(message) {
+  async error(message: string) {
     console.error.call(console, message);
   }
   @exposeMethod
-  async log(message) {
+  async log(message: string) {
     console.log.call(console, message);
   }
   @exposeMethod
-  async warn(message) {
+  async warn(message: string) {
     console.warn.call(console, message);
   }
   @exposeMethod
-  async info(message) {
+  async info(message: string) {
     console.info.call(console, message);
   }
 }
@@ -24,7 +24,7 @@ export class Logger extends BasePlugin {
 ScriptingHost.registerPlugin('Logger', Logger);
 
 export class Methods extends BasePlugin {
-  store = {};
+  store: { [key: string]: any } = {};
 
   @exposeMethod
   async setValue(key: string, value: any) {
@@ -37,7 +37,7 @@ export class Methods extends BasePlugin {
   }
 
   @exposeMethod
-  async bounce(...args) {
+  async bounce(...args: any[]) {
     console.log('bounce received', arguments);
     return args;
   }
@@ -99,12 +99,12 @@ export class Test extends BasePlugin {
   }
 
   @exposeMethod
-  async fail(arg) {
+  async fail(arg: any) {
     this.future.resolve({ pass: false, arg });
   }
 
   @exposeMethod
-  async pass(arg) {
+  async pass(arg: any) {
     this.future.resolve({ pass: true, arg });
   }
 }

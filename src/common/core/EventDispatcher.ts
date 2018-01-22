@@ -5,12 +5,14 @@ export interface Dictionary<T = any> {
 const eventSplitter = /\s+/g;
 
 export class EventDispatcherBinding {
-  id: number;
-  cb;
-  event: string;
-  sharedList: EventDispatcherBinding[];
-  object: EventDispatcher<any>;
   enabled: boolean = true;
+  constructor(
+    public id: number,
+    public cb: Function | null,
+    public event: string,
+    public sharedList: EventDispatcherBinding[],
+    public object: EventDispatcher<any> | null
+  ) { }
 
   off() {
     if (this.object) {
@@ -41,7 +43,7 @@ export class EventDispatcherBinding {
   }
 }
 
-function turnOffCallback(f) {
+function turnOffCallback(f: EventDispatcherBinding) {
   delete f.cb;
 }
 
@@ -55,52 +57,53 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
 
   on<K extends keyof T>(event: K, callback: T[K], once?: boolean): EventDispatcherBinding;
   on(event: string, callback: (...args: any[]) => void, once?: boolean): EventDispatcherBinding;
-  on(event, callback, once?: boolean): EventDispatcherBinding {
+  on(event: string, callback: any, once?: boolean): EventDispatcherBinding {
     this.ed_bindCount++;
 
     let events = event.split(eventSplitter);
 
-    let tmp: EventDispatcherBinding;
-    let bindList = [];
+    let bindList: EventDispatcherBinding[] = [];
+    let latest: EventDispatcherBinding | null = null;
 
-    events.forEach(evt => {
-      tmp = new EventDispatcherBinding();
-      tmp.id = this.ed_bindCount;
-      tmp.cb = null;
-      tmp.event = evt;
-      tmp.sharedList = bindList;
-      tmp.object = this;
+    for (let evt of events) {
+      let tmp = new EventDispatcherBinding(
+        this.ed_bindCount,
+        null,
+        evt,
+        bindList,
+        this
+      );
 
       bindList && bindList.push(tmp);
 
       if (once) {
-        tmp.cb = function () {
+        tmp.cb = (function (this: EventDispatcher<T>) {
           callback.apply(this, arguments);
           tmp.cb = null;
-        };
+        }).bind(this);
       } else {
-        tmp.cb = callback;
+        tmp.cb = callback.bind(this);
       }
-
-      tmp.cb = tmp.cb.bind(this);
 
       this.ed_bindings[evt] = this.ed_bindings[evt] || [];
       this.ed_bindings[evt].push(tmp);
-    });
 
-    return tmp;
+      latest = tmp;
+    }
+
+    return latest as EventDispatcherBinding;
   }
 
   once<K extends keyof T>(event: K, callback: T[K]): EventDispatcherBinding;
   once(event: string, callback: Function): EventDispatcherBinding;
-  once(event, callback) {
+  once(event: string, callback: any) {
     return this.on(event, callback, true);
   }
 
-  off(binding: EventDispatcherBinding);
-  off(eventName: string, boundCallback?: Function);
-  off(boundCallback: Function);
-  off(arg0?: string | Function | EventDispatcherBinding, arg1?: Function) {
+  off(binding: EventDispatcherBinding): void;
+  off(eventName: string, boundCallback?: Function): void;
+  off(boundCallback: Function): void;
+  off(arg0?: string | Function | EventDispatcherBinding, arg1?: Function): void {
     if (arguments.length == 0) {
       for (let i in this.ed_bindings) {
         for (let e in this.ed_bindings[i])
@@ -132,22 +135,9 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
     }
   }
 
-  // cleanup the disposed events
-  protected cleanupTurnedOffEvents() {
-    for (let evt in this.ed_bindings) {
-      let list = [];
-      for (let i in this.ed_bindings[evt]) {
-        if (this.ed_bindings[evt][i] && this.ed_bindings[evt][i] instanceof EventDispatcherBinding && this.ed_bindings[evt][i].cb) {
-          list.push(this.ed_bindings[evt]);
-        }
-      }
-      this.ed_bindings[evt] = list;
-    }
-  }
-
-  emit(event: 'error', error: any);
-  emit<K extends keyof T>(event: K, ...params: any[]);
-  emit(event: string, ...params: any[]);
+  emit(event: 'error', error: any): void;
+  emit<K extends keyof T>(event: K, ...params: any[]): void;
+  emit(event: string, ...params: any[]): void;
   emit(event: string) {
     if (event in this.ed_bindings) {
 

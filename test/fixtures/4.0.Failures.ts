@@ -1,4 +1,3 @@
-import { ScriptingClient } from '../../lib/client';
 import { testToFail } from './support/ClientHelpers';
 import { Methods } from './support/ClientCommons';
 

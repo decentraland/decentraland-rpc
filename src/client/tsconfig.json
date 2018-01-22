@@ -4,12 +4,6 @@
     "outDir": "../../lib",
     "module": "es2015",
     "target": "es2015",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
     "lib": [
       "es2015",
       "es2015.promise",
@@ -19,5 +13,6 @@
   },
   "exclude": [
     "../../node_modules"
-  ]
+  ],
+  "extends": "../../tsconfig.base.json"
 }

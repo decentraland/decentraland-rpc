@@ -1,11 +1,11 @@
-import { ScriptingClient, getPlugin } from '../../lib/client';
+import { getPlugin } from '../../lib/client';
 import { test } from './support/ClientHelpers';
 
 test(async () => {
 
   const xRuntime = getPlugin('xRuntime') as {
     enable(): Promise<any>;
-    onExecutionContextDestroyed(callback);
+    onExecutionContextDestroyed(callback: Function): void;
     run(): Promise<any>;
   };
 

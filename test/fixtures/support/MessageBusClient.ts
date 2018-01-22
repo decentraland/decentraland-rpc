@@ -1,5 +1,5 @@
 import { EventDispatcher } from "../../../lib/common/core/EventDispatcher";
-import { ScriptingClient, getPlugin } from '../../../lib/client';
+import { getPlugin } from '../../../lib/client';
 
 export interface IMessageBusOptions {
 }
@@ -28,7 +28,7 @@ export class MessageBusClient<T = any> extends EventDispatcher<T> {
     });
   }
 
-  emit(event: string, ...args) {
+  emit(event: string, ...args: any[]) {
     MessageBusApi[this.broadcastIdentifier]({ event, args, sender: this.busClientId } as IMessage);
     super.emit(event, ...args);
   }

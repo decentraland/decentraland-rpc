@@ -9,6 +9,6 @@ new Function(`XMLHttpRequest = function () { throw new Error('XMLHttpRequest is 
 
 export const ScriptingClient = new WebWorkerClient();
 
-export function getPlugin<T = any>(pluginName: string): T {
+export function getPlugin<T extends {} = any>(pluginName: string): T {
   return getApi(ScriptingClient, pluginName);
 }

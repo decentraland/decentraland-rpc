@@ -1,5 +1,5 @@
-import { testInWorker, future, wait } from "./support/Helpers";
-import assert = require('assert');
+import { future, wait } from "./support/Helpers";
+import * as assert from 'assert';
 import { BasePlugin, ScriptingHost } from "../../lib/host";
 import { Test } from "./support/Commons";
 
@@ -23,7 +23,7 @@ class TicTacToeBoard extends BasePlugin {
     this.options.notify('ChooseSymbol', { symbol });
   }
 
-  @BasePlugin.expose async iAmConnected(...args) {
+  @BasePlugin.expose async iAmConnected(...args: any[]) {
     this.waitForConnection.resolve(args);
   }
 }
@@ -34,22 +34,19 @@ describe('TicTacToe', function () {
   this.timeout(6000);
   let numberOfGames = 0;
 
-  function randomizeGame(file) {
-    let workerX: ScriptingHost = null;
-    let workerO: ScriptingHost = null;
-
-    let apiX: TicTacToeBoard = null;
-    let apiO: TicTacToeBoard = null;
-
+  function randomizeGame(file: string) {
     it(`randomized game ${numberOfGames++} ${file}`, async function () {
-      workerO = await ScriptingHost.fromURL(file);
-      workerX = await ScriptingHost.fromURL(file);
+      let workerO = await ScriptingHost.fromURL(file);
+      let workerX = await ScriptingHost.fromURL(file);
 
       // workerX.setLogging({ logConsole: true });
       // workerO.setLogging({ logConsole: true });
 
-      apiX = workerX.getPluginInstance(TicTacToeBoard);
-      apiO = workerO.getPluginInstance(TicTacToeBoard);
+      let apiX = workerX.getPluginInstance(TicTacToeBoard);
+      let apiO = workerO.getPluginInstance(TicTacToeBoard);
+
+      if (!apiX) throw new Error('Cannot get apiX instance');
+      if (!apiO) throw new Error('Cannot get apiX instance');
 
       // awaits for web socket connections
       await apiX.waitForConnection;
@@ -69,9 +66,15 @@ describe('TicTacToe', function () {
         await wait(20);
       }
 
-      // waits the result
-      const winnerX = await (workerX.getPluginInstance(Test).waitForPass());
-      const winnerO = await (workerO.getPluginInstance(Test).waitForPass());
+      // waits for result
+      const TestPluginX = workerX.getPluginInstance(Test);
+      const TestPluginO = workerO.getPluginInstance(Test);
+
+      if (!TestPluginX) throw new Error('Cannot retieve Test plugin instance');
+      if (!TestPluginO) throw new Error('Cannot retieve Test plugin instance');
+
+      const winnerX = await TestPluginX.waitForPass();
+      const winnerO = await TestPluginO.waitForPass();
 
       console.log('winner X', winnerX);
       console.log('winner O', winnerO);

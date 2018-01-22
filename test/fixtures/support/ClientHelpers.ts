@@ -1,12 +1,12 @@
 import { Test } from './ClientCommons';
 
-export type IFuture<T> = Promise<T> & { resolve?: (x: T) => void, reject?: (x: Error) => void };
+export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject: (x: Error) => void };
 
 export function future<T = any>(): IFuture<T> {
   let resolver: (x: T) => void = (x: T) => { throw new Error("Error initilizing mutex"); };
   let rejecter: (x: Error) => void = (x: Error) => { throw x; };
 
-  const promise: IFuture<T> = new Promise((ok, err) => {
+  const promise: any = new Promise((ok, err) => {
     resolver = ok;
     rejecter = err;
   });
@@ -14,10 +14,8 @@ export function future<T = any>(): IFuture<T> {
   promise.resolve = resolver;
   promise.reject = rejecter;
 
-  return promise;
+  return promise as IFuture<T>;
 }
-
-
 
 export function wait(ms: number): Promise<void> {
   return new Promise(ok => {
@@ -50,7 +48,7 @@ export function testToFail(fn: () => Promise<any>) {
 
 export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {
   try {
-    const result = await fn();
+    await fn();
     throw new Error(`${msg} - It did not fail.`);
   } catch (e) {
     if (!(e instanceof Error)) {

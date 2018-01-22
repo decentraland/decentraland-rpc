@@ -1,6 +1,5 @@
-import { ScriptingClient, getPlugin } from '../../lib/client';
-import assert = require('assert');
-import { test, shouldFail, future, wait } from './support/ClientHelpers';
+import { getPlugin } from '../../lib/client';
+import { test, future } from './support/ClientHelpers';
 import { MessageBusClient } from './support/MessageBusClient';
 import { Test } from './support/ClientCommons';
 
@@ -18,13 +17,13 @@ const winingCombinations = [
 ];
 
 const TicTacToeBoard = getPlugin('TicTacToeBoard') as {
-  onCommandsDidFinish(cb: () => void);
-  onChooseSymbol(cb: (x: { symbol: GameSymbol }) => void);
-  onClickPosition(cb: (x: { position: number }) => void);
+  onCommandsDidFinish(cb: () => void): void;
+  onChooseSymbol(cb: (x: { symbol: GameSymbol }) => void): void;
+  onClickPosition(cb: (x: { position: number }) => void): void;
   iAmConnected(): Promise<void>;
 };
 
-type GameSymbol = 'x' | 'o';
+type GameSymbol = 'x' | 'o' | null;
 
 class Game {
   mySymbol: GameSymbol = null;

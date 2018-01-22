@@ -1,7 +1,5 @@
-/// <reference path="../../node_modules/@types/mocha/index.d.ts" />
-
-import { ScriptingHost, BasePlugin, ExposedAPI, exposeMethod } from '../../lib/host';
-import assert = require('assert');
+import { ScriptingHost, BasePlugin, exposeMethod } from '../../lib/host';
+import * as assert from 'assert';
 import { future, testInWorker } from './support/Helpers';
 
 const aFuture = future();

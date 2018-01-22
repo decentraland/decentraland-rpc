@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
+
 import * as runner from 'mocha-headless-chrome';
 import { resolve } from 'path';
 import * as ws from 'ws';
 import * as http from 'http';
-import * as url from 'url';
 import * as express from 'express';
-import * as fs from 'fs';
 
 
 const keepOpen = process.argv.some($ => $ == '--keep-open');
@@ -25,7 +24,7 @@ console.log(resolve(__dirname, '../node_modules'));
 app.use('/test', express.static(resolve(__dirname, '../test')));
 app.use('/node_modules', express.static(resolve(__dirname, '../node_modules')));
 
-server.listen(port, function (error) {
+server.listen(port, function (error: any) {
   if (error) {
     console.error(error);
     process.exit(1);
@@ -38,11 +37,11 @@ server.listen(port, function (error) {
     };
 
     runner(options)
-      .then(result => {
+      .then((result: any) => {
         console.dir(result);
         if (!keepOpen) process.exit(result.result.stats.failures);
       })
-      .catch(err => {
+      .catch((err: Error) => {
         console.error(err.message || JSON.stringify(err));
         console.dir(err);
         if (!keepOpen) process.exit(1);
@@ -51,10 +50,6 @@ server.listen(port, function (error) {
 });
 
 wss.on('connection', function connection(ws, req) {
-  const location = url.parse(req.url, true);
-  // You might use location.query.access_token to authenticate or share sessions
-  // or req.headers.cookie (see http://stackoverflow.com/a/16395220/151312)
-
   ws.on('message', function incoming(data) {
     console.log('[WSS] received: %s', data);
     wss.clients.forEach(function each(client) {

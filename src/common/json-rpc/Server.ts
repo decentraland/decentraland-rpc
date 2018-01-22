@@ -19,7 +19,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     this.setLogging(opts);
   }
 
-  abstract sendMessage(to: ClientType, message: string);
+  abstract sendMessage(to: ClientType, message: string): void;
   abstract getAllClients(): Iterable<ClientType>;
 
   /**
@@ -41,7 +41,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     try {
       request = JSON.parse(messageStr);
     } catch (e) {
-      return this._sendError(from, request, JsonRpc2.ErrorCode.ParseError);
+      return this._sendError(from, null, JsonRpc2.ErrorCode.ParseError);
     }
 
     // Ensure method is atleast defined
@@ -91,13 +91,13 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     }
   }
 
-  on(method: 'error', callback: (error) => void, once?: boolean): EventDispatcherBinding;
+  on(method: 'error', callback: (error: any) => void, once?: boolean): EventDispatcherBinding;
   on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding;
   on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding {
     return super.on(method, callback, once);
   }
 
-  once(method: 'error', callback: (error) => void): EventDispatcherBinding;
+  once(method: 'error', callback: (error: any) => void): EventDispatcherBinding;
   once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding;
   once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding {
     return super.once(method, callback);
@@ -120,7 +120,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     this.sendMessage(receiver, messageStr);
   }
 
-  private _sendError(receiver: ClientType, request: JsonRpc2.IRequest, errorCode: JsonRpc2.ErrorCode, error?: Error) {
+  private _sendError(receiver: ClientType, request: JsonRpc2.IRequest | null, errorCode: JsonRpc2.ErrorCode, error?: Error) {
     try {
       this._send(receiver, {
         id: request && request.id || -1,
@@ -131,7 +131,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     }
   }
 
-  private _errorFromCode(code: JsonRpc2.ErrorCode, data?: any, method?: string): JsonRpc2.IError {
+  private _errorFromCode(code: JsonRpc2.ErrorCode, data: any = null, method: string | null = null): JsonRpc2.IError {
     let message = '';
 
     switch (code) {

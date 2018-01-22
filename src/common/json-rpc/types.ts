@@ -85,6 +85,11 @@ export const enum ErrorCode {
 
 export type PromiseOrNot<T> = Promise<T> | T;
 
+export type Resolvable<T = any> = {
+  resolve(arg: T): void;
+  reject(arg: Error): void;
+};
+
 /** A JsonRPC Client that abstracts the transportation of messages to and from the Server. */
 export interface IClient {
   /** Creates a Request object and sends to the Server. Returns the Response from the Server as a Promise. */

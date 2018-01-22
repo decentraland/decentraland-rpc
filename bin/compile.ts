@@ -5,10 +5,8 @@
 
 
 import webpack = require('webpack');
-import ProgressPlugin = require('webpack/lib/ProgressPlugin');
 import globPkg = require('glob');
-import { promisify, callbackify } from 'util';
-import { resolve, parse as parsePath, dirname, relative, basename } from 'path';
+import { resolve, parse as parsePath, dirname, basename } from 'path';
 import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader';
 
 import rimraf = require('rimraf');
@@ -18,7 +16,7 @@ const isWatching = process.argv.some($ => $ == '--watch');
 import fs = require('fs');
 import { spawn } from 'child_process';
 
-export function findConfigFile(baseDir: string, configFileName: string) {
+export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName);
 
   if (fs.existsSync(configFilePath)) {
@@ -123,8 +121,8 @@ export async function tsc(tsconfig: string) {
     return true;
   }
 
-  let resolve = (a) => void 0;
-  let reject = (a) => void 0;
+  let resolve: (x: any) => any = (a) => void 0;
+  let reject: (x: any) => any = (a) => void 0;
 
   const semaphore = new Promise((ok, err) => {
     resolve = ok;

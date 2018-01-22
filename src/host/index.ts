@@ -1,31 +1,8 @@
 import { Dictionary } from "../common/core/EventDispatcher";
 import { WebWorkerServer } from "./WebWorkerServer";
+import { IPluginOptions, ScriptingHostPlugin, ScriptingHostPluginConstructor, ExposableMethod } from "./types";
 
-export interface ExposedAPI {
-  [method: string]: (() => Promise<any>) | ((arg) => Promise<any>);
-}
-
-export interface IPluginOptions {
-  pluginName: string;
-  on(event: string, handler: Function): void;
-  notify(event: string, params?: any): void;
-  expose(method: string, handler: <T>(params: any) => Promise<T>): void;
-}
-
-
-export interface ScriptingHostPlugin {
-  terminate(): void;
-}
-
-export interface ScriptingHostPluginConstructor<T> {
-  new(options: IPluginOptions): T;
-}
-
-export interface ScriptingHostEvents {
-  willTerminate: any;
-  didTerminate: any;
-  willEnable: any;
-}
+const exposedMethodSymbol = Symbol('exposedMethod');
 
 export const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor<ScriptingHostPlugin>> = {};
 
@@ -41,7 +18,7 @@ function registerPlugin(name: string, api: ScriptingHostPluginConstructor<Script
   RegisteredAPIs[name] = api;
 }
 
-export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
+export class ScriptingHost extends WebWorkerServer {
   apiInstances: Dictionary<any> = {};
 
   constructor(worker: Worker) {
@@ -53,9 +30,9 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
       plugins.forEach(pluginName => {
         const instance = new RegisteredAPIs[pluginName]({
           pluginName,
-          on: (event: string, handler: (params) => void) => this.on(`${pluginName}.${event}`, handler),
+          on: (event: string, handler: <A, O extends object>(params: Array<A> | O) => void) => this.on(`${pluginName}.${event}`, handler),
           notify: (event: string, params?: any) => this.notify(`${pluginName}.${event}`, params),
-          expose: (event: string, handler: <T>(params) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
+          expose: (event: string, handler: <A, O extends object, T>(params: Array<A> | O) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
         });
 
         this.apiInstances[pluginName] = instance;
@@ -66,9 +43,9 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
     this.enable();
   }
 
-  getPluginInstance<X>(plugin: { new(...args): X }): X | null;
+  getPluginInstance<X>(plugin: { new(options: IPluginOptions): X }): X | null;
   getPluginInstance(name: string): ScriptingHostPlugin | null;
-  getPluginInstance(arg) {
+  getPluginInstance(arg: any) {
     if (typeof arg == 'string') {
       return this.apiInstances[arg] || null;
     } else if (typeof arg == 'function') {
@@ -115,24 +92,23 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
   }
 }
 
-export type ExposableMethod = (...args) => Promise<any>;
-
 export function exposeMethod(target: BasePlugin, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<ExposableMethod>) {
-  target._exposedMethodsSet = target._exposedMethodsSet || new Set();
-  target._exposedMethodsSet.add(propertyKey.toString());
+  getExposedMethods(target).add(propertyKey.toString());
+}
+
+export function getExposedMethods(instance: any): Set<string> {
+  instance[exposedMethodSymbol] = instance[exposedMethodSymbol] || new Set();
+  return instance[exposedMethodSymbol];
 }
 
 export abstract class BasePlugin implements ScriptingHostPlugin {
-  _exposedMethodsSet: Set<string>;
-
   terminate(): void { /* noop */ }
 
   constructor(protected options: IPluginOptions) {
-    if (this._exposedMethodsSet) {
-      this._exposedMethodsSet.forEach($ => {
-        this.options.expose($, this[$].bind(this));
-      });
-    }
+    const that = this as any as { [key: string]: Function };
+    getExposedMethods(this).forEach(($: any) => {
+      this.options.expose($, that[$].bind(this));
+    });
   }
 
   static expose = exposeMethod;

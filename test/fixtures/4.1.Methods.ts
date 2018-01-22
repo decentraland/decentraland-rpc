@@ -1,5 +1,4 @@
-import { ScriptingClient } from '../../lib/client';
-import assert = require('assert');
+import * as assert from 'assert';
 import { test, shouldFail } from './support/ClientHelpers';
 import { Methods } from './support/ClientCommons';
 

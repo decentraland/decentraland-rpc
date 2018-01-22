@@ -1,6 +1,5 @@
-import { BasePlugin, ScriptingHost, ExposedAPI } from "../../../lib/host";
+import { BasePlugin, ScriptingHost } from "../../../lib/host";
 import { EventDispatcher, EventDispatcherBinding } from "../../../lib/common/core/EventDispatcher";
-import { EventEmitter } from "events";
 
 const messageBus = new EventDispatcher;
 
@@ -8,14 +7,14 @@ const messageBus = new EventDispatcher;
 export class MessageBusManager extends BasePlugin {
   joinedTo: EventDispatcherBinding[] = [];
 
-  @BasePlugin.expose async getChannel(name, uid, options) {
+  @BasePlugin.expose async getChannel(name: string, uid: string, options: any) {
 
     const id = (Math.random() * 100000000).toFixed(0);
 
     const key = 'Broadcast_' + id;
 
     this.joinedTo.push(
-      messageBus.on(name, (message) => {
+      messageBus.on(name, (message: any) => {
         try {
           this.options.notify(key, message);
         } catch (e) {
@@ -24,9 +23,9 @@ export class MessageBusManager extends BasePlugin {
       })
     );
 
-    this.options.expose(key, (message) =>
-      messageBus.emit(name, message)
-    );
+    this.options.expose(key, async (message: any) => {
+      messageBus.emit(name, message);
+    });
 
     return { id };
   }

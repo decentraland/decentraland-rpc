@@ -1,7 +1,7 @@
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ScriptingHost, BasePlugin, ExposedAPI } from '../../lib/host';
-import assert = require('assert');
+import { ScriptingHost } from '../../lib/host';
+import * as assert from 'assert';
 import { future } from './support/Helpers';
 import { Test } from './support/Commons';
 
@@ -32,7 +32,11 @@ it('test/out/2.Proxy.js', async () => {
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.');
 
-  await (worker.getPluginInstance(Test).waitForPass());
+  const TestPlugin = worker.getPluginInstance(Test);
+
+  if (!TestPlugin) throw new Error('Cannot retieve Test plugin instance');
+
+  await TestPlugin.waitForPass();
 
   worker.terminate();
 });

@@ -1,7 +1,7 @@
 import { Server } from "../common/json-rpc/Server";
 import { IServerOpts } from "../common/json-rpc/types";
 
-export class WebWorkerServer<T = any> extends Server<Worker> {
+export class WebWorkerServer extends Server<Worker> {
   constructor(public worker: Worker, opt: IServerOpts = {}) {
     super(opt);
 
