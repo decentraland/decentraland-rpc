@@ -4,6 +4,7 @@ import { EventEmitter } from "events";
 
 const messageBus = new EventDispatcher;
 
+@ScriptingHost.registerPlugin('MessageBus')
 export class MessageBusManager extends BasePlugin {
   joinedTo: EventDispatcherBinding[] = [];
 
@@ -36,5 +37,3 @@ export class MessageBusManager extends BasePlugin {
     this.joinedTo.length = 0;
   }
 }
-
-ScriptingHost.registerPlugin('MessageBus', MessageBusManager);

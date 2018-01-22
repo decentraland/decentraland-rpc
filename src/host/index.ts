@@ -97,7 +97,14 @@ export class ScriptingHost extends WebWorkerServer<ScriptingHostEvents> {
   }
 
 
-  static registerPlugin(name: string, api: ScriptingHostPluginConstructor<any>): void {
+  static registerPlugin(name: string): (klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>) => void;
+  static registerPlugin(name: string, api: ScriptingHostPluginConstructor<any>): void;
+  static registerPlugin(name: string, api?: ScriptingHostPluginConstructor<any>) {
+    if (!api) {
+      return function (api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
+        registerPlugin(name, api);
+      };
+    }
     registerPlugin(name, api);
   }
 
