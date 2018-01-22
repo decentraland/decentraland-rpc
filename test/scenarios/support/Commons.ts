@@ -87,7 +87,6 @@ ScriptingHost.registerPlugin('Methods', Methods);
 export class Test extends BasePlugin {
   future = future<{ pass: boolean, arg: any }>();
 
-  @exposeMethod
   async waitForPass() {
     const result = await this.future;
 
