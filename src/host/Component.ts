@@ -12,12 +12,6 @@ export function getExposedMethods<T extends Component>(instance: T): Set<keyof T
   return instanceAny[exposedMethodSymbol]
 }
 
-// we use an interface here because it is mergable with the class
-export interface Component {
-  componentDidMount?(): Promise<void> | void
-  componentWillUnmount?(): Promise<void> | void
-}
-
 export type ComponentOptions = {
   componentName: string
   on(event: string, handler: <A, O extends object>(params: Array<A> | O) => void): void
@@ -70,4 +64,10 @@ export abstract class Component {
   static factory(ctor: ComponentClass<Component>, options: ComponentOptions) {
     return new ctor(options)
   }
+}
+
+// we use an interface here because it is mergable with the class
+export interface Component {
+  componentDidMount?(): Promise<void> | void
+  componentWillUnmount?(): Promise<void> | void
 }

@@ -65,32 +65,62 @@ export function registerComponent(componentName: string): (klass: ComponentClass
 export class ComponentSystem extends WebWorkerServer {
   componentInstances: Map<string, Component> = new Map()
 
-  constructor(worker: Worker) {
+  private constructor(worker: Worker) {
     super(worker)
 
     this.expose('LoadComponents', this.RPCLoadComponents.bind(this))
   }
 
+  static async fromWorker(worker: Worker) {
+    return new ComponentSystem(worker)
+  }
+
   static async fromURL(url: string) {
     const worker = new Worker(url)
 
-    return new ComponentSystem(worker)
+    return ComponentSystem.fromWorker(worker)
   }
 
   static async fromBlob(blob: Blob) {
     const worker = new Worker(window.URL.createObjectURL(blob))
 
-    return new ComponentSystem(worker)
+    return ComponentSystem.fromWorker(worker)
   }
 
+  /**
+   * This methdod should be called only from the interface that manages the COmponentSystems.
+   * It initializes the system and it's queued components. It also sends a first notification
+   * to the implementation of the system telling it is now enabled. In that moment, the
+   * implementation will send the queued messages and execute the queued methods against the
+   * materialized components.
+   *
+   * It:
+   *  1) emits a ComponentSystemEvents.systemWillEnable event
+   *  2) mounts all the components
+   *  3) sends the notification to the actual system implementation
+   */
   enable() {
     this.emit(ComponentSystemEvents.systemWillEnable)
     this.componentInstances.forEach(PrivateHelpers.mountComponent)
     super.enable()
   }
 
+  /**
+   * This is a service locator, it locates or instantiate the requested component
+   * for this instance of ComponentSystem.
+   *
+   * @param component A class constructor
+   */
   getComponentInstance<X>(component: { new(options: ComponentOptions): X }): X
+
+  /**
+   * This is a service locator, it locates or instantiate the requested component
+   * for this instance of ComponentSystem.
+   *
+   * @param name The name of used to register the component
+   */
   getComponentInstance(name: string): Component | null
+
   getComponentInstance(component: any) {
     if (typeof component === 'string') {
       if (this.componentInstances.has(component)) {
@@ -117,13 +147,16 @@ export class ComponentSystem extends WebWorkerServer {
     throw Object.assign(new Error('Cannot get instance of the specified component'), { component })
   }
 
+  /**
+   * This method unmounts all the components and releases the Worker
+   */
   unmount() {
+    this.notify('SIGKILL')
+
     this.emit(ComponentSystemEvents.systemWillUnmount)
 
     this.componentInstances.forEach(PrivateHelpers.unmountComponent)
     this.componentInstances.clear()
-
-    this.notify('SIGKILL')
 
     this.worker.terminate()
 

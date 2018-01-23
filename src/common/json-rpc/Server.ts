@@ -34,7 +34,9 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     return super.once(method, callback)
   }
 
-  /** Set logging for all received and sent messages */
+  /**
+   * Set logging for all received and sent messages
+   */
   public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
     this._consoleLog = logConsole
   }
