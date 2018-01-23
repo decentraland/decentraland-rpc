@@ -4,7 +4,8 @@ import { BasePlugin, ScriptingHost, registerPlugin } from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
 
-@registerPlugin('TicTacToeBoard') export class TicTacToeBoard extends BasePlugin {
+@registerPlugin('TicTacToeBoard')
+export class TicTacToeBoard extends BasePlugin {
   /**
    * This API should mock the behavior of a board in the floor
    * inside a parcel. It will emit events that mimic click
@@ -24,7 +25,8 @@ import './support/MessageBusManager'
     this.options.notify('ChooseSymbol', { symbol })
   }
 
-  @BasePlugin.expose async iAmConnected(...args: any[]) {
+  @BasePlugin.expose
+  async iAmConnected(...args: any[]) {
     this.waitForConnection.resolve(args)
   }
 }
@@ -38,11 +40,13 @@ describe('TicTacToe', function () {
       let workerO = await ScriptingHost.fromURL(file)
       let workerX = await ScriptingHost.fromURL(file)
 
-      // workerX.getPluginInstance(MessageBusManager)
-      // workerO.getPluginInstance(MessageBusManager)
+      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), false)
 
       setUpPlugins(workerO)
       setUpPlugins(workerX)
+
+      workerO.enable()
+      workerX.enable()
 
       // workerX.setLogging({ logConsole: true })
       // workerO.setLogging({ logConsole: true });
@@ -50,20 +54,19 @@ describe('TicTacToe', function () {
       let apiX = workerX.getPluginInstance(TicTacToeBoard)
       let apiO = workerO.getPluginInstance(TicTacToeBoard)
 
-      workerO.enable()
-      workerX.enable()
+      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), true)
 
       if (!apiX) throw new Error('Cannot get apiX instance')
       if (!apiO) throw new Error('Cannot get apiX instance')
 
-      // awaits for web socket connections
+      // await for web workers ready signal
       await apiX.waitForConnection
       await apiO.waitForConnection
 
       apiX.userDidChooseSymbol('x')
       apiO.userDidChooseSymbol('o')
 
-      // clicks some positions
+      // click some positions
       for (let i = 0; i < 30; i++) {
         if (Math.random() > 0.5) {
           apiX.userDidClickPosition(i % 9)
@@ -72,7 +75,8 @@ describe('TicTacToe', function () {
         }
 
         // Let the event system exchange the information between workers
-        await wait(20)
+        // this acts as a Thread.yield in C#
+        await wait(0)
       }
 
       // waits for result
@@ -84,9 +88,6 @@ describe('TicTacToe', function () {
 
       const winnerX = await TestPluginX.waitForPass()
       const winnerO = await TestPluginO.waitForPass()
-
-      console.log('winner X', winnerX)
-      console.log('winner O', winnerO)
 
       assert.deepEqual(winnerX, winnerO)
 
