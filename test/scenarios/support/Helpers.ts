@@ -7,6 +7,7 @@ export type ITestInWorkerOptions = {
   log?: boolean;
   validateResult?: (result: any) => void;
   execute?: (worker: ScriptingHost) => void;
+  plugins?: any[];
 }
 
 export function wait(ms: number): Promise<void> {
@@ -37,6 +38,10 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
     if (options.log) {
       worker.setLogging({ logConsole: true })
     }
+
+    options.plugins && options.plugins.forEach($ => worker.getPluginInstance($))
+
+    worker.enable()
 
     options.execute && options.execute(worker)
 

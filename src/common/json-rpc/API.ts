@@ -1,5 +1,7 @@
 import { Client } from './Client'
 
+const blacklistedMethods = ['then', 'catch']
+
 /**
  * Builds an ES6 Proxy where api.domain.method(params) transates into client.send('{domain}.{method}', params) calls
  * api.domain.on{method} will add event handlers for {method} events
@@ -39,6 +41,8 @@ export function getApi<T extends object = any>(rpcClient: Client, _prefix: strin
       } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
         const method = prop.substr(4)
         target[prop] = (...args: any[]) => rpcClient.notify(`${prefix}${method}`, args)
+      } else if (blacklistedMethods.indexOf(prop) !== -1) {
+        return undefined
       } else {
         const method = prop
         target[prop] = (...args: any[]) => rpcClient.call(`${prefix}${method}`, args)

@@ -1,11 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es2015",
+    "target": "es2017",
     "outDir": "out",
     "declaration": false,
     "lib": [
-      "es2015",
-      "es2015.promise",
+      "es2017",
       "dom"
     ]
   },

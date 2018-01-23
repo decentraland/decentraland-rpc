@@ -1,17 +1,19 @@
-import { ScriptingHost, BasePlugin, exposeMethod } from '../../lib/host'
+import { BasePlugin, exposeMethod, registerPlugin } from '../../lib/host'
 import * as assert from 'assert'
 import { future, testInWorker } from './support/Helpers'
 
 const aFuture = future()
 
-class Debugger extends BasePlugin {
+@registerPlugin('Debugger')
+export class Debugger extends BasePlugin {
   @exposeMethod
   async enable() {
     return 1
   }
 }
 
-class Profiler extends BasePlugin {
+@registerPlugin('Profiler')
+export class Profiler extends BasePlugin {
   @exposeMethod
   async enable() {
     return 1
@@ -31,7 +33,9 @@ class Profiler extends BasePlugin {
   }
 }
 
-class Runtime extends BasePlugin {
+@registerPlugin('Runtime')
+export class Runtime extends BasePlugin {
+
   @exposeMethod
   async enable() {
     return 1
@@ -43,11 +47,8 @@ class Runtime extends BasePlugin {
   }
 }
 
-ScriptingHost.registerPlugin('Debugger', Debugger)
-ScriptingHost.registerPlugin('Profiler', Profiler)
-ScriptingHost.registerPlugin('Runtime', Runtime)
-
 testInWorker('test/out/3.Class.js', {
+  plugins: [Debugger, Profiler, Runtime],
   validateResult: async (result) => {
     assert.equal(await aFuture, true)
   }

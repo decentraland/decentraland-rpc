@@ -10,9 +10,14 @@ it('test/out/2.Proxy.js', async () => {
 
   let aFuture = future()
 
-  // worker.setLogging({ logConsole: true, logEmit: true });
+  worker.setLogging({ logConsole: true })
 
   const enable = async () => void 0
+
+  // Fool the worker to make it believe it has these plugins loaded
+  worker.apiInstances.set('xDebugger', {} as any)
+  worker.apiInstances.set('xProfiler', {} as any)
+  worker.apiInstances.set('xRuntime', {} as any)
 
   worker.expose('xDebugger.enable', enable)
 
@@ -29,6 +34,8 @@ it('test/out/2.Proxy.js', async () => {
 
   worker.expose('xRuntime.enable', enable)
   worker.expose('xRuntime.run', enable)
+
+  worker.enable()
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.')
 

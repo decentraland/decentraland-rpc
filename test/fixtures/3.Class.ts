@@ -2,12 +2,9 @@ import { getPlugin } from '../../lib/client'
 import { test } from './support/ClientHelpers'
 
 test(async () => {
-
-  const Runtime = getPlugin('Runtime')
-
-  const Debugger = getPlugin('Debugger')
-
-  const Profiler = getPlugin('Profiler')
+  const Runtime = await getPlugin('Runtime')
+  const Debugger = await getPlugin('Debugger')
+  const Profiler = await getPlugin('Profiler')
 
   await Promise.all([
     Runtime.enable(),

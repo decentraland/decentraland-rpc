@@ -1,7 +1,7 @@
 import { getPlugin } from '../../lib/client'
 import { test, future } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
-import { Test } from './support/ClientCommons'
+import { TestPlugin } from './support/ClientCommons'
 
 const winingCombinations = [
   [0, 1, 2], // 1 row
@@ -15,8 +15,6 @@ const winingCombinations = [
   [0, 4, 8], // nw - se
   [6, 4, 2] // sw - ne
 ]
-
-const TicTacToeBoard = getPlugin('TicTacToeBoard')
 
 type GameSymbol = 'x' | 'o' | null
 
@@ -47,6 +45,9 @@ class Game {
 }
 
 test(async () => {
+  const Test = await TestPlugin
+  const TicTacToeBoard = await getPlugin('TicTacToeBoard')
+
   const futureWinner = future()
 
   const game = new Game()

@@ -3,56 +3,47 @@ import { WebWorkerServer } from './WebWorkerServer'
 import { IPluginOptions, ScriptingHostPlugin, ScriptingHostPluginConstructor, ExposableMethod } from './types'
 
 const exposedMethodSymbol = Symbol('exposedMethod')
+const pluginNameSymbol = Symbol('pluginName')
 
-export const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor<ScriptingHostPlugin>> = {}
+const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor<ScriptingHostPlugin>> = {}
 
-function registerPlugin(name: string, api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
-  if (name in RegisteredAPIs) {
-    throw new Error(`The API ${name} is already registered`)
+function _registerPlugin(pluginName: string, api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
+  if (pluginNameSymbol in api) {
+    throw new Error(`The API you are trying to register is already registered`)
+  }
+
+  if (pluginName in RegisteredAPIs) {
+    throw new Error(`The API ${pluginName} is already registered`)
   }
 
   if (typeof (api as any) !== 'function') {
-    throw new Error(`The API ${name} is not a class, it is of type ${typeof api}`)
+    throw new Error(`The API ${pluginName} is not a class, it is of type ${typeof api}`)
   }
 
-  RegisteredAPIs[name] = api
+  // save the registered name
+  (api as any)[pluginNameSymbol] = pluginName
+
+  RegisteredAPIs[pluginName] = api
+}
+
+export function getPluginName(klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>): string | null {
+  return (klass as any)[pluginNameSymbol] || null
+}
+
+export function registerPlugin(pluginName: string): (klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>) => void {
+  return function (api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
+    _registerPlugin(pluginName, api)
+  }
 }
 
 export class ScriptingHost extends WebWorkerServer {
-
-  apiInstances: Dictionary<any> = {}
+  apiInstances: Map<string, ScriptingHostPlugin> = new Map()
 
   constructor(worker: Worker) {
     super(worker)
 
-    const plugins = Object.keys(RegisteredAPIs)
-
-    if (plugins.length) {
-      plugins.forEach(pluginName => {
-        const instance = new RegisteredAPIs[pluginName]({
-          pluginName,
-          on: (event: string, handler: <A, O extends object>(params: Array<A> | O) => void) => this.on(`${pluginName}.${event}`, handler),
-          notify: (event: string, params?: any) => this.notify(`${pluginName}.${event}`, params),
-          expose: (event: string, handler: <A, O extends object, T>(params: Array<A> | O) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
-        })
-
-        this.apiInstances[pluginName] = instance
-      })
-    }
-
-    this.emit('willEnable')
-    this.enable()
-  }
-
-  static registerPlugin(name: string): (klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>) => void
-  static registerPlugin(name: string, api: ScriptingHostPluginConstructor<any>): void
-  static registerPlugin(name: string, api?: ScriptingHostPluginConstructor<any>) {
-    if (!api) {
-      return function (api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
-        registerPlugin(name, api)
-      }
-    }
-    registerPlugin(name, api)
+    this.expose('LoadPlugin', this.RPCLoadPlugin.bind(this))
+    this.expose('LoadPlugins', this.RPCLoadPlugins.bind(this))
   }
 
   static async fromURL(url: string) {
@@ -61,28 +52,51 @@ export class ScriptingHost extends WebWorkerServer {
     return new ScriptingHost(worker)
   }
 
-  getPluginInstance<X>(plugin: { new(options: IPluginOptions): X }): X | null
+  static async fromBlob(blob: Blob) {
+    const worker = new Worker(window.URL.createObjectURL(blob))
+
+    return new ScriptingHost(worker)
+  }
+
+  enable() {
+    this.emit('willEnable')
+    super.enable()
+  }
+
+  getPluginInstance<X>(plugin: { new(options: IPluginOptions): X }): X
   getPluginInstance(name: string): ScriptingHostPlugin | null
-  getPluginInstance(arg: any) {
-    if (typeof arg === 'string') {
-      return this.apiInstances[arg] || null
-    } else if (typeof arg === 'function') {
-      return Object
-        .keys(this.apiInstances)
-        .map($ => this.apiInstances[$])
-        .find($ => $ instanceof arg)
+  getPluginInstance(plugin: any) {
+    if (typeof plugin === 'string') {
+      if (this.apiInstances.has(plugin)) {
+        return this.apiInstances.get(plugin)
+      }
+      if (plugin in RegisteredAPIs) {
+        return this.instantiatePlugin(RegisteredAPIs[plugin])
+      }
+      return null
+    } else if (typeof plugin === 'function') {
+      // if it has a name, use that indirection to find in the instance's map
+      if ('pluginName' in plugin && this.apiInstances.has(plugin.pluginName)) {
+        return this.apiInstances.get(plugin.pluginName)
+      }
+
+      // If we don't have a local instance, create the instance of the plugin
+      return this.instantiatePlugin(plugin)
     }
-    return null
+
+    throw Object.assign(new Error('Cannot get instance of the specified plugin'), { plugin })
   }
 
   terminate() {
     this.emit('willTerminate')
 
     Object.keys(this.apiInstances).forEach($ => {
-      if (this.apiInstances[$].terminate) {
-        this.apiInstances[$].terminate()
-      }
+      this.apiInstances.forEach((value, key) => {
+        value.terminate()
+      })
     })
+
+    this.apiInstances.clear()
 
     this.notify('SIGKILL')
 
@@ -91,6 +105,58 @@ export class ScriptingHost extends WebWorkerServer {
     this.emit('didTerminate')
   }
 
+  protected instantiatePlugin<X extends ScriptingHostPlugin>(ctor: { new(options: IPluginOptions): X }): X {
+    const pluginName = getPluginName(ctor)
+
+    if (pluginName === null) {
+      throw new Error('The plugin is not registered')
+    }
+
+    if (this.apiInstances.has(pluginName)) {
+      return this.apiInstances.get(pluginName) as X
+    }
+
+    const instance = new ctor({
+      pluginName,
+      on: (event: string, handler: <A, O extends object>(params: Array<A> | O) => void) => this.on(`${pluginName}.${event}`, handler),
+      notify: (event: string, params?: any) => this.notify(`${pluginName}.${event}`, params),
+      expose: (event: string, handler: <A, O extends object, T>(params: Array<A> | O) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
+    })
+
+    this.apiInstances.set(pluginName, instance)
+
+    return instance
+  }
+
+  // Preloads a plugin
+  private async RPCLoadPlugin(pluginName: string) {
+    if (typeof pluginName !== 'string') {
+      throw new TypeError('LoadPlugin(name) name must be a string')
+    }
+
+    const plugin = this.getPluginInstance(pluginName)
+
+    if (!plugin) {
+      throw new TypeError(`Plugin not found ${pluginName}`)
+    }
+  }
+
+  /// Preloads a list of plugins
+  private async RPCLoadPlugins(pluginNames: string[]) {
+    if (typeof pluginNames !== 'object' || !(pluginNames instanceof Array)) {
+      throw new TypeError('LoadPlugin(name) name must be a string')
+    }
+
+    const notFound =
+      pluginNames
+        .map(name => ({ plugin: this.getPluginInstance(name), name }))
+        .filter($ => $.plugin == null)
+        .map($ => $.name)
+
+    if (notFound.length) {
+      throw new TypeError(`Plugins not found ${notFound.join(',')}`)
+    }
+  }
 }
 
 export function exposeMethod(target: BasePlugin, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<ExposableMethod>) {

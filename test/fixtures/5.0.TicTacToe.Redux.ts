@@ -1,9 +1,7 @@
 import { getPlugin } from '../../lib/client'
 import { test, future } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
-import { Test } from './support/ClientCommons'
-
-const TicTacToeBoard = getPlugin('TicTacToeBoard')
+import { TestPlugin } from './support/ClientCommons'
 
 type GameSymbol = 'x' | 'o' | null
 
@@ -91,6 +89,8 @@ const getWinner = () =>
   )
 
 test(async () => {
+  const Test = await TestPlugin
+  const TicTacToeBoard = await getPlugin('TicTacToeBoard')
   const futureWinner = future()
   const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com')
 

@@ -1,10 +1,11 @@
-import { BasePlugin, ScriptingHost } from '../../../lib/host'
+import { BasePlugin, registerPlugin } from '../../../lib/host'
 import { EventDispatcher, EventDispatcherBinding } from '../../../lib/common/core/EventDispatcher'
 
 const messageBus = new EventDispatcher()
 
-@ScriptingHost.registerPlugin('MessageBus')
+@registerPlugin('MessageBus')
 export class MessageBusManager extends BasePlugin {
+
   joinedTo: EventDispatcherBinding[] = []
 
   @BasePlugin.expose async getChannel(name: string, uid: string, options: any) {

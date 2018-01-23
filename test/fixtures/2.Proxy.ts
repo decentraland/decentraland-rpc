@@ -3,11 +3,11 @@ import { test } from './support/ClientHelpers'
 
 test(async () => {
 
-  const xRuntime = getPlugin('xRuntime')
+  const xRuntime = await getPlugin('xRuntime')
 
-  const xDebugger = getPlugin('xDebugger')
+  const xDebugger = await getPlugin('xDebugger')
 
-  const xProfiler = getPlugin('xProfiler')
+  const xProfiler = await getPlugin('xProfiler')
 
   await Promise.all([
     xRuntime.enable(),

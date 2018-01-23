@@ -1,9 +1,10 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { BasePlugin, ScriptingHost } from '../../lib/host'
-import { Test } from './support/Commons'
+import { BasePlugin, ScriptingHost, registerPlugin } from '../../lib/host'
+import { Test, setUpPlugins } from './support/Commons'
+import './support/MessageBusManager'
 
-class TicTacToeBoard extends BasePlugin {
+@registerPlugin('TicTacToeBoard') export class TicTacToeBoard extends BasePlugin {
   /**
    * This API should mock the behavior of a board in the floor
    * inside a parcel. It will emit events that mimic click
@@ -28,8 +29,6 @@ class TicTacToeBoard extends BasePlugin {
   }
 }
 
-ScriptingHost.registerPlugin('TicTacToeBoard', TicTacToeBoard)
-
 describe('TicTacToe', function () {
   this.timeout(6000)
   let numberOfGames = 0
@@ -39,11 +38,20 @@ describe('TicTacToe', function () {
       let workerO = await ScriptingHost.fromURL(file)
       let workerX = await ScriptingHost.fromURL(file)
 
-      // workerX.setLogging({ logConsole: true });
+      // workerX.getPluginInstance(MessageBusManager)
+      // workerO.getPluginInstance(MessageBusManager)
+
+      setUpPlugins(workerO)
+      setUpPlugins(workerX)
+
+      // workerX.setLogging({ logConsole: true })
       // workerO.setLogging({ logConsole: true });
 
       let apiX = workerX.getPluginInstance(TicTacToeBoard)
       let apiO = workerO.getPluginInstance(TicTacToeBoard)
+
+      workerO.enable()
+      workerX.enable()
 
       if (!apiX) throw new Error('Cannot get apiX instance')
       if (!apiO) throw new Error('Cannot get apiX instance')

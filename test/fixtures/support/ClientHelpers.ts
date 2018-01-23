@@ -1,4 +1,4 @@
-import { Test } from './ClientCommons'
+import { TestPlugin } from './ClientCommons'
 
 export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject: (x: Error) => void }
 
@@ -24,17 +24,18 @@ export function wait(ms: number): Promise<void> {
 }
 
 export function test(fn: () => Promise<any>) {
-  fn()
+  TestPlugin.then(Test => fn()
     .then((x) => Test.pass(x))
     .catch(x => {
       console.error('Test failed')
       console.error(x)
       return Test.fail(x)
     })
+  )
 }
 
 export function testToFail(fn: () => Promise<any>) {
-  fn()
+  TestPlugin.then(Test => fn()
     .then((x) => {
       console.error('Test did not fail')
       console.error(x)
@@ -44,6 +45,7 @@ export function testToFail(fn: () => Promise<any>) {
       console.log(x)
       return Test.pass(x)
     })
+  )
 }
 
 export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {

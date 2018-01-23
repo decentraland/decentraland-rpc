@@ -1,8 +1,10 @@
 import * as assert from 'assert'
 import { test, shouldFail } from './support/ClientHelpers'
-import { Methods } from './support/ClientCommons'
+import { MethodsPlugin } from './support/ClientCommons'
 
 test(async () => {
+  const Methods = await MethodsPlugin
+
   assert.equal(await Methods.enable(), 1)
   assert.equal(typeof (await Methods.getRandomNumber()), 'number')
   assert(await Methods.getRandomNumber() > 0)
