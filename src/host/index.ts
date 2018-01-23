@@ -97,7 +97,7 @@ export class ScriptingHost extends WebWorkerServer {
 
     Object.keys(this.apiInstances).forEach($ => {
       this.apiInstances.forEach((value, key) => {
-        value.terminate()
+        value.terminate && value.terminate()
       })
     })
 

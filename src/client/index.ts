@@ -16,7 +16,7 @@ export async function getPlugin<T extends {} = any>(pluginName: string): Promise
     return Promise.resolve(loadedPlugins[pluginName] as T)
   }
 
-  await ScriptingClient.call('LoadPlugin', [pluginName])
+  await ScriptingClient.call('LoadComponent', [pluginName])
 
   const plugin = loadedPlugins[pluginName] = getApi(ScriptingClient, pluginName)
 
