@@ -14,12 +14,12 @@ And the tests.
 Scripts are pieces of logic that run inside the context of a Web Worker. They are meant to provide the user a way to run custom logic inside the player's client, allowing the creation of rich experiences inside Decentraland. To achieve this, low level hooks are exposed from the scripting host and consumed by the scripting client.
 
 ## Scripting Host
-The term `host` refers to an instance of the VR client running on a user's pc. It contains a set of `plugins` created and mantained by the Decentraland Team and their collaborators.
+The term `host` refers to an instance of the VR client running on a user's pc. It contains a set of `components` created and mantained by the Decentraland Team and their collaborators.
 
-## Plugins
-Plugins work as a bridge between user-created scripts and the lower level APIs of the VR client (communication, 3D entity management, etc). It provides a set of exposed methods that can be accessed from the Web Worker context. These methods are `async` by default and Promises are used as hooks for events that may be triggered in the future (HTTP Responses, entity collisions, etc).
+## Components
+Components work as a bridge between user-created scripts and the lower level APIs of the VR client (communication, 3D entity management, etc). It provides a set of exposed methods that can be accessed from the Web Worker context. These methods are `async` by default and Promises are used as hooks for events that may be triggered in the future (HTTP Responses, entity collisions, etc).
 
-The `exposeMethod` decorator is provided as means of exposing Plugin methods to the Scripting Client.
+The `exposeMethod` decorator is provided as means of exposing component methods to the Scripting Client.
 
 An example implementation can be found at https://github.com/decentraland/script/blob/master/test/scenarios/3.Class.spec.ts
 
@@ -29,3 +29,8 @@ The scripting client refers to the instance of a user-created script running ins
 An example implementation can be found at https://github.com/decentraland/script/blob/master/test/fixtures/3.Class.ts
 
 
+# Related documents
+
+[The Entity-Component-System - An awesome gamedesign pattern in C Part 1](https://www.gamasutra.com/blogs/TobiasStein/20171122/310172/The_EntityComponentSystem__An_awesome_gamedesign_pattern_in_C_Part_1.php)  
+
+Why do we create a component based system? [Components](http://gameprogrammingpatterns.com/component.html)

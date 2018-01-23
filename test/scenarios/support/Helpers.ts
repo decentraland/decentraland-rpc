@@ -39,13 +39,13 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
       worker.setLogging({ logConsole: true })
     }
 
-    options.plugins && options.plugins.forEach($ => worker.getPluginInstance($))
+    options.plugins && options.plugins.forEach($ => worker.getComponentInstance($))
 
     worker.enable()
 
     options.execute && options.execute(worker)
 
-    const TestPlugin = worker.getPluginInstance(Test)
+    const TestPlugin = worker.getComponentInstance(Test)
 
     if (!TestPlugin) throw new Error('Cannot get the Test plugin instance')
 

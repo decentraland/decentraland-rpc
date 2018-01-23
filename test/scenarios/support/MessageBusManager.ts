@@ -1,14 +1,14 @@
-import { BasePlugin, registerPlugin } from '../../../lib/host'
+import { registerComponent, ComponentBase } from '../../../lib/host'
 import { EventDispatcher, EventDispatcherBinding } from '../../../lib/common/core/EventDispatcher'
 
 const messageBus = new EventDispatcher()
 
-@registerPlugin('MessageBus')
-export class MessageBusManager extends BasePlugin {
+@registerComponent('MessageBus')
+export class MessageBusManager extends ComponentBase {
 
   joinedTo: EventDispatcherBinding[] = []
 
-  @BasePlugin.expose async getChannel(name: string, uid: string, options: any) {
+  @ComponentBase.expose async getChannel(name: string, uid: string, options: any) {
 
     const id = (Math.random() * 100000000).toFixed(0)
 

@@ -1,49 +1,50 @@
 import { Dictionary } from '../common/core/EventDispatcher'
 import { WebWorkerServer } from './WebWorkerServer'
-import { IPluginOptions, ScriptingHostPlugin, ScriptingHostPluginConstructor, ExposableMethod } from './types'
+import { ComponentOptions, Component, ComponentConstructor } from './types'
 
-const exposedMethodSymbol = Symbol('exposedMethod')
-const pluginNameSymbol = Symbol('pluginName')
+export * from './Component'
 
-const RegisteredAPIs: Dictionary<ScriptingHostPluginConstructor<ScriptingHostPlugin>> = {}
+const componentNameSymbol = Symbol('pluginName')
 
-function _registerPlugin(pluginName: string, api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
-  if (pluginNameSymbol in api) {
+const registeredComponents: Dictionary<ComponentConstructor<Component>> = {}
+
+function _registerComponent(componentName: string, api: ComponentConstructor<Component>) {
+  if (componentNameSymbol in api) {
     throw new Error(`The API you are trying to register is already registered`)
   }
 
-  if (pluginName in RegisteredAPIs) {
-    throw new Error(`The API ${pluginName} is already registered`)
+  if (componentName in registeredComponents) {
+    throw new Error(`The API ${componentName} is already registered`)
   }
 
   if (typeof (api as any) !== 'function') {
-    throw new Error(`The API ${pluginName} is not a class, it is of type ${typeof api}`)
+    throw new Error(`The API ${componentName} is not a class, it is of type ${typeof api}`)
   }
 
   // save the registered name
-  (api as any)[pluginNameSymbol] = pluginName
+  (api as any)[componentNameSymbol] = componentName
 
-  RegisteredAPIs[pluginName] = api
+  registeredComponents[componentName] = api
 }
 
-export function getPluginName(klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>): string | null {
-  return (klass as any)[pluginNameSymbol] || null
+export function getComponentName(klass: ComponentConstructor<Component>): string | null {
+  return (klass as any)[componentNameSymbol] || null
 }
 
-export function registerPlugin(pluginName: string): (klass: ScriptingHostPluginConstructor<ScriptingHostPlugin>) => void {
-  return function (api: ScriptingHostPluginConstructor<ScriptingHostPlugin>) {
-    _registerPlugin(pluginName, api)
+export function registerComponent(componentName: string): (klass: ComponentConstructor<Component>) => void {
+  return function (api: ComponentConstructor<Component>) {
+    _registerComponent(componentName, api)
   }
 }
 
 export class ScriptingHost extends WebWorkerServer {
-  apiInstances: Map<string, ScriptingHostPlugin> = new Map()
+  apiInstances: Map<string, Component> = new Map()
 
   constructor(worker: Worker) {
     super(worker)
 
-    this.expose('LoadPlugin', this.RPCLoadPlugin.bind(this))
-    this.expose('LoadPlugins', this.RPCLoadPlugins.bind(this))
+    this.expose('LoadComponent', this.RPCLoadComponent.bind(this))
+    this.expose('LoadComponents', this.RPCLoadComponents.bind(this))
   }
 
   static async fromURL(url: string) {
@@ -63,28 +64,32 @@ export class ScriptingHost extends WebWorkerServer {
     super.enable()
   }
 
-  getPluginInstance<X>(plugin: { new(options: IPluginOptions): X }): X
-  getPluginInstance(name: string): ScriptingHostPlugin | null
-  getPluginInstance(plugin: any) {
-    if (typeof plugin === 'string') {
-      if (this.apiInstances.has(plugin)) {
-        return this.apiInstances.get(plugin)
+  getComponentInstance<X>(component: { new(options: ComponentOptions): X }): X
+  getComponentInstance(name: string): Component | null
+  getComponentInstance(component: any) {
+    if (typeof component === 'string') {
+      if (this.apiInstances.has(component)) {
+        return this.apiInstances.get(component)
       }
-      if (plugin in RegisteredAPIs) {
-        return this.instantiatePlugin(RegisteredAPIs[plugin])
+      if (component in registeredComponents) {
+        return this.initializeComponent(registeredComponents[component])
       }
       return null
-    } else if (typeof plugin === 'function') {
-      // if it has a name, use that indirection to find in the instance's map
-      if ('pluginName' in plugin && this.apiInstances.has(plugin.pluginName)) {
-        return this.apiInstances.get(plugin.pluginName)
-      }
+    } else if (typeof component === 'function') {
+      const componentName = getComponentName(component)
 
-      // If we don't have a local instance, create the instance of the plugin
-      return this.instantiatePlugin(plugin)
+      // if it has a name, use that indirection to find in the instance's map
+      if (componentName != null) {
+        if (this.apiInstances.has(componentName)) {
+          return this.apiInstances.get(componentName)
+        }
+
+        // If we don't have a local instance, create the instance of the component
+        return this.initializeComponent(component)
+      }
     }
 
-    throw Object.assign(new Error('Cannot get instance of the specified plugin'), { plugin })
+    throw Object.assign(new Error('Cannot get instance of the specified component'), { component })
   }
 
   terminate() {
@@ -105,78 +110,56 @@ export class ScriptingHost extends WebWorkerServer {
     this.emit('didTerminate')
   }
 
-  protected instantiatePlugin<X extends ScriptingHostPlugin>(ctor: { new(options: IPluginOptions): X }): X {
-    const pluginName = getPluginName(ctor)
+  protected initializeComponent<X extends Component>(ctor: { new(options: ComponentOptions): X }): X {
+    const componentName = getComponentName(ctor)
 
-    if (pluginName === null) {
+    if (componentName === null) {
       throw new Error('The plugin is not registered')
     }
 
-    if (this.apiInstances.has(pluginName)) {
-      return this.apiInstances.get(pluginName) as X
+    if (this.apiInstances.has(componentName)) {
+      return this.apiInstances.get(componentName) as X
     }
 
     const instance = new ctor({
-      pluginName,
-      on: (event: string, handler: <A, O extends object>(params: Array<A> | O) => void) => this.on(`${pluginName}.${event}`, handler),
-      notify: (event: string, params?: any) => this.notify(`${pluginName}.${event}`, params),
-      expose: (event: string, handler: <A, O extends object, T>(params: Array<A> | O) => Promise<T>) => this.expose(`${pluginName}.${event}`, handler)
+      componentName,
+      on: (event: string, handler: <A, O extends object>(params: Array<A> | O) => void) => this.on(`${componentName}.${event}`, handler),
+      notify: (event: string, params?: any) => this.notify(`${componentName}.${event}`, params),
+      expose: (event: string, handler: <A, O extends object, T>(params: Array<A> | O) => Promise<T>) => this.expose(`${componentName}.${event}`, handler)
     })
 
-    this.apiInstances.set(pluginName, instance)
+    this.apiInstances.set(componentName, instance)
 
     return instance
   }
 
   // Preloads a plugin
-  private async RPCLoadPlugin(pluginName: string) {
-    if (typeof pluginName !== 'string') {
-      throw new TypeError('LoadPlugin(name) name must be a string')
+  private async RPCLoadComponent(componentName: string) {
+    if (typeof componentName !== 'string') {
+      throw new TypeError('RPCLoadComponent(name) name must be a string')
     }
 
-    const plugin = this.getPluginInstance(pluginName)
+    const plugin = this.getComponentInstance(componentName)
 
     if (!plugin) {
-      throw new TypeError(`Plugin not found ${pluginName}`)
+      throw new TypeError(`Plugin not found ${componentName}`)
     }
   }
 
-  /// Preloads a list of plugins
-  private async RPCLoadPlugins(pluginNames: string[]) {
-    if (typeof pluginNames !== 'object' || !(pluginNames instanceof Array)) {
-      throw new TypeError('LoadPlugin(name) name must be a string')
+  /// Preloads a list of components
+  private async RPCLoadComponents(componentNames: string[]) {
+    if (typeof componentNames !== 'object' || !(componentNames instanceof Array)) {
+      throw new TypeError('RPCLoadComponents(names) name must be an array of strings')
     }
 
     const notFound =
-      pluginNames
-        .map(name => ({ plugin: this.getPluginInstance(name), name }))
-        .filter($ => $.plugin == null)
+      componentNames
+        .map(name => ({ component: this.getComponentInstance(name), name }))
+        .filter($ => $.component == null)
         .map($ => $.name)
 
     if (notFound.length) {
-      throw new TypeError(`Plugins not found ${notFound.join(',')}`)
+      throw new TypeError(`Components not found ${notFound.join(',')}`)
     }
   }
-}
-
-export function exposeMethod(target: BasePlugin, propertyKey: string | symbol, descriptor: TypedPropertyDescriptor<ExposableMethod>) {
-  getExposedMethods(target).add(propertyKey.toString())
-}
-
-export function getExposedMethods(instance: any): Set<string> {
-  instance[exposedMethodSymbol] = instance[exposedMethodSymbol] || new Set()
-  return instance[exposedMethodSymbol]
-}
-
-export abstract class BasePlugin implements ScriptingHostPlugin {
-  static expose = exposeMethod
-
-  constructor(protected options: IPluginOptions) {
-    const that = this as any as { [key: string]: Function }
-    getExposedMethods(this).forEach(($: any) => {
-      this.options.expose($, that[$].bind(this))
-    })
-  }
-
-  terminate(): void { /* noop */ }
 }

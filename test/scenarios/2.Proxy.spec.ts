@@ -39,7 +39,7 @@ it('test/out/2.Proxy.js', async () => {
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.')
 
-  const TestPlugin = worker.getPluginInstance(Test)
+  const TestPlugin = worker.getComponentInstance(Test)
 
   if (!TestPlugin) throw new Error('Cannot retieve Test plugin instance')
 

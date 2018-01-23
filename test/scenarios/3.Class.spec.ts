@@ -1,19 +1,20 @@
-import { BasePlugin, exposeMethod, registerPlugin } from '../../lib/host'
+import { registerComponent, ComponentBase, exposeMethod } from '../../lib/host'
+
 import * as assert from 'assert'
 import { future, testInWorker } from './support/Helpers'
 
 const aFuture = future()
 
-@registerPlugin('Debugger')
-export class Debugger extends BasePlugin {
+@registerComponent('Debugger')
+export class Debugger extends ComponentBase {
   @exposeMethod
   async enable() {
     return 1
   }
 }
 
-@registerPlugin('Profiler')
-export class Profiler extends BasePlugin {
+@registerComponent('Profiler')
+export class Profiler extends ComponentBase {
   @exposeMethod
   async enable() {
     return 1
@@ -33,8 +34,8 @@ export class Profiler extends BasePlugin {
   }
 }
 
-@registerPlugin('Runtime')
-export class Runtime extends BasePlugin {
+@registerComponent('Runtime')
+export class Runtime extends ComponentBase {
 
   @exposeMethod
   async enable() {

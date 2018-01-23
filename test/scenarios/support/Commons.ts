@@ -1,9 +1,9 @@
-import { BasePlugin, exposeMethod, registerPlugin, ScriptingHost } from '../../../lib/host'
+import { registerComponent, ComponentBase, exposeMethod, ScriptingHost } from '../../../lib/host'
 import { future } from './Helpers'
 import './MessageBusManager'
 
-@registerPlugin('Logger')
-export class Logger extends BasePlugin {
+@registerComponent('Logger')
+export class Logger extends ComponentBase {
   @exposeMethod async error(message: string) {
     console.error.call(console, message)
   }
@@ -21,8 +21,8 @@ export class Logger extends BasePlugin {
   }
 }
 
-@registerPlugin('Methods')
-export class Methods extends BasePlugin {
+@registerComponent('Methods')
+export class Methods extends ComponentBase {
   store: { [key: string]: any } = {}
 
   @exposeMethod async setValue(key: string, value: any) {
@@ -72,8 +72,8 @@ export class Methods extends BasePlugin {
   }
 }
 
-@registerPlugin('Test')
-export class Test extends BasePlugin {
+@registerComponent('Test')
+export class Test extends ComponentBase {
 
   future = future<{ pass: boolean, arg: any }>()
 
@@ -97,7 +97,7 @@ export class Test extends BasePlugin {
 }
 
 export function setUpPlugins(worker: ScriptingHost) {
-  worker.getPluginInstance(Logger)
-  worker.getPluginInstance(Methods)
-  worker.getPluginInstance(Test)
+  worker.getComponentInstance(Logger)
+  worker.getComponentInstance(Methods)
+  worker.getComponentInstance(Test)
 }

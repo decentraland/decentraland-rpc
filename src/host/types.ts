@@ -1,17 +1,17 @@
 
-export interface IPluginOptions {
-  pluginName: string
+export interface ComponentOptions {
+  componentName: string
   on(event: string, handler: Function): void
   notify(event: string, params?: any): void
   expose(method: string, handler: (params: any) => Promise<any>): void
 }
 
-export interface ScriptingHostPlugin {
-  terminate(): void
+export interface Component {
+  terminate?(): void
 }
 
-export interface ScriptingHostPluginConstructor<T> {
-  new(options: IPluginOptions): T
+export interface ComponentConstructor<T> {
+  new(options: ComponentOptions): T
 }
 
 export interface ScriptingHostEvents {

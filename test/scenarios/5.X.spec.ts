@@ -1,11 +1,11 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { BasePlugin, ScriptingHost, registerPlugin } from '../../lib/host'
+import { registerComponent, ComponentBase, ScriptingHost } from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
 
-@registerPlugin('TicTacToeBoard')
-export class TicTacToeBoard extends BasePlugin {
+@registerComponent('TicTacToeBoard')
+export class TicTacToeBoard extends ComponentBase {
   /**
    * This API should mock the behavior of a board in the floor
    * inside a parcel. It will emit events that mimic click
@@ -25,7 +25,7 @@ export class TicTacToeBoard extends BasePlugin {
     this.options.notify('ChooseSymbol', { symbol })
   }
 
-  @BasePlugin.expose
+  @ComponentBase.expose
   async iAmConnected(...args: any[]) {
     this.waitForConnection.resolve(args)
   }
@@ -51,8 +51,8 @@ describe('TicTacToe', function () {
       // workerX.setLogging({ logConsole: true })
       // workerO.setLogging({ logConsole: true });
 
-      let apiX = workerX.getPluginInstance(TicTacToeBoard)
-      let apiO = workerO.getPluginInstance(TicTacToeBoard)
+      let apiX = workerX.getComponentInstance(TicTacToeBoard)
+      let apiO = workerO.getComponentInstance(TicTacToeBoard)
 
       assert.equal(workerO.apiInstances.has('TicTacToeBoard'), true)
 
@@ -80,8 +80,8 @@ describe('TicTacToe', function () {
       }
 
       // waits for result
-      const TestPluginX = workerX.getPluginInstance(Test)
-      const TestPluginO = workerO.getPluginInstance(Test)
+      const TestPluginX = workerX.getComponentInstance(Test)
+      const TestPluginO = workerO.getComponentInstance(Test)
 
       if (!TestPluginX) throw new Error('Cannot retieve Test plugin instance')
       if (!TestPluginO) throw new Error('Cannot retieve Test plugin instance')
