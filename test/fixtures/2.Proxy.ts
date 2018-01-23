@@ -1,13 +1,13 @@
-import { getPlugin } from '../../lib/client'
+import { getComponent } from '../../lib/client'
 import { test } from './support/ClientHelpers'
 
 test(async () => {
 
-  const xRuntime = await getPlugin('xRuntime')
+  const xRuntime = await getComponent('xRuntime')
 
-  const xDebugger = await getPlugin('xDebugger')
+  const xDebugger = await getComponent('xDebugger')
 
-  const xProfiler = await getPlugin('xProfiler')
+  const xProfiler = await getComponent('xProfiler')
 
   await Promise.all([
     xRuntime.enable(),

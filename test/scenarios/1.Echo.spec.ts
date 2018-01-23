@@ -1,12 +1,12 @@
 
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ScriptingHost } from '../../lib/host'
+import { ComponentSystem } from '../../lib/host'
 import * as assert from 'assert'
 import { future } from './support/Helpers'
 
 it('test/out/1.Echo.js', async () => {
-  const worker = await ScriptingHost.fromURL('test/out/1.Echo.js')
+  const worker = await ComponentSystem.fromURL('test/out/1.Echo.js')
 
   const randomNumber = Math.random()
   const aFuture = future()
@@ -25,5 +25,5 @@ it('test/out/1.Echo.js', async () => {
 
   assert.equal(await aFuture, randomNumber, 'exchanged numbers must match')
 
-  worker.terminate()
+  worker.unmount()
 })

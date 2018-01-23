@@ -1,4 +1,4 @@
-import { ScriptingHost } from '../../../lib/host'
+import { ComponentSystem } from '../../../lib/host'
 import { Test } from './Commons'
 
 export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject?: (x: Error) => void }
@@ -6,7 +6,7 @@ export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject?: (x: Er
 export type ITestInWorkerOptions = {
   log?: boolean;
   validateResult?: (result: any) => void;
-  execute?: (worker: ScriptingHost) => void;
+  execute?: (worker: ComponentSystem) => void;
   plugins?: any[];
 }
 
@@ -33,7 +33,7 @@ export function future<T = any>(): IFuture<T> {
 
 export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   it(file, async () => {
-    const worker = await ScriptingHost.fromURL(file)
+    const worker = await ComponentSystem.fromURL(file)
 
     if (options.log) {
       worker.setLogging({ logConsole: true })
@@ -53,6 +53,6 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
 
     options.validateResult && options.validateResult(result)
 
-    worker.terminate()
+    worker.unmount()
   })
 }

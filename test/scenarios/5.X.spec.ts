@@ -1,11 +1,11 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { registerComponent, ComponentBase, ScriptingHost } from '../../lib/host'
+import { registerComponent, Component, ComponentSystem } from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
 
 @registerComponent('TicTacToeBoard')
-export class TicTacToeBoard extends ComponentBase {
+export class TicTacToeBoard extends Component {
   /**
    * This API should mock the behavior of a board in the floor
    * inside a parcel. It will emit events that mimic click
@@ -25,7 +25,7 @@ export class TicTacToeBoard extends ComponentBase {
     this.options.notify('ChooseSymbol', { symbol })
   }
 
-  @ComponentBase.expose
+  @Component.expose
   async iAmConnected(...args: any[]) {
     this.waitForConnection.resolve(args)
   }
@@ -37,10 +37,10 @@ describe('TicTacToe', function () {
 
   function randomizeGame(file: string) {
     it(`randomized game ${numberOfGames++} ${file}`, async function () {
-      let workerO = await ScriptingHost.fromURL(file)
-      let workerX = await ScriptingHost.fromURL(file)
+      let workerO = await ComponentSystem.fromURL(file)
+      let workerX = await ComponentSystem.fromURL(file)
 
-      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), false)
+      assert.equal(workerO.componentInstances.has('TicTacToeBoard'), false)
 
       setUpPlugins(workerO)
       setUpPlugins(workerX)
@@ -54,7 +54,7 @@ describe('TicTacToe', function () {
       let apiX = workerX.getComponentInstance(TicTacToeBoard)
       let apiO = workerO.getComponentInstance(TicTacToeBoard)
 
-      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), true)
+      assert.equal(workerO.componentInstances.has('TicTacToeBoard'), true)
 
       if (!apiX) throw new Error('Cannot get apiX instance')
       if (!apiO) throw new Error('Cannot get apiX instance')
@@ -92,8 +92,8 @@ describe('TicTacToe', function () {
       assert.deepEqual(winnerX, winnerO)
 
       // terminates the workers
-      workerX.terminate()
-      workerO.terminate()
+      workerX.unmount()
+      workerO.unmount()
     })
   }
 

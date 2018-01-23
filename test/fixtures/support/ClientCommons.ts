@@ -1,4 +1,4 @@
-import { getPlugin } from '../../../lib/client'
+import { getComponent } from '../../../lib/client'
 
 export interface Methods {
   fail(): Promise<void>
@@ -18,6 +18,6 @@ export interface Test {
   pass(result: any): Promise<void>
 }
 
-export const MethodsPlugin: Promise<Methods> = getPlugin('Methods')
+export const MethodsPlugin: Promise<Methods> = getComponent('Methods')
 
-export const TestPlugin: Promise<any> = getPlugin('Test')
+export const TestPlugin: Promise<any> = getComponent('Test')

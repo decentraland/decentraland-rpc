@@ -1,5 +1,5 @@
 import { EventDispatcher } from '../../../lib/common/core/EventDispatcher'
-import { getPlugin } from '../../../lib/client'
+import { getComponent } from '../../../lib/client'
 
 export interface IMessageBusOptions {
 }
@@ -10,7 +10,7 @@ export interface IMessage {
   sender: string
 }
 
-const MessageBusProxy = getPlugin('MessageBus')
+const MessageBusProxy = getComponent('MessageBus')
 
 export class MessageBusClient<T = any> extends EventDispatcher<T> {
   private broadcastIdentifier = `Broadcast_${this.id}`

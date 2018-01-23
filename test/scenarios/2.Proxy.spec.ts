@@ -1,12 +1,12 @@
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ScriptingHost } from '../../lib/host'
+import { ComponentSystem } from '../../lib/host'
 import * as assert from 'assert'
 import { future } from './support/Helpers'
 import { Test } from './support/Commons'
 
 it('test/out/2.Proxy.js', async () => {
-  const worker = await ScriptingHost.fromURL('test/out/2.Proxy.js')
+  const worker = await ComponentSystem.fromURL('test/out/2.Proxy.js')
 
   let aFuture = future()
 
@@ -15,9 +15,9 @@ it('test/out/2.Proxy.js', async () => {
   const enable = async () => void 0
 
   // Fool the worker to make it believe it has these plugins loaded
-  worker.apiInstances.set('xDebugger', {} as any)
-  worker.apiInstances.set('xProfiler', {} as any)
-  worker.apiInstances.set('xRuntime', {} as any)
+  worker.componentInstances.set('xDebugger', {} as any)
+  worker.componentInstances.set('xProfiler', {} as any)
+  worker.componentInstances.set('xRuntime', {} as any)
 
   worker.expose('xDebugger.enable', enable)
 
@@ -45,5 +45,5 @@ it('test/out/2.Proxy.js', async () => {
 
   await TestPlugin.waitForPass()
 
-  worker.terminate()
+  worker.unmount()
 })

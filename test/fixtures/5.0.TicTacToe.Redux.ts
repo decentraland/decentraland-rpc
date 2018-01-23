@@ -1,4 +1,4 @@
-import { getPlugin } from '../../lib/client'
+import { getComponent } from '../../lib/client'
 import { test, future } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
 import { TestPlugin } from './support/ClientCommons'
@@ -90,7 +90,7 @@ const getWinner = () =>
 
 test(async () => {
   const Test = await TestPlugin
-  const TicTacToeBoard = await getPlugin('TicTacToeBoard')
+  const TicTacToeBoard = await getComponent('TicTacToeBoard')
   const futureWinner = future()
   const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com')
 

@@ -1,14 +1,14 @@
-import { registerComponent, ComponentBase } from '../../../lib/host'
+import { registerComponent, Component } from '../../../lib/host'
 import { EventDispatcher, EventDispatcherBinding } from '../../../lib/common/core/EventDispatcher'
 
 const messageBus = new EventDispatcher()
 
 @registerComponent('MessageBus')
-export class MessageBusManager extends ComponentBase {
+export class MessageBusManager extends Component {
 
   joinedTo: EventDispatcherBinding[] = []
 
-  @ComponentBase.expose async getChannel(name: string, uid: string, options: any) {
+  @Component.expose async getChannel(name: string, uid: string, options: any) {
 
     const id = (Math.random() * 100000000).toFixed(0)
 
@@ -31,8 +31,8 @@ export class MessageBusManager extends ComponentBase {
     return { id }
   }
 
-  terminate() {
-    super.terminate()
+  componentWillUnmount() {
+    // TODO: test component will unmount
     this.joinedTo.forEach($ => $.off())
     this.joinedTo.length = 0
   }
