@@ -1,6 +1,6 @@
-import { test, future } from './support/ClientHelpers'
+import { future, TestableSystem, testSystem } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
-import { Test } from './support/ClientCommons'
+import { inject } from '../../lib/client/index'
 
 const winingCombinations = [
   [0, 1, 2], // 1 row
@@ -17,7 +17,9 @@ const winingCombinations = [
 
 type GameSymbol = 'x' | 'o' | null
 
-class Game {
+class Game extends TestableSystem {
+  @inject TicTacToeBoard: any = null
+
   mySymbol: GameSymbol = null
 
   board: GameSymbol[] = [null, null, null, null, null, null, null, null, null]
@@ -37,47 +39,39 @@ class Game {
   setAt(position: number, symbol: GameSymbol) {
     this.board[position] = symbol
   }
+
+  async doTest() {
+    const futureWinner = future()
+
+    const messageBus = await MessageBusClient.acquireChannel(
+      this,
+      'rtc://tictactoe.signaling.com'
+    )
+
+    this.TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
+      this.selectMySymbol(symbol)
+    })
+
+    this.TicTacToeBoard.onClickPosition(
+      ({ position }: { position: number }) => {
+        messageBus.emit('set_at', position, this.mySymbol)
+      }
+    )
+
+    messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
+      this.setAt(index, symbol)
+
+      const winner = this.getWinner()
+
+      if (winner !== undefined) {
+        futureWinner.resolve(winner)
+      }
+    })
+
+    await this.TicTacToeBoard.iAmConnected()
+
+    await futureWinner
+  }
 }
 
-test(async ScriptingClient => {
-  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents([
-    'Test',
-    'TicTacToeBoard'
-  ])) as {
-    Test: Test
-    TicTacToeBoard: any
-  }
-
-  const futureWinner = future()
-
-  const messageBus = await MessageBusClient.acquireChannel(
-    ScriptingClient,
-    'rtc://tictactoe.signaling.com'
-  )
-
-  const game = new Game()
-
-  TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
-    game.selectMySymbol(symbol)
-  })
-
-  TicTacToeBoard.onClickPosition(({ position }: { position: number }) => {
-    messageBus.emit('set_at', position, game.mySymbol)
-  })
-
-  messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
-    game.setAt(index, symbol)
-
-    const winner = game.getWinner()
-
-    if (winner !== undefined) {
-      Test.pass(winner)
-      futureWinner.resolve(winner)
-    }
-  })
-
-  await TicTacToeBoard.iAmConnected()
-
-  // wait every command to execute
-  console.log('class the winner is', await futureWinner)
-})
+testSystem(Game)

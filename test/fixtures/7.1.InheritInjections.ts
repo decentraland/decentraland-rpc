@@ -30,7 +30,7 @@ export class TestMethods extends BaseTestMethods {
     }
 
     if (!this.Test) {
-      throw new Error('Logger was not loaded')
+      throw new Error('Test was not loaded')
     }
 
     const Methods = this.Methods
