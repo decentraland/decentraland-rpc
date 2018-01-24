@@ -100,10 +100,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
             this._sendError(from, request, JsonRpc2.ErrorCode.InvalidParams, new Error('params is not an Array or Object'))
           } else {
             try {
-              const result: JsonRpc2.PromiseOrNot<any> =
-                request.params instanceof Array
-                  ? handler.apply(null, request.params)
-                  : handler.call(null, request.params)
+              const result: JsonRpc2.PromiseOrNot<any> = request.params instanceof Array ? handler.apply(null, request.params) : handler.call(null, request.params)
 
               if (result instanceof Promise) {
                 // Result is a promise, so lets wait for the result and handle accordingly
@@ -118,7 +115,6 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
                 // Result is not a promise so send immediately
                 this._send(from, { id: request.id, result: result || [] })
               }
-
             } catch (error) {
               this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error)
             }
@@ -151,8 +147,8 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   private _sendError(receiver: ClientType, request: JsonRpc2.IRequest | null, errorCode: JsonRpc2.ErrorCode, error?: Error) {
     try {
       this._send(receiver, {
-        id: request && request.id || -1,
-        error: this._errorFromCode(errorCode, error && error.message || error, request && request.method)
+        id: (request && request.id) || -1,
+        error: this._errorFromCode(errorCode, (error && error.message) || error, request && request.method)
       })
     } catch (error) {
       // Since we can't even send errors, do nothing. The connection was probably closed.

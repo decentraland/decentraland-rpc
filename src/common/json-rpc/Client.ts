@@ -19,15 +19,20 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
   abstract sendMessage(message: string): void
 
-  public processMessage(messageStr: string) {
-    this._logMessage(messageStr, 'receive')
+  public processMessage(messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification)) {
     let message: JsonRpc2.IResponse & JsonRpc2.INotification
 
-    // Ensure JSON is not malformed
-    try {
-      message = JSON.parse(messageStr)
-    } catch (e) {
-      return this.emit('error', e)
+    if (typeof messageStr === 'string') {
+      this._logMessage(messageStr, 'receive')
+
+      // Ensure JSON is not malformed
+      try {
+        message = JSON.parse(messageStr)
+      } catch (e) {
+        return this.emit('error', e)
+      }
+    } else {
+      message = messageStr
     }
 
     // Check that messages is well formed
@@ -56,7 +61,9 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     }
   }
 
-  /** Set logging for all received and sent messages */
+  /**
+   * Set logging for all received and sent messages
+   */
   public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
     this._consoleLog = logConsole
   }
@@ -128,5 +135,4 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       console.log(`Client ${direction === 'send' ? '>' : '<'}`, message)
     }
   }
-
 }

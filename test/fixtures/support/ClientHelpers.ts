@@ -1,10 +1,17 @@
-import { TestPlugin } from './ClientCommons'
+import { System, Transports } from '../../../lib/client/index'
 
-export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject: (x: Error) => void }
+export type IFuture<T> = Promise<T> & {
+  resolve: (x: T) => void
+  reject: (x: Error) => void
+}
 
 export function future<T = any>(): IFuture<T> {
-  let resolver: (x: T) => void = (x: T) => { throw new Error('Error initilizing mutex') }
-  let rejecter: (x: Error) => void = (x: Error) => { throw x }
+  let resolver: (x: T) => void = (x: T) => {
+    throw new Error('Error initilizing mutex')
+  }
+  let rejecter: (x: Error) => void = (x: Error) => {
+    throw x
+  }
 
   const promise: any = new Promise((ok, err) => {
     resolver = ok
@@ -23,32 +30,43 @@ export function wait(ms: number): Promise<void> {
   })
 }
 
-export function test(fn: () => Promise<any>) {
-  TestPlugin.then(Test => fn()
-    .then((x) => Test.pass(x))
-    .catch(x => {
-      console.error('Test failed')
-      console.error(x)
-      return Test.fail(x)
-    })
+export function test(fn: (system: System) => Promise<any>) {
+  const ScriptingClient = new System(Transports.WebWorker())
+
+  ScriptingClient.loadComponents(['Test'])
+    .then(({ Test }) =>
+      fn(ScriptingClient)
+        .then(x => Test.pass(x))
+        .catch(x => {
+          console.error('Test failed')
+          console.error(x)
+          return Test.fail(x)
+        })
+    )
+    .catch(x => console.error(x))
+}
+
+export function testToFail(fn: (system: System) => Promise<any>) {
+  const ScriptingClient = new System(Transports.WebWorker())
+
+  ScriptingClient.loadComponents(['Test']).then(({ Test }) =>
+    fn(ScriptingClient)
+      .then(x => {
+        console.error('Test did not fail')
+        console.error(x)
+        return Test.fail(x)
+      })
+      .catch(x => {
+        console.log(x)
+        return Test.pass(x)
+      })
   )
 }
 
-export function testToFail(fn: () => Promise<any>) {
-  TestPlugin.then(Test => fn()
-    .then((x) => {
-      console.error('Test did not fail')
-      console.error(x)
-      return Test.fail(x)
-    })
-    .catch(x => {
-      console.log(x)
-      return Test.pass(x)
-    })
-  )
-}
-
-export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {
+export async function shouldFail(
+  fn: () => Promise<any>,
+  msg: string = 'shouldFail'
+) {
   try {
     await fn()
     throw new Error(`${msg} - It did not fail.`)

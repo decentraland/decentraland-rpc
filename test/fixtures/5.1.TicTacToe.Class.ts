@@ -1,7 +1,6 @@
-import { getComponent } from '../../lib/client'
 import { test, future } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
-import { TestPlugin } from './support/ClientCommons'
+import { Test } from './support/ClientCommons'
 
 const winingCombinations = [
   [0, 1, 2], // 1 row
@@ -21,11 +20,7 @@ type GameSymbol = 'x' | 'o' | null
 class Game {
   mySymbol: GameSymbol = null
 
-  board: GameSymbol[] = [
-    null, null, null,
-    null, null, null,
-    null, null, null
-  ]
+  board: GameSymbol[] = [null, null, null, null, null, null, null, null, null]
 
   getWinner() {
     return ['x', 'o'].find($ =>
@@ -44,15 +39,23 @@ class Game {
   }
 }
 
-test(async () => {
-  const Test = await TestPlugin
-  const TicTacToeBoard = await getComponent('TicTacToeBoard')
+test(async ScriptingClient => {
+  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents([
+    'Test',
+    'TicTacToeBoard'
+  ])) as {
+    Test: Test
+    TicTacToeBoard: any
+  }
 
   const futureWinner = future()
 
-  const game = new Game()
+  const messageBus = await MessageBusClient.acquireChannel(
+    ScriptingClient,
+    'rtc://tictactoe.signaling.com'
+  )
 
-  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe2.signaling.com')
+  const game = new Game()
 
   TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
     game.selectMySymbol(symbol)

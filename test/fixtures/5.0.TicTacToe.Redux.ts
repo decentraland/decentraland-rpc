@@ -1,7 +1,6 @@
-import { getComponent } from '../../lib/client'
 import { test, future } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
-import { TestPlugin } from './support/ClientCommons'
+import { Test } from './support/ClientCommons'
 
 type GameSymbol = 'x' | 'o' | null
 
@@ -23,17 +22,16 @@ interface IGenericAction {
 }
 
 const initialState: ITicTacToeState = {
-  board: [
-    null, null, null,
-    null, null, null,
-    null, null, null
-  ],
+  board: [null, null, null, null, null, null, null, null, null],
   mySymbol: null
 }
 
 let state = initialState
 
-function reducer(state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
+function reducer(
+  state: ITicTacToeState = initialState,
+  action: IGenericAction
+): ITicTacToeState {
   const { type, payload } = action
 
   switch (type) {
@@ -51,7 +49,9 @@ function reducer(state: ITicTacToeState = initialState, action: IGenericAction):
     case TicTacToeAction.PLACE:
       return {
         ...state,
-        board: Object.assign([], state.board, { [payload.index]: payload.symbol })
+        board: Object.assign([], state.board, {
+          [payload.index]: payload.symbol
+        })
       }
 
     case TicTacToeAction.SET_SYMBOL:
@@ -88,11 +88,21 @@ const getWinner = () =>
     )
   )
 
-test(async () => {
-  const Test = await TestPlugin
-  const TicTacToeBoard = await getComponent('TicTacToeBoard')
+test(async ScriptingClient => {
+  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents([
+    'Test',
+    'TicTacToeBoard'
+  ])) as {
+    Test: Test
+    TicTacToeBoard: any
+  }
+
   const futureWinner = future()
-  const messageBus = await MessageBusClient.acquireChannel('rtc://tictactoe.signaling.com')
+
+  const messageBus = await MessageBusClient.acquireChannel(
+    ScriptingClient,
+    'rtc://tictactoe.signaling.com'
+  )
 
   TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
     handleAction({

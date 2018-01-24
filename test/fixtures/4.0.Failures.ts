@@ -1,11 +1,13 @@
 import { testToFail } from './support/ClientHelpers'
-import { MethodsPlugin } from './support/ClientCommons'
+import { Methods } from './support/ClientCommons'
 
-testToFail(async () => {
+testToFail(async ScriptingClient => {
+  const { Methods } = (await ScriptingClient.loadComponents(['Methods'])) as {
+    Methods: Methods
+  }
+
   // this line throws an error in the RPC host
   // the error should be forwarded to the client
   // and it should create and throw a valid instance of Error (js)
-  const Methods = await MethodsPlugin
-
   await Methods.fail()
 })

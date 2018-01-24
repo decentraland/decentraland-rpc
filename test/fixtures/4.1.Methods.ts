@@ -1,19 +1,23 @@
 import * as assert from 'assert'
 import { test, shouldFail } from './support/ClientHelpers'
-import { MethodsPlugin } from './support/ClientCommons'
+import { Methods } from './support/ClientCommons'
 
-test(async () => {
-  const Methods = await MethodsPlugin
+test(async ScriptingClient => {
+  const { Methods } = (await ScriptingClient.loadComponents(['Methods'])) as {
+    Methods: Methods
+  }
 
   assert.equal(await Methods.enable(), 1)
-  assert.equal(typeof (await Methods.getRandomNumber()), 'number')
-  assert(await Methods.getRandomNumber() > 0)
+  assert.equal(typeof await Methods.getRandomNumber(), 'number')
+  assert((await Methods.getRandomNumber()) > 0)
 
   const sentObject = {
     x: await Methods.getRandomNumber()
   }
 
-  assert.deepEqual(await Methods.receiveObject(sentObject), { received: sentObject })
+  assert.deepEqual(await Methods.receiveObject(sentObject), {
+    received: sentObject
+  })
 
   await Methods.failsWithoutParams(1)
   await Methods.failsWithParams()

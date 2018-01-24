@@ -1,5 +1,3 @@
-import { getComponent } from '../../../lib/client'
-
 export interface Methods {
   fail(): Promise<void>
   enable(): Promise<void>
@@ -17,7 +15,3 @@ export interface Test {
   fail(err: Error): Promise<void>
   pass(result: any): Promise<void>
 }
-
-export const MethodsPlugin: Promise<Methods> = getComponent('Methods')
-
-export const TestPlugin: Promise<any> = getComponent('Test')

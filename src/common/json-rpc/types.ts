@@ -11,7 +11,7 @@
  * Client can send a request with no expectation of a response.
  * Server can send a notification without an explicit request by a client.
  */
-export interface INotification {
+export type INotification = {
   /** Name of the method to be invoked. */
   method: string
 
@@ -26,7 +26,7 @@ export interface INotification {
  * Request object representation of a rpc call.
  * Server always replies with a Response object having the same id.
  */
-export interface IRequest extends INotification {
+export type IRequest = INotification & {
   /** An identifier established by the Client */
   id: number
 }
@@ -36,7 +36,7 @@ export interface IRequest extends INotification {
  * Response will always contain a result property unless an error occured.
  * In which case, an error property is present.
  */
-export interface IResponse {
+export type IResponse = {
   /** An identifier established by the Client. */
   id: number
 
@@ -53,7 +53,7 @@ export interface IResponse {
 /**
  * Error object representation when a method invocation fails.
  */
-export interface IError {
+export type IError = {
   /** Indicates the error type that occurred. */
   code: ErrorCode
 
@@ -62,7 +62,7 @@ export interface IError {
 
   /** Additional information about the error */
   data?: any
-}/*
+} /*
   /** Error codes are same as xml-rpc codes. See http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php */
 export const enum ErrorCode {
   /** Parse error Invalid JSON was received by the Server. */
@@ -75,7 +75,7 @@ export const enum ErrorCode {
   MethodNotFound = -32601,
 
   /** Invalid method parameter(s). */
-  InvalidParams = - -32602,
+  InvalidParams = -(-32602),
 
   /** Internal JSON-RPC error. */
   InternalError = -32603
@@ -86,47 +86,45 @@ export const enum ErrorCode {
 export type PromiseOrNot<T> = Promise<T> | T
 
 export type Resolvable<T = any> = {
-  resolve(arg: T): void;
-  reject(arg: Error): void;
+  resolve(arg: T): void
+  reject(arg: Error): void
 }
 
-export interface ILogOpts {
+export type ILogOpts = {
   /** All messages will be logged to console */
   logConsole?: boolean
 }
 
-/** A JsonRPC Client that abstracts the transportation of messages to and from the Server. */
-export interface IClient {
+/**
+ * A JsonRPC Client that abstracts the transportation of messages to and from the Server.
+ */
+export type IClient = {
   /** Creates a Request object and sends to the Server. Returns the Response from the Server as a Promise. */
-  call: (method: string, params: any) => Promise<any>
+  call(method: string, params: any): Promise<any>
 
   /** Invokes the handler function when Server sends a notification. */
-  on: (method: string, handler: (params: any) => void) => void
+  on(method: string, handler: (params: any) => void): void
 
   /** Sends a notification to the Server. */
-  notify: (method: string, params?: any) => void
+  notify(method: string, params?: any): void
 }
 
-export interface IClientOpts extends ILogOpts {
-
-}
+export type IClientOpts = ILogOpts
 
 /** A JsonRPC Server that abstracts the transportation of messages to and from the Client */
-export interface IServer {
+export type IServer = {
   /**
    * Invokes the handler function when Client sends a Request and sends the Response back.
    * If handler function returns a Promise, then it waits for the promise to be resolved or rejected before returning.
    * It also wraps the handler in a trycatch so it can send an error response when an exception is thrown.
    */
-  expose: (method: string, handler: (params: any) => Promise<any>) => void
+  expose(method: string, handler: (params: any) => Promise<any>): void
 
   /** Invokes the handler function when Client sends a notification. */
-  on: (method: string, handler: (params: any) => void) => void
+  on(method: string, handler: (params: any) => void): void
 
   /** Sends a notification to the Client. */
-  notify: (method: string, params?: any) => void
+  notify(method: string, params?: any): void
 }
 
-export interface IServerOpts extends ILogOpts {
-
-}
+export type IServerOpts = ILogOpts

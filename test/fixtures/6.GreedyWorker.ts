@@ -1,11 +1,12 @@
-import { getComponent } from '../../lib/client'
 import { test } from './support/ClientHelpers'
 
-test(async () => {
-  const Terminator = await getComponent('Terminate')
+test(async System => {
+  const { Terminator } = await System.loadComponents(['Terminate'])
 
   setInterval(() => Terminator.emitPing(), 16)
 
-  while(true) {
+  // tslint:disable-next-line:no-empty
+  while (true) {
+    /*noop*/
   }
 })
