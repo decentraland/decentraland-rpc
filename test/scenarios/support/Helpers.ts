@@ -1,13 +1,16 @@
 import { ComponentSystem } from '../../../lib/host'
 import { Test } from './Commons'
 
-export type IFuture<T> = Promise<T> & { resolve: (x: T) => void, reject?: (x: Error) => void }
+export type IFuture<T> = Promise<T> & {
+  resolve: (x: T) => void
+  reject?: (x: Error) => void
+}
 
 export type ITestInWorkerOptions = {
-  log?: boolean;
-  validateResult?: (result: any) => void;
-  execute?: (worker: ComponentSystem) => void;
-  plugins?: any[];
+  log?: boolean
+  validateResult?: (result: any) => void
+  execute?: (worker: ComponentSystem) => void
+  plugins?: any[]
 }
 
 export function wait(ms: number): Promise<void> {
@@ -17,8 +20,12 @@ export function wait(ms: number): Promise<void> {
 }
 
 export function future<T = any>(): IFuture<T> {
-  let resolver: (x: T) => void = (x: T) => { throw new Error('Error initilizing mutex') }
-  let rejecter: (x: Error) => void = (x: Error) => { throw x }
+  let resolver: (x: T) => void = (x: T) => {
+    throw new Error('Error initilizing mutex')
+  }
+  let rejecter: (x: Error) => void = (x: Error) => {
+    throw x
+  }
 
   const promise: any = new Promise((ok, err) => {
     resolver = ok
@@ -39,7 +46,8 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
       worker.setLogging({ logConsole: true })
     }
 
-    options.plugins && options.plugins.forEach($ => worker.getComponentInstance($))
+    options.plugins &&
+      options.plugins.forEach($ => worker.getComponentInstance($))
 
     worker.enable()
 
@@ -49,7 +57,7 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
 
     if (!TestPlugin) throw new Error('Cannot get the Test plugin instance')
 
-    const result = await (TestPlugin.waitForPass())
+    const result = await TestPlugin.waitForPass()
 
     options.validateResult && options.validateResult(result)
 

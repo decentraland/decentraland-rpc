@@ -36,7 +36,6 @@ export class Profiler extends Component {
 
 @registerComponent('Runtime')
 export class Runtime extends Component {
-
   @exposeMethod
   async enable() {
     return 1
@@ -50,7 +49,7 @@ export class Runtime extends Component {
 
 testInWorker('test/out/3.Class.js', {
   plugins: [Debugger, Profiler, Runtime],
-  validateResult: async (result) => {
+  validateResult: async result => {
     assert.equal(await aFuture, true)
   }
 })

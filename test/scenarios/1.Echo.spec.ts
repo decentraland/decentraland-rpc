@@ -1,4 +1,3 @@
-
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
 import { ComponentSystem } from '../../lib/host'
@@ -13,11 +12,11 @@ it('test/out/1.Echo.js', async () => {
 
   // worker.setLogging({ logConsole: true, logEmit: true });
 
-  worker.expose('MethodX', async (message) => {
+  worker.expose('MethodX', async message => {
     return { number: randomNumber }
   })
 
-  worker.expose('JumpBack', async (data) => {
+  worker.expose('JumpBack', async data => {
     aFuture.resolve(data.number)
   })
 

@@ -10,9 +10,14 @@ const blacklistedMethods = ['then', 'catch']
  * This allows the consumer to abstract all the internal details of marshalling the message from function call to a string
  * Calling client.api('') will return an unprefixed client. e.g api.hello() is equivalient to client.send('hello')
  */
-export function getApi<T extends object = any>(rpcClient: Client, _prefix: string = ''): T {
+export function getApi<T extends object = any>(
+  rpcClient: Client,
+  _prefix: string = ''
+): T {
   if (!Proxy) {
-    throw new Error('getApi() requires ES6 Proxy. Please use an ES6 compatible engine')
+    throw new Error(
+      'getApi() requires ES6 Proxy. Please use an ES6 compatible engine'
+    )
   }
 
   const prefix = _prefix === '' ? '' : `${_prefix}.`
@@ -27,25 +32,28 @@ export function getApi<T extends object = any>(rpcClient: Client, _prefix: strin
         return Object.prototype
       } else if (prop.substr(0, 2) === 'on' && prop.length > 3) {
         const method = prop.substr(2)
-        target[prop] = (handler: Function) => rpcClient.on(`${prefix}${method}`, (params: any) => {
-          try {
-            if (params && (params instanceof Array)) {
-              handler.apply(null, params)
-            } else {
-              handler.call(null, params)
+        target[prop] = (handler: Function) =>
+          rpcClient.on(`${prefix}${method}`, (params: any) => {
+            try {
+              if (params && params instanceof Array) {
+                handler.apply(null, params)
+              } else {
+                handler.call(null, params)
+              }
+            } catch (e) {
+              rpcClient.emit('error', e)
             }
-          } catch (e) {
-            rpcClient.emit('error', e)
-          }
-        })
+          })
       } else if (prop.substr(0, 4) === 'emit' && prop.length > 5) {
         const method = prop.substr(4)
-        target[prop] = (...args: any[]) => rpcClient.notify(`${prefix}${method}`, args)
+        target[prop] = (...args: any[]) =>
+          rpcClient.notify(`${prefix}${method}`, args)
       } else if (blacklistedMethods.indexOf(prop) !== -1) {
         return undefined
       } else {
         const method = prop
-        target[prop] = (...args: any[]) => rpcClient.call(`${prefix}${method}`, args)
+        target[prop] = (...args: any[]) =>
+          rpcClient.call(`${prefix}${method}`, args)
       }
 
       return target[prop]

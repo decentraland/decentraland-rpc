@@ -2,25 +2,38 @@
 
 const exposedMethodSymbol = Symbol('exposedMethod')
 
-export function exposeMethod<T extends Component>(target: T, propertyKey: keyof T, descriptor: TypedPropertyDescriptor<ExposableMethod>) {
+export function exposeMethod<T extends Component>(
+  target: T,
+  propertyKey: keyof T,
+  descriptor: TypedPropertyDescriptor<ExposableMethod>
+) {
   getExposedMethods(target).add(propertyKey)
 }
 
-export function getExposedMethods<T extends Component>(instance: T): Set<keyof T> {
+export function getExposedMethods<T extends Component>(
+  instance: T
+): Set<keyof T> {
   const instanceAny: any = instance
-  instanceAny[exposedMethodSymbol] = instanceAny[exposedMethodSymbol] || new Set()
+  instanceAny[exposedMethodSymbol] =
+    instanceAny[exposedMethodSymbol] || new Set()
   return instanceAny[exposedMethodSymbol]
 }
 
 export type ComponentOptions = {
   componentName: string
-  on(event: string, handler: <A, O extends object>(params: Array<A> | O) => void): void
+  on(
+    event: string,
+    handler: <A, O extends object>(params: Array<A> | O) => void
+  ): void
   notify(event: string, params?: any): void
-  expose(event: string, handler: <A, O extends object>(params: Array<A> | O) => Promise<any>): void
+  expose(
+    event: string,
+    handler: <A, O extends object>(params: Array<A> | O) => Promise<any>
+  ): void
 }
 
 export type ComponentClass<T> = {
-  new(options: ComponentOptions): T
+  new (options: ComponentOptions): T
 }
 
 export type ExposableMethod = (...args: any[]) => Promise<any>

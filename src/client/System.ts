@@ -24,9 +24,12 @@ export function inject<T extends System>(target: T, propertyKey: keyof T) {
   getInjectedComponents(target).add(propertyKey)
 }
 
-export function getInjectedComponents<T extends System>(instance: T): Set<keyof T> {
+export function getInjectedComponents<T extends System>(
+  instance: T
+): Set<keyof T> {
   const instanceAny: any = instance
-  instanceAny[injectedComponentSymbol] = instanceAny[injectedComponentSymbol] || new Set()
+  instanceAny[injectedComponentSymbol] =
+    instanceAny[injectedComponentSymbol] || new Set()
   return instanceAny[injectedComponentSymbol]
 }
 
@@ -37,7 +40,10 @@ async function _injectComponents(target: System) {
 
   await target.loadComponents(Array.from(injectedSet))
 
-  injectedSet.forEach(componentName => ((target as any)[componentName] = target.loadedComponents[componentName]))
+  injectedSet.forEach(
+    componentName =>
+      ((target as any)[componentName] = target.loadedComponents[componentName])
+  )
 }
 
 export class System extends Client {
@@ -78,7 +84,9 @@ export class System extends Client {
    * @param componentName Name of the plugin we are trying to obtain
    * @returns {object} loadedComponents
    */
-  async loadComponents(componentNames: string[]): Promise<{ [key: string]: any }> {
+  async loadComponents(
+    componentNames: string[]
+  ): Promise<{ [key: string]: any }> {
     const loadedKeys = Object.keys(this.loadedComponents)
     const keysToRequest = componentNames.filter($ => !loadedKeys.includes($))
 

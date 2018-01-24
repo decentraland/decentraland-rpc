@@ -1,6 +1,11 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { registerComponent, Component, ComponentSystem, exposeMethod } from '../../lib/host'
+import {
+  registerComponent,
+  Component,
+  ComponentSystem,
+  exposeMethod
+} from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
 
@@ -31,12 +36,12 @@ export class TicTacToeBoard extends Component {
   }
 }
 
-describe('TicTacToe', function () {
+describe('TicTacToe', function() {
   this.timeout(6000)
   let numberOfGames = 0
 
   function randomizeGame(file: string) {
-    it(`randomized game ${numberOfGames++} ${file}`, async function () {
+    it(`randomized game ${numberOfGames++} ${file}`, async function() {
       let workerO = await ComponentSystem.fromURL(file)
       let workerX = await ComponentSystem.fromURL(file)
 

@@ -5,7 +5,8 @@ import * as JsonRpc2 from './types'
  * Creates a RPC Client.
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
-export abstract class Client extends EventDispatcher implements JsonRpc2.IClient {
+export abstract class Client extends EventDispatcher
+  implements JsonRpc2.IClient {
   private _responsePromiseMap: Map<number, JsonRpc2.Resolvable> = new Map()
   private _nextMessageId: number = 0
   private _consoleLog: boolean = false
@@ -19,7 +20,9 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
   abstract sendMessage(message: string): void
 
-  public processMessage(messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification)) {
+  public processMessage(
+    messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification)
+  ) {
     let message: JsonRpc2.IResponse & JsonRpc2.INotification
 
     if (typeof messageStr === 'string') {
@@ -37,21 +40,32 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
     // Check that messages is well formed
     if (!message) {
-      this.emit('error', new Error(`Message cannot be null, empty or undefined`))
+      this.emit(
+        'error',
+        new Error(`Message cannot be null, empty or undefined`)
+      )
     } else if (message.id) {
       if (this._responsePromiseMap.has(message.id)) {
         // Resolve promise from pending message
-        const promise = this._responsePromiseMap.get(message.id) as JsonRpc2.Resolvable
+        const promise = this._responsePromiseMap.get(
+          message.id
+        ) as JsonRpc2.Resolvable
         if (message.result) {
           promise.resolve(message.result)
         } else if (message.error) {
           const error = Object.assign(new Error('Remote error'), message.error)
           promise.reject(error)
         } else {
-          this.emit('error', new Error(`Response must have result or error: ${messageStr}`))
+          this.emit(
+            'error',
+            new Error(`Response must have result or error: ${messageStr}`)
+          )
         }
       } else {
-        this.emit('error', new Error(`Response with id:${message.id} has no pending request`))
+        this.emit(
+          'error',
+          new Error(`Response with id:${message.id} has no pending request`)
+        )
       }
     } else if (message.method) {
       // Server has sent a notification
@@ -77,7 +91,9 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   call(method: string, params: { [key: string]: any }): Promise<any>
   call(method: string, params?: any) {
     if (typeof params !== 'undefined' && typeof params !== 'object') {
-      throw new Error('Client#call Params must be structured data (Array | Object) got ${JSON.stringify(params)}')
+      throw new Error(
+        'Client#call Params must be structured data (Array | Object) got ${JSON.stringify(params)}'
+      )
     }
 
     const id = ++this._nextMessageId
@@ -102,7 +118,11 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   notify(method: string, params: { [key: string]: any }): void
   notify(method: string, params?: any): void {
     if (typeof params !== 'undefined' && typeof params !== 'object') {
-      throw new Error(`Client#notify Params must be structured data (Array | Object) got ${JSON.stringify(params)}`)
+      throw new Error(
+        `Client#notify Params must be structured data (Array | Object) got ${JSON.stringify(
+          params
+        )}`
+      )
     }
 
     this._send({ method, params })
