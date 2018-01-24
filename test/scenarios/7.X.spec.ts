@@ -11,4 +11,9 @@ describe('Class based systems', function() {
     plugins: [],
     log: false
   })
+
+  testInWorker('test/out/7.1.InheritInjections.js', {
+    plugins: [],
+    log: false
+  })
 })

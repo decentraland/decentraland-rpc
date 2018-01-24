@@ -10,18 +10,36 @@ import { Test } from '../../scenarios/support/Commons'
 export abstract class TestableSystem extends System {
   @inject Test: Test | null = null
 
-  pass(result?: any) {
-    this.emit('passed', result)
-    this.Test!.pass(result)
+  private didFail: Error | null = null
+
+  constructor(a: SystemTransport) {
+    super(a)
+
+    this.on('error', (e: Error) => {
+      this.didFail = e
+      if (this.Test) {
+        this.Test.fail(e)
+      }
+    })
   }
+
+  pass(result?: any) {
+    this.Test!.pass(result)
+    this.emit('passed', result)
+  }
+
   fail(error: any) {
     this.emit('error', error)
-    this.Test!.fail(error)
   }
 
   abstract doTest(): Promise<void>
 
   async systemDidEnable() {
+    if (this.didFail) {
+      this.Test!.fail(this.didFail)
+      return
+    }
+
     try {
       this.pass(await this.doTest())
     } catch (e) {
