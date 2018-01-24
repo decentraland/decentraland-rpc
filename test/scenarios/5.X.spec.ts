@@ -1,6 +1,6 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { registerComponent, Component, ComponentSystem } from '../../lib/host'
+import { registerComponent, Component, ComponentSystem, exposeMethod } from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
 
@@ -25,7 +25,7 @@ export class TicTacToeBoard extends Component {
     this.options.notify('ChooseSymbol', { symbol })
   }
 
-  @Component.expose
+  @exposeMethod
   async iAmConnected(...args: any[]) {
     this.waitForConnection.resolve(args)
   }

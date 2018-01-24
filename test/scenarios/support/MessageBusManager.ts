@@ -1,4 +1,4 @@
-import { registerComponent, Component } from '../../../lib/host'
+import { registerComponent, Component, exposeMethod } from '../../../lib/host'
 import { EventDispatcher, EventDispatcherBinding } from '../../../lib/common/core/EventDispatcher'
 
 const messageBus = new EventDispatcher()
@@ -8,7 +8,8 @@ export class MessageBusManager extends Component {
 
   joinedTo: EventDispatcherBinding[] = []
 
-  @Component.expose async getChannel(name: string, uid: string, options: any) {
+  @exposeMethod 
+  async getChannel(name: string, uid: string, options: any) {
 
     const id = (Math.random() * 100000000).toFixed(0)
 
