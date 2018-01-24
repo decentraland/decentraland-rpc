@@ -1,4 +1,34 @@
-import { System, Transports } from '../../../lib/client/index'
+import {
+  System,
+  Transports,
+  SystemTransport,
+  inject
+} from '../../../lib/client/index'
+import { WebWorkerTransport } from '../../../lib/client/transports/WebWorker'
+import { Test } from '../../scenarios/support/Commons'
+
+export abstract class TestableSystem extends System {
+  @inject Test: Test | null = null
+
+  pass(result?: any) {
+    this.emit('passed', result)
+    this.Test!.pass(result)
+  }
+  fail(error: any) {
+    this.emit('error', error)
+    this.Test!.fail(error)
+  }
+
+  abstract doTest(): Promise<void>
+
+  async systemDidEnable() {
+    try {
+      this.pass(await this.doTest())
+    } catch (e) {
+      this.fail(e)
+    }
+  }
+}
 
 export type IFuture<T> = Promise<T> & {
   resolve: (x: T) => void
@@ -61,6 +91,12 @@ export function testToFail(fn: (system: System) => Promise<any>) {
         return Test.pass(x)
       })
   )
+}
+
+export function testSystem(system: {
+  new (transport: SystemTransport): TestableSystem
+}) {
+  return new system(WebWorkerTransport())
 }
 
 export async function shouldFail(
