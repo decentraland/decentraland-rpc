@@ -1,5 +1,4 @@
-import { registerComponent, Component, exposeMethod } from '../../lib/host'
-import { rateLimit } from './support/RateLimit'
+import { registerComponent, Component, exposeMethod, rateLimit } from '../../lib/host'
 import { testInWorker } from './support/Helpers';
 
 @registerComponent('RateLimiter')
