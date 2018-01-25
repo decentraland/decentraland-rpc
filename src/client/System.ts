@@ -5,7 +5,11 @@ import { ILogOpts } from '../common/json-rpc/types'
 /** this is defined in the constructor ComponentSystem() */
 const loadComponentsNotificationName = 'LoadComponents'
 
-const injectedComponentSymbol = Symbol('injectedComponent')
+// If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+const hasSymbol = typeof Symbol === 'function' && Symbol.for
+
+const injectedComponentSymbol = hasSymbol ? Symbol('injectedComponent') : 0xfea0
 
 export interface System {
   systemDidEnable?(): Promise<void> | void

@@ -2,7 +2,12 @@ import { Dictionary } from '../common/core/EventDispatcher'
 import { WebWorkerServer } from './WebWorkerServer'
 import { ComponentClass, Component, ComponentOptions } from './Component'
 
-const componentNameSymbol = Symbol('pluginName')
+// If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+const hasSymbol = typeof Symbol === 'function' && Symbol.for
+
+const componentNameSymbol: any = hasSymbol ? Symbol('pluginName') : 0xfea2
+
 const registeredComponents: Dictionary<ComponentClass<Component>> = {}
 
 namespace PrivateHelpers {
@@ -27,6 +32,7 @@ namespace PrivateHelpers {
     }
 
     // save the registered name
+    // tslint:disable-next-line:semicolon
     ;(api as any)[componentNameSymbol] = componentName
 
     registeredComponents[componentName] = api

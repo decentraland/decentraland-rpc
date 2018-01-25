@@ -1,6 +1,10 @@
 // http://gameprogrammingpatterns.com/component.html
 
-const exposedMethodSymbol = Symbol('exposedMethod')
+// If there is no native Symbol
+// nor polyfill, then a plain number is used for performance.
+const hasSymbol = typeof Symbol === 'function' && Symbol.for
+
+const exposedMethodSymbol = hasSymbol ? Symbol('exposedMethod') : 0xfea1
 
 export function exposeMethod<T extends Component>(
   target: T,
