@@ -9,6 +9,14 @@ export interface Methods {
   setValue(key: string, value: any): Promise<void>
   getValue(key: string): Promise<any>
   bounce<T>(...args: T[]): Promise<T>
+
+  ret0(): Promise<0>
+  retEmptyStr(): Promise<''>
+  retNull(): Promise<null>
+  retFalse(): Promise<false>
+  retTrue(): Promise<true>
+
+  singleBounce<T>(a: T): Promise<T>
 }
 
 export interface Test {

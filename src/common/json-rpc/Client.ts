@@ -50,17 +50,22 @@ export abstract class Client extends EventDispatcher
         const promise = this._responsePromiseMap.get(
           message.id
         ) as JsonRpc2.Resolvable
-        if (message.result) {
+
+        if ('result' in message) {
           promise.resolve(message.result)
-        } else if (message.error) {
+        } else if ('error' in message) {
           const error = Object.assign(new Error('Remote error'), message.error)
           promise.reject(error)
         } else {
-          this.emit(
-            'error',
-            new Error(`Response must have result or error: ${messageStr}`)
+          promise.reject(
+            Object.assign(
+              new Error(`Response must have result or error: ${messageStr}`),
+              { code: JsonRpc2.ErrorCode.ParseError }
+            )
           )
         }
+
+        this._responsePromiseMap.delete(message.id)
       } else {
         this.emit(
           'error',

@@ -15,6 +15,12 @@ test(async ScriptingClient => {
     x: await Methods.getRandomNumber()
   }
 
+  assert.equal(await Methods.ret0(), 0)
+  assert.equal(await Methods.retFalse(), false)
+  assert.equal(await Methods.retNull(), null)
+  assert.equal(await Methods.retEmptyStr(), '')
+  assert.equal(await Methods.retTrue(), true)
+
   assert.deepEqual(await Methods.receiveObject(sentObject), {
     received: sentObject
   })
@@ -28,4 +34,9 @@ test(async ScriptingClient => {
   const sentElements = [1, true, null, false, 'xxx', { a: null }]
 
   assert.deepEqual(await Methods.bounce(...sentElements), sentElements)
+  assert.deepEqual(await Methods.singleBounce(sentElements), sentElements)
+
+  for (let $ of sentElements) {
+    assert.deepEqual(await Methods.singleBounce($), $)
+  }
 })

@@ -56,6 +56,36 @@ export class Methods extends Component {
   }
 
   @exposeMethod
+  async singleBounce(arg: any) {
+    return arg
+  }
+
+  @exposeMethod
+  async ret0() {
+    return 0
+  }
+
+  @exposeMethod
+  async retNull() {
+    return null
+  }
+
+  @exposeMethod
+  async retFalse() {
+    return false
+  }
+
+  @exposeMethod
+  async retTrue() {
+    return true
+  }
+
+  @exposeMethod
+  async retEmptyStr() {
+    return ''
+  }
+
+  @exposeMethod
   async getRandomNumber() {
     return Math.random()
   }

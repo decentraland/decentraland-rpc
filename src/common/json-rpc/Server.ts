@@ -151,7 +151,10 @@ export abstract class Server<ClientType = any> extends EventDispatcher
                   .then((actualResult: any) => {
                     this._send(from, {
                       id: request.id,
-                      result: actualResult || []
+                      result:
+                        typeof actualResult === 'undefined'
+                          ? null
+                          : actualResult
                     })
                   })
                   .catch((error: Error) => {
@@ -164,7 +167,10 @@ export abstract class Server<ClientType = any> extends EventDispatcher
                   })
               } else {
                 // Result is not a promise so send immediately
-                this._send(from, { id: request.id, result: result || [] })
+                this._send(from, {
+                  id: request.id,
+                  result: typeof result === 'undefined' ? null : result
+                })
               }
             } catch (error) {
               this._sendError(

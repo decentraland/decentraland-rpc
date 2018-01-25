@@ -53,9 +53,8 @@ async function _injectComponents(target: System) {
 
   await target.loadComponents(Array.from(injectedMap.values()))
 
-  injectedMap.forEach((componentName: string, property) => {
+  injectedMap.forEach(function(componentName: string, property) {
     target[property] = target.loadedComponents[componentName]
-    console.log(`Setting property ${property} with component ${componentName}`)
   })
 }
 
@@ -101,7 +100,10 @@ export class System extends Client {
     componentNames: string[]
   ): Promise<{ [key: string]: any }> {
     const loadedKeys = Object.keys(this.loadedComponents)
-    const keysToRequest = componentNames.filter($ => !loadedKeys.includes($))
+
+    const keysToRequest = componentNames.filter(function($) {
+      return !loadedKeys.includes($)
+    })
 
     if (keysToRequest.length) {
       await this.call(loadComponentsNotificationName, [keysToRequest])
