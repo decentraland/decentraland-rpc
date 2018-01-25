@@ -11,39 +11,52 @@ export interface System {
   systemDidEnable?(): Promise<void> | void
 }
 
-export interface Component {}
+export type Component = any
 
 export interface SystemTransport {
+  /** sendMessage is used to send a string message thru the transport */
   sendMessage(message: string): void
+  /** the onConnect callback is called when the transport gets connected */
   onConnect?(callback: () => void): void
+  /** the onMessage callback is called when the transport receives a message */
   onMessage(callback: (message: string) => void): void
+  /** the onError callback is called when the transport triggers an error */
   onError?(callback: (e: Error) => void): void
 }
 
-export function inject<T extends System>(target: T, propertyKey: keyof T) {
-  getInjectedComponents(target).add(propertyKey)
+/**
+ * This function decorates parameters to load components
+ * @param componentName component name to load
+ */
+export function inject(componentName?: string) {
+  if (componentName !== undefined && !componentName) {
+    throw new TypeError('Component name cannot be null / empty')
+  }
+  return function<T extends System>(target: T, propertyKey: keyof T) {
+    getInjectedComponents(target).set(propertyKey, componentName || propertyKey)
+  }
 }
 
 export function getInjectedComponents<T extends System>(
   instance: T
-): Set<keyof T> {
+): Map<keyof T, string> {
   const instanceAny: any = instance
   instanceAny[injectedComponentSymbol] =
-    instanceAny[injectedComponentSymbol] || new Set()
+    instanceAny[injectedComponentSymbol] || new Map()
   return instanceAny[injectedComponentSymbol]
 }
 
 async function _injectComponents(target: System) {
-  const injectedSet = getInjectedComponents(target)
+  const injectedMap = getInjectedComponents(target)
 
-  if (injectedSet.size === 0) return
+  if (injectedMap.size === 0) return
 
-  await target.loadComponents(Array.from(injectedSet))
+  await target.loadComponents(Array.from(injectedMap.values()))
 
-  injectedSet.forEach(
-    componentName =>
-      ((target as any)[componentName] = target.loadedComponents[componentName])
-  )
+  injectedMap.forEach((componentName: string, property) => {
+    target[property] = target.loadedComponents[componentName]
+    console.log(`Setting property ${property} with component ${componentName}`)
+  })
 }
 
 export class System extends Client {
@@ -54,14 +67,6 @@ export class System extends Client {
   constructor(private transport: SystemTransport, opt?: ILogOpts) {
     super(opt)
 
-    if (transport.onConnect) {
-      transport.onConnect(() => {
-        this.didConnect()
-      })
-    } else {
-      this.didConnect()
-    }
-
     if (transport.onError) {
       transport.onError(e => {
         this.emit('error', e)
@@ -71,6 +76,14 @@ export class System extends Client {
     transport.onMessage(message => {
       this.processMessage(message)
     })
+
+    if (transport.onConnect) {
+      transport.onConnect(() => {
+        this.didConnect()
+      })
+    } else {
+      this.didConnect()
+    }
   }
 
   sendMessage(message: string) {

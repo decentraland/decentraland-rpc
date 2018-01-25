@@ -18,10 +18,9 @@ const winingCombinations = [
 type GameSymbol = 'x' | 'o' | null
 
 class Game extends TestableSystem {
-  @inject TicTacToeBoard: any = null
+  @inject('TicTacToeBoard') ticTacToe: any = null
 
   mySymbol: GameSymbol = null
-
   board: GameSymbol[] = [null, null, null, null, null, null, null, null, null]
 
   getWinner() {
@@ -48,15 +47,13 @@ class Game extends TestableSystem {
       'rtc://tictactoe.signaling.com'
     )
 
-    this.TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
+    this.ticTacToe.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
       this.selectMySymbol(symbol)
     })
 
-    this.TicTacToeBoard.onClickPosition(
-      ({ position }: { position: number }) => {
-        messageBus.emit('set_at', position, this.mySymbol)
-      }
-    )
+    this.ticTacToe.onClickPosition(({ position }: { position: number }) => {
+      messageBus.emit('set_at', position, this.mySymbol)
+    })
 
     messageBus.on('set_at', (index: number, symbol: GameSymbol) => {
       this.setAt(index, symbol)
@@ -68,7 +65,7 @@ class Game extends TestableSystem {
       }
     })
 
-    await this.TicTacToeBoard.iAmConnected()
+    await this.ticTacToe.iAmConnected()
 
     await futureWinner
   }

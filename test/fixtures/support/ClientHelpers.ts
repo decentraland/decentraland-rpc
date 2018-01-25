@@ -8,7 +8,7 @@ import { WebWorkerTransport } from '../../../lib/client/transports/WebWorker'
 import { Test } from '../../scenarios/support/Commons'
 
 export abstract class TestableSystem extends System {
-  @inject Test: Test | null = null
+  @inject('Test') testComponent: Test | null = null
 
   private didFail: Error | null = null
 
@@ -17,14 +17,14 @@ export abstract class TestableSystem extends System {
 
     this.on('error', (e: Error) => {
       this.didFail = e
-      if (this.Test) {
-        this.Test.fail(e)
+      if (this.testComponent) {
+        this.testComponent.fail(e)
       }
     })
   }
 
   pass(result?: any) {
-    this.Test!.pass(result)
+    this.testComponent!.pass(result)
     this.emit('passed', result)
   }
 
@@ -36,7 +36,7 @@ export abstract class TestableSystem extends System {
 
   async systemDidEnable() {
     if (this.didFail) {
-      this.Test!.fail(this.didFail)
+      this.testComponent!.fail(this.didFail)
       return
     }
 

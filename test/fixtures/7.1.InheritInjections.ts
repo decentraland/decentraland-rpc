@@ -4,7 +4,7 @@ import { Methods } from './support/ClientCommons'
 import { inject, getInjectedComponents } from '../../lib/client/index'
 
 export class BaseTestMethods extends TestableSystem {
-  @inject Methods: Methods | null = null
+  @inject('Methods') m: Methods | null = null
 
   async doTest() {
     throw new Error('This should be overwritten and never called')
@@ -12,16 +12,19 @@ export class BaseTestMethods extends TestableSystem {
 }
 
 export class TestMethods extends BaseTestMethods {
-  @inject Logger: any = null
-  @inject Test: any = null
+  @inject() Logger: any = null
+  @inject('Test') testComponent: any = null
+  @inject('Test') xxx: any = null
 
   async doTest() {
-    assert.deepEqual(
-      Array.from(getInjectedComponents(this)).sort(),
-      ['Test', 'Methods', 'Logger'].sort()
-    )
+    assert.deepEqual(Array.from(getInjectedComponents(this)), [
+      ['testComponent', 'Test'],
+      ['m', 'Methods'],
+      ['Logger', 'Logger'],
+      ['xxx', 'Test']
+    ])
 
-    if (!this.Methods) {
+    if (!this.m) {
       throw new Error('Methods was not loaded')
     }
 
@@ -29,11 +32,17 @@ export class TestMethods extends BaseTestMethods {
       throw new Error('Logger was not loaded')
     }
 
-    if (!this.Test) {
+    if (!this.testComponent) {
       throw new Error('Test was not loaded')
     }
 
-    const Methods = this.Methods
+    if (!this.xxx) {
+      throw new Error('xxx was not loaded')
+    }
+
+    const Methods = this.m
+
+    assert.equal(this.xxx, this.testComponent)
 
     assert.equal(await Methods.enable(), 1)
     assert.equal(typeof await Methods.getRandomNumber(), 'number')

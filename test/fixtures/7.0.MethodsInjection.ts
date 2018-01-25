@@ -4,7 +4,7 @@ import { Methods } from './support/ClientCommons'
 import { inject } from '../../lib/client/index'
 
 export class TestMethods extends TestableSystem {
-  @inject Methods: Methods | null = null
+  @inject() Methods: Methods | null = null
 
   async doTest() {
     if (!this.Methods) {
