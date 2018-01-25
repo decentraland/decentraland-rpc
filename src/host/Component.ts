@@ -29,7 +29,7 @@ export type ComponentOptions = {
     event: string,
     handler: <A, O extends object>(params: Array<A> | O) => void
   ): void
-  notify(event: string, params?: any): void
+  notify(event: string, params?: Object | Array<any>): void
   expose(
     event: string,
     handler: <A, O extends object>(params: Array<A> | O) => Promise<any>

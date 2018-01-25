@@ -207,7 +207,7 @@ export class ComponentSystem extends WebWorkerServer {
     const componentOptions: ComponentOptions = {
       componentName,
       on: (event, handler) => this.on(`${componentName}.${event}`, handler),
-      notify: (event, params) =>
+      notify: (event, params?) =>
         this.notify(`${componentName}.${event}`, params),
       expose: (event, handler) =>
         this.expose(`${componentName}.${event}`, handler)

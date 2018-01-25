@@ -76,7 +76,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher
   notify(method: string, params: boolean): never
   notify(method: string, params: null): never
   notify<T>(method: string, params: Iterable<T>): void
-  notify(method: string, params: { [key: string]: any }): void
+  notify(method: string, params?: Object): void
   notify(method: string, params?: any): void {
     if (typeof params !== 'undefined' && typeof params !== 'object') {
       throw new Error(
