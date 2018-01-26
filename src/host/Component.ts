@@ -60,6 +60,8 @@ export type ComponentOptions = {
     event: string,
     handler: <A, O extends object>(params: Array<A> | O) => Promise<any>
   ): void
+  getComponentInstance<X>(component: { new (options: ComponentOptions): X }): X
+  getComponentInstance(name: string): Component | null
 }
 
 export type ComponentClass<T> = {

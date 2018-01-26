@@ -1,4 +1,4 @@
-import { testSystem, TestableSystem, wait } from "./support/ClientHelpers";
+import { testSystem, TestableSystem, wait } from "./support/ClientHelpers"
 import { inject } from "../../lib/client/index"
 import * as assert from "assert"
 
@@ -36,4 +36,3 @@ export class RateLimited extends TestableSystem {
 }
 
 testSystem(RateLimited)
-false

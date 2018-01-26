@@ -210,7 +210,10 @@ export class ComponentSystem extends WebWorkerServer {
       notify: (event, params?) =>
         this.notify(`${componentName}.${event}`, params),
       expose: (event, handler) =>
-        this.expose(`${componentName}.${event}`, handler)
+        this.expose(`${componentName}.${event}`, handler),
+      getComponentInstance: (name: any) => {
+        return this.getComponentInstance(name) as any
+      }
     }
 
     const instance = ctor.factory
