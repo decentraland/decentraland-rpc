@@ -2,19 +2,21 @@
 
 // This started as something different as it is right now. It became gulp. damnit
 
-import webpack = require('webpack')
-import globPkg = require('glob')
+import * as webpack from 'webpack'
+import * as globPkg from 'glob'
+import * as rimraf from 'rimraf'
+import * as fs from 'fs'
 import { resolve, parse as parsePath, dirname, basename } from 'path'
 import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader'
 
-import rimraf = require('rimraf')
-
 const isWatching = process.argv.some($ => $ === '--watch')
 
-import fs = require('fs')
 import { spawn } from 'child_process'
 
-export function findConfigFile(baseDir: string, configFileName: string): string | null {
+export function findConfigFile(
+  baseDir: string,
+  configFileName: string
+): string | null {
   let configFilePath = resolve(baseDir, configFileName)
 
   if (fs.existsSync(configFilePath)) {
@@ -38,7 +40,6 @@ export interface ICompilerOptions {
 
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
-
     const options: webpack.Configuration = {
       entry: opt.file,
       output: {
@@ -59,7 +60,11 @@ export async function compile(opt: ICompilerOptions) {
       module: {
         rules: [
           // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
-          { test: /\.tsx?$/, loader: 'awesome-typescript-loader', options: { configFileName: opt.tsconfig, silent: true } }
+          {
+            test: /\.tsx?$/,
+            loader: 'awesome-typescript-loader',
+            options: { configFileName: opt.tsconfig, silent: true }
+          }
         ]
       },
       target: opt.target
@@ -80,21 +85,28 @@ export async function compile(opt: ICompilerOptions) {
         }
       })
     } else {
-      compiler.watch({ ignored: /node_modules/, aggregateTimeout: 1000 }, (err, stats) => {
-        if (stats.hasErrors() || stats.hasWarnings()) {
-          console.log(stats.toString({
-            colors: true,
-            errors: true,
-            warnings: true
-          }))
-        } else {
-          console.log('OK  ' + opt.file + ' -> ' + opt.outDir + '/' + opt.outFile)
-        }
+      compiler.watch(
+        { ignored: /node_modules/, aggregateTimeout: 1000 },
+        (err, stats) => {
+          if (stats.hasErrors() || stats.hasWarnings()) {
+            console.log(
+              stats.toString({
+                colors: true,
+                errors: true,
+                warnings: true
+              })
+            )
+          } else {
+            console.log(
+              'OK  ' + opt.file + ' -> ' + opt.outDir + '/' + opt.outFile
+            )
+          }
 
-        if (!err) {
-          onSuccess(stats)
+          if (!err) {
+            onSuccess(stats)
+          }
         }
-      })
+      )
     }
   })
 }
@@ -102,9 +114,11 @@ export async function compile(opt: ICompilerOptions) {
 export async function tsc(tsconfig: string) {
   const tscLocation = require.resolve('typescript/bin/tsc')
 
-  console.log(`
+  console.log(
+    `
     Executing "tsc -p ${basename(tsconfig)}" in ${dirname(tsconfig)}
-  `.trim())
+  `.trim()
+  )
 
   const args = ['-p', basename(tsconfig)]
 
@@ -120,23 +134,23 @@ export async function tsc(tsconfig: string) {
     return true
   }
 
-  let resolve: (x: any) => any = (a) => void 0
-  let reject: (x: any) => any = (a) => void 0
+  let resolve: (x: any) => any = a => void 0
+  let reject: (x: any) => any = a => void 0
 
   const semaphore = new Promise((ok, err) => {
     resolve = ok
     reject = err
   })
 
-  childProcess.stdout.on('data', (data) => {
+  childProcess.stdout.on('data', data => {
     console.log(`tsc stdout: ${data}`)
   })
 
-  childProcess.stderr.on('data', (data) => {
+  childProcess.stderr.on('data', data => {
     console.log(`tsc stderr: ${data}`)
   })
 
-  childProcess.on('close', (exitCode) => {
+  childProcess.on('close', exitCode => {
     if (exitCode) {
       reject(exitCode)
     } else {
@@ -147,7 +161,12 @@ export async function tsc(tsconfig: string) {
   await semaphore
 }
 
-export async function processFile(opt: { file: string, outFile?: string, watch?: boolean, target?: string }) {
+export async function processFile(opt: {
+  file: string
+  outFile?: string
+  watch?: boolean
+  target?: string
+}) {
   if (opt.file.endsWith('.json')) {
     return processJson(opt.file)
   }
@@ -162,17 +181,15 @@ export async function processFile(opt: { file: string, outFile?: string, watch?:
 
   const parsedTsConfig = require(configFile)
 
-  let outFile =
-    opt.outFile
-      ? resolve(process.cwd(), opt.outFile)
-      : parsedTsConfig.compilerOptions.outFile
-        ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
-        : (parsed.name + '.js')
+  let outFile = opt.outFile
+    ? resolve(process.cwd(), opt.outFile)
+    : parsedTsConfig.compilerOptions.outFile
+      ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
+      : parsed.name + '.js'
 
-  const outDir =
-    parsedTsConfig.compilerOptions.outDir
-      ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
-      : dirname(outFile)
+  const outDir = parsedTsConfig.compilerOptions.outDir
+    ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
+    : dirname(outFile)
 
   if (outFile.startsWith(outDir)) {
     outFile = outFile.replace(outDir + '/', '')
@@ -195,14 +212,16 @@ compiling: ${opt.file}
   const result = await compile(options)
 
   if (result.hasErrors() || result.hasWarnings()) {
-    console.log(result.toString({
-      assets: true,
-      colors: true,
-      entrypoints: true,
-      env: true,
-      errors: true,
-      publicPath: true
-    }))
+    console.log(
+      result.toString({
+        assets: true,
+        colors: true,
+        entrypoints: true,
+        env: true,
+        errors: true,
+        publicPath: true
+      })
+    )
   }
 }
 
@@ -241,9 +260,11 @@ export async function processJson(file: string) {
     if ($.kind === 'RM') {
       if (!isWatching) {
         // delete a folder
-        console.log(`
-        Deleting folder: ${$.path}
-      `.trim())
+        console.log(
+          `
+          Deleting folder: ${$.path}
+        `.trim()
+        )
         rimraf.sync($.path)
       }
     } else if ($.kind === 'Webpack') {
