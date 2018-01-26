@@ -6,15 +6,20 @@ Systems contain custom logic that is executed outside of the context of the [Com
 
 ```ts
 class ExampleSystems extends System {
-  @inject('SoundComponent')
-  Sound: SoundComponent
+  @inject('Pinger')
+  Pinger: Pinger
 
   systemDidEnable() {
-    const { Sound } = this
-    await Sound.playSound('test.mp3');
+    const { Pinger } = this
+    this.emitPing()
+    await Pinger.getLastPing()
   }
 }
 ```
+
+Following the example started in the [Components ](../components/introduction.md), the System above emits a Ping message and request a value from an exposed method.
+
+Systems can load Components using the `@inject` decorator by specifying the name registered in the Component System. Additional types for that Component must be created and exported separately.
 
 ## Receiving notifications
 
