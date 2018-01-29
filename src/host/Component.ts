@@ -27,7 +27,7 @@ export function rateLimit<T>(interval: number = 100) {
   return function(
     target: T,
     propertyKey: string,
-    descriptor: TypedPropertyDescriptor<() => Promise<any | void>>
+    descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any | void>>
   ) {
     const originalValue = descriptor.value as Function
     let lastCall: number = performance.now() 
