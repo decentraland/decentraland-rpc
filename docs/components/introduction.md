@@ -59,14 +59,25 @@ Rate limiting allows to specify a time interval in which calls to a Component's 
 ```ts
   @exposeMethod
   @rateLimit(1000)  
-  asd
   async playSound(): number {
     // some sensible logic
   }
 }
 ``` 
 
-In the above example only one sound will be allowed to be played per second.
+## Throttling
+Much like Rate limiting, Throttling allows to specify a time interval in which an specific amount of calls to a Component's method can be accepted. This functionality can be accessed through the `@throttle(callLimit, inteval)` decorator:
+
+```ts
+  @exposeMethod
+  @throttle(5, 1000)
+  async playSound(): number {
+    // some sensible logic
+  }
+}
+``` 
+
+In the above example only five sounds will be allowed to be played per second. This method is specially useful for setting more complex limitations to a method that could be could from an external system.
 
 ## Instancing a Component from within another Component
 
