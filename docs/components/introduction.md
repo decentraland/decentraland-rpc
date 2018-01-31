@@ -57,11 +57,10 @@ When extending from the core `Component` class a set of functions become availab
 Rate limiting allows to specify a time interval in which calls to a Component's method can be accepted. This allows for more control over computationally expensive methods and can be specified by using the `@rateLimit(inteval)` decorator:
 
 ```ts
-  @exposeMethod
-  @rateLimit(1000)  
-  async playSound(): number {
-    // some sensible logic
-  }
+@exposeMethod
+@rateLimit(1000)  
+async playSound(): number {
+  // some sensible logic
 }
 ``` 
 
@@ -69,11 +68,10 @@ Rate limiting allows to specify a time interval in which calls to a Component's 
 Much like Rate limiting, Throttling allows to specify a time interval in which an specific amount of calls to a Component's method can be accepted. This functionality can be accessed through the `@throttle(callLimit, inteval)` decorator:
 
 ```ts
-  @exposeMethod
-  @throttle(5, 1000)
-  async playSound(): number {
-    // some sensible logic
-  }
+@exposeMethod
+@throttle(5, 1000)
+async playSound(): number {
+  // some sensible logic
 }
 ``` 
 
