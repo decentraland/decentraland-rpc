@@ -149,3 +149,12 @@ export interface Component {
   componentDidMount?(): Promise<void> | void
   componentWillUnmount?(): Promise<void> | void
 }
+
+export abstract class SubscribableComponent extends Component {
+  abstract async subscribe(event: string): Promise<void>
+}
+
+export interface ISubscribableComponent {
+  subscribe(event: string): Promise<void>
+  onSubscribedEvent(fn: (data: any) => void): void
+}
