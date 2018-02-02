@@ -6,6 +6,7 @@ export class SomeSystem extends TestableSystem {
   @inject('eventController') eventController: any | null = null
 
   async doTest() {
+    this.eventController.setCount(0)
     const eventSubscriber = new EventSubscriber(this.eventController)
 
     const gotFirstEvent = future()
@@ -32,7 +33,7 @@ export class SomeSystem extends TestableSystem {
     assert.equal(counter, 10)
 
     // We also need to validate that unrelated event bindings are kept intact
-    this.eventController.emitValidate() // will be handled by the EventListener class
+    this.eventController.emitValidate({ value: 10 }) // will be handled by the EventListener class
 
   }
 }

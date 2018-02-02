@@ -2,7 +2,7 @@ import { EventDispatcher, EventDispatcherBinding } from '../common/core/EventDis
 import { ISubscribableComponent } from '../host/Component'
 
 export class EventSubscriber extends EventDispatcher {
-  private subscriptions: string[] = []
+  private subscriptions: {[event: string]: number} = {}
 
   constructor(private component: ISubscribableComponent) {
     super()
@@ -18,11 +18,11 @@ export class EventSubscriber extends EventDispatcher {
    * @param handler A handler which be called each time the event is received
    */
   addEventListener(event: string, handler: any) {
-    if (!this.subscriptions.includes(event)) {
+    if (!this.subscriptions[event]) {
       this.component
         .subscribe(event)
         .then(() => {
-          this.subscriptions.push(event)
+          this.subscriptions[event] = this.subscriptions[event] ? this.subscriptions[event] + 1 : 1 
         })
         .catch(e => this.emit('error', e))
     }
@@ -35,13 +35,20 @@ export class EventSubscriber extends EventDispatcher {
    * @param binding A reference to a binding returned by a previous `addEventListener` call
    */
   removeEventListener(event: string, binding: EventDispatcherBinding) {
-    const index = this.subscriptions.indexOf(event)
-    if (index > -1) {
-      this.component.unsubscribe(event)
-      .then(() => {
-        this.subscriptions.splice(index, 1)
-      })
-      .catch(e => this.emit('error', e))
+    if (this.subscriptions[event]) {
+
+      // If we are removing the last event listener, remove it also from the component
+      // this will keep listeners unrelated to the component intact
+      if (this.subscriptions[event] === 1) {
+        this.component.unsubscribe(event)
+        .then(() => {
+          delete this.subscriptions[event]
+        })
+        .catch(e => this.emit('error', e))
+      } else {
+        this.subscriptions[event]--
+      }
+      
     }
     return super.off.apply(this, [binding])
   }

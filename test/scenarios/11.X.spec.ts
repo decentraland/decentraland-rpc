@@ -5,7 +5,7 @@ import * as assert from 'assert'
 
 class EventListener extends EventDispatcher {
 
-  private count: number = 0
+  count: number = 0
 
   constructor() {
     super();
@@ -28,8 +28,8 @@ class EventListener extends EventDispatcher {
     this.emit(type, detail ? { data: { message: detail }} : {})
   }
 
-  validateCount() {
-    if (this.count <= 10) {
+  validateCount(value: number) {
+    if (this.count <= value) {
       assert.fail(`EventListener's binding must not be removed`)
     }
   }
@@ -46,9 +46,14 @@ export class EventController extends SubscribableComponent {
     super(opts)
     this.listener = new EventListener
 
-    this.options.on('Validate', () => {
-      this.listener.validateCount()
+    this.options.on('Validate', (data: any) => {
+      this.listener.validateCount(data.value)
     })
+  }
+
+  @exposeMethod
+  async setCount(count: number) {
+    this.listener.count = 0
   }
 
   @exposeMethod
@@ -69,7 +74,12 @@ export class EventController extends SubscribableComponent {
 }
 
 describe('EventDispatcher', function () {
-  testInWorker('test/out/11.EventSubscriber.js', {
+  testInWorker('test/out/11.1.EventSubscriber.js', {
+    plugins: [EventController],
+    log: true
+  })
+
+  testInWorker('test/out/11.2.ComplexEventSubscriber.js', {
     plugins: [EventController],
     log: true
   })
