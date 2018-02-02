@@ -156,5 +156,6 @@ export abstract class SubscribableComponent extends Component {
 
 export interface ISubscribableComponent {
   subscribe(event: string): Promise<void>
+  unsubscribe(event: string): Promise<void>  
   onSubscribedEvent(fn: (data: any) => void): void
 }
