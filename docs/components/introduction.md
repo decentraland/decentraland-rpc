@@ -1,9 +1,7 @@
 # Introduction
-
 Components work as a bridge between user-created scripts and the lower level APIs of the client (communication, 3D entity management, etc). It provides a set of exposed methods that can be accessed from the Web Worker context. These methods are `async` by default and Promises are used as hooks for events that may be triggered in the future (HTTP Responses, entity collisions, etc).
 
 ## A basic component
-
 The following is the implementation of a basic Component that exposes the method `getLastPing` to be used by a external [System](../systems/introduction.md).
 
 
@@ -33,7 +31,6 @@ Components can hold state of their own, as is the case of the `lastPing` propert
 Finally, the `@registerComponent` decorator will make the class available as a Component consumable from within other Systems.
 
 ## *Options* methods
-
 When extending from the core `Component` class a set of functions become available through the `options` property. The following is a list of them and their functionality:
 
 - `notify(identifier: string, data?: Array | Object)`
@@ -78,7 +75,6 @@ async playSound(): number {
 In the above example only five sounds will be allowed to be played per second. This method is specially useful for setting more complex limitations to a method that could be could from an external system.
 
 ## Instancing a Component from within another Component
-
 It is possible to access an istance of a Component from another Component's context. This can be achieved with the `getComponentInstance()` method found inside the `options` property.
 
 It can be used to create an instance based on a Component's regitered name:
