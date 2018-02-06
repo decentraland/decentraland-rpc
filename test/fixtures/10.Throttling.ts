@@ -1,14 +1,14 @@
-import { testSystem, TestableSystem, wait } from "./support/ClientHelpers"
-import { inject } from "../../lib/client/index"
-import * as assert from "assert"
+import { testSystem, TestableSystem, wait } from './support/ClientHelpers'
+import { inject } from '../../lib/client/index'
+import * as assert from 'assert'
 
 export class Throttling extends TestableSystem {
-  @inject("Throttling") throttling: any = null
+  @inject('Throttling') throttling: any = null
 
   async doTest() {
     const { throttling } = this
 
-    let failed = false;
+    let failed = false
 
     // Calls 5 every 10 ms so it's within the 100ms range
     for (let index = 0; index < 5; index++) {
@@ -19,12 +19,12 @@ export class Throttling extends TestableSystem {
         failed = true
       }
     }
-    
+
     assert.equal(failed, false)
 
     // Gets Throttled: calls 6 in a 5 calls per 100ms range
     await wait(100)
-    
+
     for (let index = 0; index < 6; index++) {
       await wait(10)
       try {
@@ -33,7 +33,7 @@ export class Throttling extends TestableSystem {
         failed = true
       }
     }
-    
+
     assert.equal(failed, true)
 
     // Call once, wait for the next interval, then get throttled
@@ -50,9 +50,8 @@ export class Throttling extends TestableSystem {
         failed = true
       }
     }
-    
+
     assert.equal(failed, true)
-    
   }
 }
 

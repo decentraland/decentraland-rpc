@@ -1,5 +1,10 @@
-import { registerComponent, Component, ComponentOptions, exposeMethod } from '../../lib/host'
-import { testInWorker } from './support/Helpers';
+import {
+  registerComponent,
+  Component,
+  ComponentOptions,
+  exposeMethod
+} from '../../lib/host'
+import { testInWorker } from './support/Helpers'
 
 @registerComponent('Greeter')
 export class Greeter extends Component {
@@ -10,7 +15,7 @@ export class Greeter extends Component {
 
 @registerComponent('Instancer')
 export class Instancer extends Component {
-  private Greeter: Greeter;
+  private Greeter: Greeter
 
   constructor(options: ComponentOptions) {
     super(options)
@@ -22,8 +27,8 @@ export class Instancer extends Component {
     return this.Greeter.greet('World')
   }
 }
-  
-describe('Intance a Component from another Component', function () {
+
+describe('Intance a Component from another Component', function() {
   testInWorker('test/out/9.ComponentInstancing.js', {
     plugins: [Instancer],
     log: true

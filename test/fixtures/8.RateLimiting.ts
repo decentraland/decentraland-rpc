@@ -1,14 +1,14 @@
-import { testSystem, TestableSystem, wait } from "./support/ClientHelpers"
-import { inject } from "../../lib/client/index"
-import * as assert from "assert"
+import { testSystem, TestableSystem, wait } from './support/ClientHelpers'
+import { inject } from '../../lib/client/index'
+import * as assert from 'assert'
 
 export class RateLimited extends TestableSystem {
-  @inject("RateLimiter") RateLimiter: any = null
+  @inject('RateLimiter') RateLimiter: any = null
 
   async doTest() {
     const { RateLimiter } = this
 
-    let failed = false;
+    let failed = false
 
     for (let index = 0; index < 10; index++) {
       await wait(101)
@@ -18,7 +18,7 @@ export class RateLimited extends TestableSystem {
         failed = true
       }
     }
-    
+
     assert.equal(failed, false)
 
     for (let index = 0; index < 10; index++) {
@@ -29,9 +29,8 @@ export class RateLimited extends TestableSystem {
         failed = true
       }
     }
-    
+
     assert.equal(failed, true)
-    
   }
 }
 
