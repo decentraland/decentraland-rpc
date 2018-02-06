@@ -20,3 +20,5 @@ export * from './System'
 import * as Transports from './transports'
 
 export { Transports }
+
+export * from './EventSubscriber'
