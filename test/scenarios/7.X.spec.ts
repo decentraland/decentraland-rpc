@@ -11,10 +11,31 @@ import * as assert from 'assert'
 @registerComponent('Test7')
 export class Test7 extends Component {
   receivedNumber: number = -1
+  status: string = ''
 
   @exposeMethod
   async setNumber(num: number) {
     this.receivedNumber = num
+  }
+
+  @exposeMethod
+  async setStatus() {
+    this.status = 'ready'
+  }
+
+
+  @exposeMethod
+  async doSomething(): Promise<any> {
+    if (this.status === 'ready') {
+      return true
+    }
+
+    throw new Error('Component was not ready yet')
+  }
+
+  @exposeMethod
+  async isReady(): Promise<boolean> {
+    return this.status === 'ready'
   }
 }
 
@@ -42,4 +63,17 @@ describe('Class based systems', function() {
       assert.notEqual(test7.receivedNumber, -1)
     }
   })
+
+  testInWorker('test/out/7.3.Interval.js', {
+    plugins: [],
+    log: false,
+    validateResult: (result: any, worker: ComponentSystem) => {
+      const test7 = worker.getComponentInstance(Test7)
+
+      setTimeout(() => {
+        test7.setStatus()
+      }, 500)
+    }
+  })
+
 })
