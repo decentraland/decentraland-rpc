@@ -142,8 +142,8 @@ export abstract class Server<ClientType = any> extends EventDispatcher
             try {
               const result: JsonRpc2.PromiseOrNot<any> =
                 request.params instanceof Array
-                  ? handler.apply(null, request.params)
-                  : handler.call(null, request.params)
+                  ? handler.apply(this, request.params)
+                  : handler.call(this, request.params)
 
               if (result instanceof Promise) {
                 // Result is a promise, so lets wait for the result and handle accordingly

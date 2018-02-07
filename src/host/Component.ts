@@ -30,25 +30,23 @@ export function rateLimit<T>(interval: number = 100) {
     descriptor: TypedPropertyDescriptor<(...args: any[]) => Promise<any | void>>
   ) {
     const originalValue = descriptor.value as Function
-    let lastCall: number = performance.now() 
+    let lastCall: number = performance.now()
 
     return {
       ...descriptor,
       value: function(this: T) {
         const now = performance.now()
 
-        if ((now - lastCall) < interval) {
+        if (now - lastCall < interval) {
           return Promise.reject(new Error('Rate limit exceeded'))
         }
-        
+
         lastCall = now
-        
         return originalValue.apply(this, arguments)
       }
     }
   }
 }
-
 
 export function throttle<T>(callLimit: number, interval: number = 100) {
   return function(
@@ -58,14 +56,14 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
   ) {
     const originalValue = descriptor.value as Function
     let initTime: number = performance.now()
-    let calls = 0 
+    let calls = 0
 
     return {
       ...descriptor,
       value: function(this: T) {
         const now = performance.now()
 
-        if ((now - initTime) >= interval) {
+        if (now - initTime >= interval) {
           calls = 0
           initTime = now
         }
@@ -73,9 +71,9 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
         if (calls >= callLimit) {
           return Promise.reject(new Error('Throttling – Maximum rate exceeded'))
         }
-        
+
         calls++
-        
+
         return originalValue.apply(this, arguments)
       }
     }
@@ -156,6 +154,6 @@ export abstract class SubscribableComponent extends Component {
 
 export interface ISubscribableComponent {
   subscribe(event: string): Promise<void>
-  unsubscribe(event: string): Promise<void>  
+  unsubscribe(event: string): Promise<void>
   onSubscribedEvent(fn: (data: any) => void): void
 }
