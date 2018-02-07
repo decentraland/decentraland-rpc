@@ -8,7 +8,7 @@ export type IFuture<T> = Promise<T> & {
 
 export type ITestInWorkerOptions = {
   log?: boolean
-  validateResult?: (result: any) => void
+  validateResult?: (result: any, worker: ComponentSystem) => void
   execute?: (worker: ComponentSystem) => void
   plugins?: any[]
 }
@@ -59,7 +59,7 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
 
     const result = await TestPlugin.waitForPass()
 
-    options.validateResult && options.validateResult(result)
+    options.validateResult && options.validateResult(result, worker)
 
     worker.unmount()
   })
