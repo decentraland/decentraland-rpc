@@ -18,29 +18,23 @@ export class SomeSystem extends TestableSystem {
     const doneListening2 = future()
     let counters = [0, 0]
 
-    const binding = eventSubscriber.addEventListener(
-      'customEvent',
-      (evt: any) => {
-        counters[0]++
+    const binding = eventSubscriber.on('customEvent', (evt: any) => {
+      counters[0]++
 
-        if (counters[0] === 10) {
-          doneListening1.resolve(evt)
-          eventSubscriber.removeEventListener('customEvent', binding)
-        }
+      if (counters[0] === 10) {
+        doneListening1.resolve(evt)
+        eventSubscriber.off(binding)
       }
-    )
+    })
 
-    const binding2 = eventSubscriber.addEventListener(
-      'customEvent',
-      (evt: any) => {
-        counters[1]++
+    const binding2 = eventSubscriber.on('customEvent', (evt: any) => {
+      counters[1]++
 
-        if (counters[1] === 15) {
-          doneListening2.resolve(evt)
-          eventSubscriber.removeEventListener('customEvent', binding2)
-        }
+      if (counters[1] === 15) {
+        doneListening2.resolve(evt)
+        eventSubscriber.off(binding2)
       }
-    )
+    })
 
     await doneListening1
     await doneListening2

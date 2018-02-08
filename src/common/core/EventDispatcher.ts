@@ -209,4 +209,8 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       throw firstArgument
     }
   }
+
+  protected getEventBindings(event: string) {
+    return (this.edBindings[event] || []).filter($ => $ && $.enabled)
+  }
 }

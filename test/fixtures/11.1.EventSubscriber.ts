@@ -18,20 +18,17 @@ export class SomeSystem extends TestableSystem {
 
     let counter = 0
 
-    const binding = eventSubscriber.addEventListener(
-      'customEvent',
-      (evt: any) => {
-        // Make sure we receive the correct payload from the event
-        assert.equal(evt.data.message, 'test')
+    const binding = eventSubscriber.on('customEvent', (evt: any) => {
+      // Make sure we receive the correct payload from the event
+      assert.equal(evt.data.message, 'test')
 
-        counter++
+      counter++
 
-        if (counter === 10) {
-          gotFirstEvent.resolve(evt)
-          eventSubscriber.removeEventListener('customEvent', binding)
-        }
+      if (counter === 10) {
+        gotFirstEvent.resolve(evt)
+        eventSubscriber.off(binding)
       }
-    )
+    })
 
     await gotFirstEvent
     await wait(500)
