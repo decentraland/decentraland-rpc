@@ -2,7 +2,7 @@
 The following is a list of common patterns used to solve frequent problems, they are the recommended way to do things but are not by any means the only ones. Custom solutions are encouraged and so are Pull Requests!
 
 ## Subscribable Components
-Tipically there is a need to subscribe to a buch on arbitraty events from within a System. These events are often generated outside of the scope of the Component, so creating and disposing listeners across contexts becomes complicated. In this scenario we will treat the Component as a "Controller", the System as the "Subscriber" and another module as the "Event Dispatcher".
+Typically there is a need to subscribe to a buch on arbitrary events from within a System. These events are often generated outside of the scope of the Component, so creating and disposing listeners across contexts becomes complicated. In this scenario we will treat the Component as a "Controller", the System as the "Subscriber" and another module as the "Event Dispatcher".
 
 Given the following Event Dispatcher we can allow any amount of Components (and other modules) to subscribe to a domain-specific event:
 
