@@ -1,6 +1,6 @@
 {
   "name": "dcl-scripting",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "",
   "main": "lib/client/index.js",
   "typings": "lib/client/index.d.ts",
