@@ -93,6 +93,7 @@ export type ComponentOptions = {
   ): void
   getComponentInstance<X>(component: { new (options: ComponentOptions): X }): X
   getComponentInstance(name: string): Component | null
+  system: any
 }
 
 export type ComponentClass<T> = {

@@ -213,7 +213,8 @@ export class ComponentSystem extends WebWorkerServer {
         this.expose(`${componentName}.${event}`, handler),
       getComponentInstance: (name: any) => {
         return this.getComponentInstance(name) as any
-      }
+      },
+      system: this
     }
 
     const instance = ctor.factory
@@ -244,7 +245,8 @@ export class ComponentSystem extends WebWorkerServer {
       .map($ => $.name)
 
     if (notFound.length) {
-      throw new TypeError(`Components not found ${notFound.join(',')}`)
+      const message = `Components not found ${notFound.join(',')}`
+      throw new TypeError(message)
     }
   }
 }
