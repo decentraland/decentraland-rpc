@@ -13,7 +13,7 @@ const server = http.createServer(app)
 const wss = new ws.Server({ server })
 
 // serve build.html
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.sendFile(resolve(__dirname, '../test/index.html'))
 })
 
@@ -22,12 +22,16 @@ console.log(resolve(__dirname, '../node_modules'))
 app.use('/test', express.static(resolve(__dirname, '../test')))
 app.use('/node_modules', express.static(resolve(__dirname, '../node_modules')))
 
-server.listen(port, function (error: any) {
+server.listen(port, function(error: any) {
   if (error) {
     console.error(error)
     process.exit(1)
   } else {
-    console.info('==> 🌎  Listening on port %s. Open up http://localhost:%s/ in your browser.', port, port)
+    console.info(
+      '==> 🌎  Listening on port %s. Open up http://localhost:%s/ in your browser.',
+      port,
+      port
+    )
 
     const options = {
       file: `http://localhost:${port}`,
@@ -57,8 +61,8 @@ wss.on('connection', function connection(ws, req) {
     })
   })
 
-  ws.on('error', (e) => console.log(e))
+  ws.on('error', e => console.log(e))
 })
 
-wss.on('error', (e) => console.log(e))
-server.on('error', (e) => console.log(e))
+wss.on('error', e => console.log(e))
+server.on('error', e => console.log(e))

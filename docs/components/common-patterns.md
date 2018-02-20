@@ -1,20 +1,21 @@
 # Common Patterns
+
 The following is a list of common patterns used to solve frequent problems, they are the recommended way to do things but are not by any means the only ones. Custom solutions are encouraged and so are Pull Requests!
 
 ## Subscribable Components
+
 Typically there is a need to subscribe to a buch on arbitrary events from within a System. These events are often generated outside of the scope of the Component, so creating and disposing listeners across contexts becomes complicated. In this scenario we will treat the Component as a "Controller", the System as the "Subscriber" and another module as the "Event Dispatcher".
 
 Given the following Event Dispatcher we can allow any amount of Components (and other modules) to subscribe to a domain-specific event:
 
 ```ts
 class EventListener extends EventDispatcher {
-
   constructor() {
-    super();
+    super()
     const evt = new CustomEvent('customEvent', { detail: 'test' })
-    
-    window.addEventListener('customEvent', (e) => {
-      this.handleEvent(e.type, (e as CustomEvent).detail)      
+
+    window.addEventListener('customEvent', e => {
+      this.handleEvent(e.type, (e as CustomEvent).detail)
     })
 
     setInterval(() => {
@@ -23,9 +24,8 @@ class EventListener extends EventDispatcher {
   }
 
   handleEvent(type: string, detail?: string) {
-    this.emit(type, { data: { message: detail }})
+    this.emit(type, { data: { message: detail } })
   }
-
 }
 ```
 
@@ -53,7 +53,7 @@ export class EventController extends SubscribableComponent {
 
     this.bindings.push(binding)
   }
-  
+
   @exposeMethod
   async unsubscribe(event: string) {
     this.bindings

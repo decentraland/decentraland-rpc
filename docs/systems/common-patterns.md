@@ -1,7 +1,9 @@
 # Common Patterns
+
 The following is a list of common patterns used to solve frequent problems, they are the recommended way to do things but are not by any means the only ones. Custom solutions are encouraged and so are Pull Requests!
 
 ## Subscriber Systems
+
 Following the ideas presented on the [Subscribable Components](../components/common-patterns.md) section, the example below will demostrate how to add listeners from within a System:
 
 ```ts
@@ -23,7 +25,7 @@ The `EventSubscriber` helper class receives a reference to SubscribableComponent
 
 ```ts
 const binding = eventSubscriber.addEventListener('customEvent', (evt: any) => {
-  counter++;
+  counter++
 
   if (counter === 10) {
     gotFirstEvent.resolve(evt)

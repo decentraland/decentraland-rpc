@@ -23,7 +23,6 @@ export class Test7 extends Component {
     this.status = 'ready'
   }
 
-
   @exposeMethod
   async doSomething(): Promise<any> {
     if (this.status === 'ready') {
@@ -75,5 +74,4 @@ describe('Class based systems', function() {
       }, 500)
     }
   })
-
 })

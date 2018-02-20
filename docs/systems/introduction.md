@@ -6,8 +6,7 @@ Systems contain custom logic that is executed outside of the context of the [Com
 
 ```ts
 class ExampleSystems extends System {
-  @inject('Pinger')
-  pinger: Pinger
+  @inject('Pinger') pinger: Pinger
 
   systemDidEnable() {
     await this.pinger.getLastPing()
@@ -20,12 +19,12 @@ Following the example started in the [Components ](../components/introduction.md
 Systems can load Components using the `@inject` decorator by specifying the name registered in the Component System. Additional types for that Component must be created and exported separately.
 
 ## Sending/Receiving notifications
+
 A component subscribe to notifications by passing a callback to a method related to that specific notification. Te `on` prefix is used to identify methods that provide subscriptions. These methods are not defined in the Component, but instead are processed on runtime and are automatically associated to the corresponding notification:
 
 ```ts
 class ExampleSystems extends System {
-  @inject('Pinger')
-  pinger: Pinger
+  @inject('Pinger') pinger: Pinger
 
   systemDidEnable() {
     this.pinger.onPong(() => {
@@ -41,16 +40,15 @@ A System can send notifications to the client in a similar way by calling a meth
 
 ```ts
 class ExampleSystems extends System {
-  @inject('Pinger')
-  pinger: Pinger
+  @inject('Pinger') pinger: Pinger
 
   systemDidEnable() {
     const { pinger } = this
-    
+
     setInterval(() => {
       this.emitPing()
     }, 1000)
-    
+
     pinger.onPong(() => {
       console.log('Pong!')
     })
