@@ -41,12 +41,9 @@ export function inject(componentName?: string) {
   }
 }
 
-export function getInjectedComponents<T extends System>(
-  instance: T
-): Map<keyof T, string> {
+export function getInjectedComponents<T extends System>(instance: T): Map<keyof T, string> {
   const instanceAny: any = instance
-  instanceAny[injectedComponentSymbol] =
-    instanceAny[injectedComponentSymbol] || new Map()
+  instanceAny[injectedComponentSymbol] = instanceAny[injectedComponentSymbol] || new Map()
   return instanceAny[injectedComponentSymbol]
 }
 
@@ -100,9 +97,7 @@ export class System extends Client {
    * @param componentName Name of the plugin we are trying to obtain
    * @returns {object} loadedComponents
    */
-  async loadComponents(
-    componentNames: string[]
-  ): Promise<{ [key: string]: any }> {
+  async loadComponents(componentNames: string[]): Promise<{ [key: string]: any }> {
     const loadedKeys = Object.keys(this.loadedComponents)
 
     const keysToRequest = componentNames.filter(function($) {

@@ -14,12 +14,9 @@ export function exposeMethod<T extends Component>(
   getExposedMethods(target).add(propertyKey)
 }
 
-export function getExposedMethods<T extends Component>(
-  instance: T
-): Set<keyof T> {
+export function getExposedMethods<T extends Component>(instance: T): Set<keyof T> {
   const instanceAny: any = instance
-  instanceAny[exposedMethodSymbol] =
-    instanceAny[exposedMethodSymbol] || new Set()
+  instanceAny[exposedMethodSymbol] = instanceAny[exposedMethodSymbol] || new Set()
   return instanceAny[exposedMethodSymbol]
 }
 
@@ -82,15 +79,9 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
 
 export type ComponentOptions = {
   componentName: string
-  on(
-    event: string,
-    handler: <A, O extends object>(params: Array<A> | O) => void
-  ): void
+  on(event: string, handler: <A, O extends object>(params: Array<A> | O) => void): void
   notify(event: string, params?: Object | Array<any>): void
-  expose(
-    event: string,
-    handler: <A, O extends object>(params: Array<A> | O) => Promise<any>
-  ): void
+  expose(event: string, handler: <A, O extends object>(params: Array<A> | O) => Promise<any>): void
   getComponentInstance<X>(component: { new (options: ComponentOptions): X }): X
   getComponentInstance(name: string): Component | null
   system: any

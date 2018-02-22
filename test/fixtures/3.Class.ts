@@ -1,22 +1,11 @@
 import { test } from './support/ClientHelpers'
 
 test(async ScriptingClient => {
-  const { Runtime, Debugger, Profiler } = await ScriptingClient.loadComponents([
-    'Runtime',
-    'Debugger',
-    'Profiler'
-  ])
+  const { Runtime, Debugger, Profiler } = await ScriptingClient.loadComponents(['Runtime', 'Debugger', 'Profiler'])
 
-  await Promise.all([
-    Runtime.enable(),
-    Debugger.enable(),
-    Profiler.enable(),
-    Runtime.run()
-  ])
+  await Promise.all([Runtime.enable(), Debugger.enable(), Profiler.enable(), Runtime.run()])
 
-  const mutex = new Promise(resolve =>
-    Profiler.onExecutionContextDestroyed(resolve)
-  )
+  const mutex = new Promise(resolve => Profiler.onExecutionContextDestroyed(resolve))
 
   await Profiler.start()
   await mutex

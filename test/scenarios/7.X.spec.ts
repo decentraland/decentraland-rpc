@@ -1,11 +1,6 @@
 import { testInWorker } from './support/Helpers'
 import { Logger, Methods, Test } from './support/Commons'
-import {
-  registerComponent,
-  Component,
-  exposeMethod,
-  ComponentSystem
-} from '../../lib/host'
+import { registerComponent, Component, exposeMethod, ComponentSystem } from '../../lib/host'
 import * as assert from 'assert'
 
 @registerComponent('Test7')

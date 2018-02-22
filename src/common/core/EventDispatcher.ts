@@ -56,16 +56,8 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
   private edBindings: Dictionary<EventDispatcherBinding[]> = {}
   private edBindCount = 0
 
-  on<K extends keyof T>(
-    event: K,
-    callback: T[K],
-    once?: boolean
-  ): EventDispatcherBinding
-  on(
-    event: string,
-    callback: (...args: any[]) => void,
-    once?: boolean
-  ): EventDispatcherBinding
+  on<K extends keyof T>(event: K, callback: T[K], once?: boolean): EventDispatcherBinding
+  on(event: string, callback: (...args: any[]) => void, once?: boolean): EventDispatcherBinding
   on(event: string, callback: any, once?: boolean): EventDispatcherBinding {
     this.edBindCount++
 
@@ -75,13 +67,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
     let latest: EventDispatcherBinding | null = null
 
     for (let evt of events) {
-      let tmp = new EventDispatcherBinding(
-        this.edBindCount,
-        null,
-        evt,
-        bindList,
-        this
-      )
+      let tmp = new EventDispatcherBinding(this.edBindCount, null, evt, bindList, this)
 
       bindList && bindList.push(tmp)
 
@@ -112,10 +98,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
   off(binding: EventDispatcherBinding): void
   off(eventName: string, boundCallback?: Function): void
   off(boundCallback: Function): void
-  off(
-    arg0?: string | Function | EventDispatcherBinding,
-    arg1?: Function
-  ): void {
+  off(arg0?: string | Function | EventDispatcherBinding, arg1?: Function): void {
     if (arguments.length === 0) {
       for (let i in this.edBindings) {
         for (let e in this.edBindings[i]) {
@@ -125,9 +108,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       }
     } else if (arg0 instanceof EventDispatcherBinding) {
       arg0.cb = null
-      arg0.sharedList &&
-        arg0.sharedList.length &&
-        arg0.sharedList.forEach(turnOffCallback)
+      arg0.sharedList && arg0.sharedList.length && arg0.sharedList.forEach(turnOffCallback)
     } else if (typeof arg0 === 'string') {
       if (typeof arg1 === 'function') {
         for (let i in this.edBindings[arg0]) {
@@ -172,18 +153,12 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       } else if (arguments.length === 4) {
         for (let i = 0; i < this.edBindings[event].length; i++) {
           let e = this.edBindings[event][i]
-          e &&
-            e.cb &&
-            e.enabled &&
-            e.cb(arguments[1], arguments[2], arguments[3])
+          e && e.cb && e.enabled && e.cb(arguments[1], arguments[2], arguments[3])
         }
       } else if (arguments.length === 5) {
         for (let i = 0; i < this.edBindings[event].length; i++) {
           let e = this.edBindings[event][i]
-          e &&
-            e.cb &&
-            e.enabled &&
-            e.cb(arguments[1], arguments[2], arguments[3], arguments[4])
+          e && e.cb && e.enabled && e.cb(arguments[1], arguments[2], arguments[3], arguments[4])
         }
       } else if (arguments.length > 4) {
         let args = Array.prototype.slice.call(arguments, 1)

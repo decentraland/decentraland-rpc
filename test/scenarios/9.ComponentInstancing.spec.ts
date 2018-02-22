@@ -1,9 +1,4 @@
-import {
-  registerComponent,
-  Component,
-  ComponentOptions,
-  exposeMethod
-} from '../../lib/host'
+import { registerComponent, Component, ComponentOptions, exposeMethod } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 
 @registerComponent('Greeter')

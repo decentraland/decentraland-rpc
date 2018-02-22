@@ -1,7 +1,4 @@
-import {
-  EventDispatcher,
-  EventDispatcherBinding
-} from '../common/core/EventDispatcher'
+import { EventDispatcher, EventDispatcherBinding } from '../common/core/EventDispatcher'
 import { ISubscribableComponent } from '../host/Component'
 
 export class EventSubscriber extends EventDispatcher {
@@ -18,11 +15,7 @@ export class EventSubscriber extends EventDispatcher {
    * @param event The name of the event
    * @param handler A handler which be called each time the event is received
    */
-  on(
-    event: string,
-    callback: (...args: any[]) => void,
-    once?: boolean
-  ): EventDispatcherBinding
+  on(event: string, callback: (...args: any[]) => void, once?: boolean): EventDispatcherBinding
   on(event: string, callback: any, once?: boolean): EventDispatcherBinding
   on(event: string, handler: any) {
     if (this.getEventBindings(event).length === 0) {
@@ -51,9 +44,7 @@ export class EventSubscriber extends EventDispatcher {
         // If we are removing the last event listener, remove it also from the component
         // this will keep listeners unrelated to the component intact
 
-        this.component
-          .unsubscribe(theEventToValidate)
-          .catch(e => this.emit('error', e))
+        this.component.unsubscribe(theEventToValidate).catch(e => this.emit('error', e))
       }
     }
 

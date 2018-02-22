@@ -1,19 +1,12 @@
-import {
-  EventDispatcher,
-  EventDispatcherBinding
-} from '../core/EventDispatcher'
+import { EventDispatcher, EventDispatcherBinding } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
 
 /**
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
  */
-export abstract class Server<ClientType = any> extends EventDispatcher
-  implements JsonRpc2.IServer {
-  private _exposedMethodsMap: Map<
-    string,
-    (params: any) => JsonRpc2.PromiseOrNot<any>
-  > = new Map()
+export abstract class Server<ClientType = any> extends EventDispatcher implements JsonRpc2.IServer {
+  private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map()
   private _consoleLog: boolean = false
   private _isEnabled = false
 
@@ -29,33 +22,15 @@ export abstract class Server<ClientType = any> extends EventDispatcher
   abstract sendMessage(to: ClientType, message: string): void
   abstract getAllClients(): Iterable<ClientType>
 
-  on(
-    method: 'error',
-    callback: (error: any) => void,
-    once?: boolean
-  ): EventDispatcherBinding
-  on(
-    method: string,
-    callback: (params: any, sender: ClientType) => void,
-    once?: boolean
-  ): EventDispatcherBinding
-  on(
-    method: string,
-    callback: (params: any, sender: ClientType) => void,
-    once?: boolean
-  ): EventDispatcherBinding {
+  on(method: 'error', callback: (error: any) => void, once?: boolean): EventDispatcherBinding
+  on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding
+  on(method: string, callback: (params: any, sender: ClientType) => void, once?: boolean): EventDispatcherBinding {
     return super.on(method, callback, once)
   }
 
   once(method: 'error', callback: (error: any) => void): EventDispatcherBinding
-  once(
-    method: string,
-    callback: (params: any, sender: ClientType) => void
-  ): EventDispatcherBinding
-  once(
-    method: string,
-    callback: (params: any, sender: ClientType) => void
-  ): EventDispatcherBinding {
+  once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding
+  once(method: string, callback: (params: any, sender: ClientType) => void): EventDispatcherBinding {
     return super.once(method, callback)
   }
 
@@ -79,11 +54,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher
   notify(method: string, params?: Object): void
   notify(method: string, params?: any): void {
     if (typeof params !== 'undefined' && typeof params !== 'object') {
-      throw new Error(
-        `Server#notify Params must be structured data (Array | Object) got ${JSON.stringify(
-          params
-        )}`
-      )
+      throw new Error(`Server#notify Params must be structured data (Array | Object) got ${JSON.stringify(params)}`)
     }
     // Broadcast message to all clients
     const clients = this.getAllClients()
@@ -93,9 +64,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher
         this._send(client, { method, params })
       }
     } else {
-      throw new Error(
-        'Server does not support broadcasting. No "getAllClients: ClientType[]" returned null'
-      )
+      throw new Error('Server does not support broadcasting. No "getAllClients: ClientType[]" returned null')
     }
   }
 
@@ -122,11 +91,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher
     }
 
     // Ensure method is atleast defined
-    if (
-      request &&
-      request.method &&
-      typeof (request.method as any) === 'string'
-    ) {
+    if (request && request.method && typeof (request.method as any) === 'string') {
       if (request.id && typeof (request.id as any) === 'number') {
         const handler = this._exposedMethodsMap.get(request.method)
         // Handler is defined so lets call it
@@ -151,19 +116,11 @@ export abstract class Server<ClientType = any> extends EventDispatcher
                   .then((actualResult: any) => {
                     this._send(from, {
                       id: request.id,
-                      result:
-                        typeof actualResult === 'undefined'
-                          ? null
-                          : actualResult
+                      result: typeof actualResult === 'undefined' ? null : actualResult
                     })
                   })
                   .catch((error: Error) => {
-                    this._sendError(
-                      from,
-                      request,
-                      JsonRpc2.ErrorCode.InternalError,
-                      error
-                    )
+                    this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error)
                   })
               } else {
                 // Result is not a promise so send immediately
@@ -173,12 +130,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher
                 })
               }
             } catch (error) {
-              this._sendError(
-                from,
-                request,
-                JsonRpc2.ErrorCode.InternalError,
-                error
-              )
+              this._sendError(from, request, JsonRpc2.ErrorCode.InternalError, error)
             }
           }
         } else {
@@ -196,17 +148,11 @@ export abstract class Server<ClientType = any> extends EventDispatcher
 
   private _logMessage(messageStr: string, direction: 'send' | 'receive') {
     if (this._consoleLog) {
-      console.log(
-        `${direction === 'send' ? 'Server > Client' : 'Server < Client'}`,
-        messageStr
-      )
+      console.log(`${direction === 'send' ? 'Server > Client' : 'Server < Client'}`, messageStr)
     }
   }
 
-  private _send(
-    receiver: ClientType,
-    message: JsonRpc2.IResponse | JsonRpc2.INotification
-  ) {
+  private _send(receiver: ClientType, message: JsonRpc2.IResponse | JsonRpc2.INotification) {
     const messageStr = JSON.stringify(message)
     this._logMessage(messageStr, 'send')
     this.sendMessage(receiver, messageStr)
@@ -221,22 +167,14 @@ export abstract class Server<ClientType = any> extends EventDispatcher
     try {
       this._send(receiver, {
         id: (request && request.id) || -1,
-        error: this._errorFromCode(
-          errorCode,
-          (error && error.message) || error,
-          request && request.method
-        )
+        error: this._errorFromCode(errorCode, (error && error.message) || error, request && request.method)
       })
     } catch (error) {
       // Since we can't even send errors, do nothing. The connection was probably closed.
     }
   }
 
-  private _errorFromCode(
-    code: JsonRpc2.ErrorCode,
-    data: any = null,
-    method: string | null = null
-  ): JsonRpc2.IError {
+  private _errorFromCode(code: JsonRpc2.ErrorCode, data: any = null, method: string | null = null): JsonRpc2.IError {
     let message = ''
 
     switch (code) {

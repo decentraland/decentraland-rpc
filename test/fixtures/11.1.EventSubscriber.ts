@@ -1,10 +1,5 @@
 import { inject, EventSubscriber } from '../../lib/client'
-import {
-  testSystem,
-  TestableSystem,
-  future,
-  wait
-} from './support/ClientHelpers'
+import { testSystem, TestableSystem, future, wait } from './support/ClientHelpers'
 import * as assert from 'assert'
 
 export class SomeSystem extends TestableSystem {

@@ -44,7 +44,8 @@
   },
   "prettier": {
     "semi": false,
-    "singleQuote": true
+    "singleQuote": true,
+    "printWidth": 120
   },
   "dependencies": {
     "awesome-typescript-loader": "^3.4.1",

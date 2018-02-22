@@ -1,9 +1,4 @@
-import {
-  registerComponent,
-  Component,
-  exposeMethod,
-  throttle
-} from '../../lib/host'
+import { registerComponent, Component, exposeMethod, throttle } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 
 @registerComponent('Throttling')

@@ -9,12 +9,8 @@ export class WebWorkerServer extends Server<Worker> {
       throw new TypeError('worker cannot be undefined or null')
     }
 
-    this.worker.addEventListener('message', (me: MessageEvent) =>
-      this.processMessage(this.worker, me.data)
-    )
-    this.worker.addEventListener('error', (me: ErrorEvent) =>
-      this.emit('error', me)
-    )
+    this.worker.addEventListener('message', (me: MessageEvent) => this.processMessage(this.worker, me.data))
+    this.worker.addEventListener('error', (me: ErrorEvent) => this.emit('error', me))
   }
 
   sendMessage(receiver: Worker, message: string) {

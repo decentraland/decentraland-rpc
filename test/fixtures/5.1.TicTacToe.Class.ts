@@ -25,9 +25,7 @@ class Game extends TestableSystem {
 
   getWinner() {
     return ['x', 'o'].find($ =>
-      winingCombinations.some(combination =>
-        combination.every(position => this.board[position] === $)
-      )
+      winingCombinations.some(combination => combination.every(position => this.board[position] === $))
     )
   }
 
@@ -42,10 +40,7 @@ class Game extends TestableSystem {
   async doTest() {
     const futureWinner = future()
 
-    const messageBus = await MessageBusClient.acquireChannel(
-      this,
-      'rtc://tictactoe.signaling.com'
-    )
+    const messageBus = await MessageBusClient.acquireChannel(this, 'rtc://tictactoe.signaling.com')
 
     this.ticTacToe.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
       this.selectMySymbol(symbol)

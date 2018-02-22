@@ -1,13 +1,5 @@
-import {
-  EventDispatcher,
-  EventDispatcherBinding
-} from '../../lib/common/core/EventDispatcher'
-import {
-  SubscribableComponent,
-  ComponentOptions,
-  exposeMethod,
-  registerComponent
-} from '../../lib/host'
+import { EventDispatcher, EventDispatcherBinding } from '../../lib/common/core/EventDispatcher'
+import { SubscribableComponent, ComponentOptions, exposeMethod, registerComponent } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 import * as assert from 'assert'
 
@@ -72,9 +64,7 @@ export class EventController extends SubscribableComponent {
 
   @exposeMethod
   async unsubscribe(event: string) {
-    this.bindings
-      .filter(binding => binding.event === event)
-      .forEach(binding => binding.off())
+    this.bindings.filter(binding => binding.event === event).forEach(binding => binding.off())
   }
 }
 

@@ -1,10 +1,5 @@
 import { wait } from './support/Helpers'
-import {
-  registerComponent,
-  Component,
-  ComponentSystem,
-  ComponentOptions
-} from '../../lib/host'
+import { registerComponent, Component, ComponentSystem, ComponentOptions } from '../../lib/host'
 import './support/MessageBusManager'
 
 /**

@@ -11,14 +11,9 @@ const componentNameSymbol: any = hasSymbol ? Symbol('pluginName') : 0xfea2
 const registeredComponents: Dictionary<ComponentClass<Component>> = {}
 
 namespace PrivateHelpers {
-  export function _registerComponent(
-    componentName: string,
-    api: ComponentClass<Component>
-  ) {
+  export function _registerComponent(componentName: string, api: ComponentClass<Component>) {
     if (componentNameSymbol in api) {
-      throw new Error(
-        `The API you are trying to register is already registered`
-      )
+      throw new Error(`The API you are trying to register is already registered`)
     }
 
     if (componentName in registeredComponents) {
@@ -26,9 +21,7 @@ namespace PrivateHelpers {
     }
 
     if (typeof (api as any) !== 'function') {
-      throw new Error(
-        `The API ${componentName} is not a class, it is of type ${typeof api}`
-      )
+      throw new Error(`The API ${componentName} is not a class, it is of type ${typeof api}`)
     }
 
     // save the registered name
@@ -42,9 +35,7 @@ namespace PrivateHelpers {
     if (component.componentWillUnmount) {
       const promise = component.componentWillUnmount()
       if (promise && 'catch' in promise) {
-        promise.catch(error =>
-          console.error('Error unmounting component', { component, error })
-        )
+        promise.catch(error => console.error('Error unmounting component', { component, error }))
       }
     }
   }
@@ -53,9 +44,7 @@ namespace PrivateHelpers {
     if (component.componentDidMount) {
       const promise = component.componentDidMount()
       if (promise && 'catch' in promise) {
-        promise.catch(error =>
-          console.error('Error mounting component', { component, error })
-        )
+        promise.catch(error => console.error('Error mounting component', { component, error }))
       }
     }
   }
@@ -69,15 +58,11 @@ export enum ComponentSystemEvents {
   systemDidUnmount = 'systemDidUnmount'
 }
 
-export function getComponentName(
-  klass: ComponentClass<Component>
-): string | null {
+export function getComponentName(klass: ComponentClass<Component>): string | null {
   return (klass as any)[componentNameSymbol] || null
 }
 
-export function registerComponent(
-  componentName: string
-): (klass: ComponentClass<Component>) => void {
+export function registerComponent(componentName: string): (klass: ComponentClass<Component>) => void {
   return function(api: ComponentClass<Component>) {
     PrivateHelpers._registerComponent(componentName, api)
   }
@@ -165,10 +150,7 @@ export class ComponentSystem extends WebWorkerServer {
       }
     }
 
-    throw Object.assign(
-      new Error('Cannot get instance of the specified component'),
-      { component }
-    )
+    throw Object.assign(new Error('Cannot get instance of the specified component'), { component })
   }
 
   /**
@@ -189,10 +171,7 @@ export class ComponentSystem extends WebWorkerServer {
 
   protected initializeComponent<X extends Component>(ctor: {
     new (options: ComponentOptions): X
-    factory?(
-      ctor: { new (options: ComponentOptions): X },
-      options: ComponentOptions
-    ): X
+    factory?(ctor: { new (options: ComponentOptions): X }, options: ComponentOptions): X
   }): X {
     const componentName = getComponentName(ctor)
 
@@ -207,19 +186,15 @@ export class ComponentSystem extends WebWorkerServer {
     const componentOptions: ComponentOptions = {
       componentName,
       on: (event, handler) => this.on(`${componentName}.${event}`, handler),
-      notify: (event, params?) =>
-        this.notify(`${componentName}.${event}`, params),
-      expose: (event, handler) =>
-        this.expose(`${componentName}.${event}`, handler),
+      notify: (event, params?) => this.notify(`${componentName}.${event}`, params),
+      expose: (event, handler) => this.expose(`${componentName}.${event}`, handler),
       getComponentInstance: (name: any) => {
         return this.getComponentInstance(name) as any
       },
       system: this
     }
 
-    const instance = ctor.factory
-      ? ctor.factory(ctor, componentOptions)
-      : new ctor(componentOptions)
+    const instance = ctor.factory ? ctor.factory(ctor, componentOptions) : new ctor(componentOptions)
 
     this.componentInstances.set(componentName, instance)
 
@@ -230,13 +205,8 @@ export class ComponentSystem extends WebWorkerServer {
    * Preloads a list of components
    */
   private async RPCLoadComponents(componentNames: string[]) {
-    if (
-      typeof componentNames !== 'object' ||
-      !(componentNames instanceof Array)
-    ) {
-      throw new TypeError(
-        'RPCLoadComponents(names) name must be an array of strings'
-      )
+    if (typeof componentNames !== 'object' || !(componentNames instanceof Array)) {
+      throw new TypeError('RPCLoadComponents(names) name must be an array of strings')
     }
 
     const notFound = componentNames

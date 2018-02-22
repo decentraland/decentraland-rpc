@@ -12,11 +12,7 @@ export interface IMessage {
 export class MessageBusClient<T = any> extends EventDispatcher<T> {
   private broadcastIdentifier = `Broadcast_${this.id}`
 
-  private constructor(
-    protected api: any,
-    protected id: string,
-    protected busClientId: string
-  ) {
+  private constructor(protected api: any, protected id: string, protected busClientId: string) {
     super()
     api[`on${this.broadcastIdentifier}`]((message: IMessage) => {
       if (this.busClientId !== message.sender) {
@@ -25,11 +21,7 @@ export class MessageBusClient<T = any> extends EventDispatcher<T> {
     })
   }
 
-  static async acquireChannel(
-    system: System,
-    channelName: string,
-    options: IMessageBusOptions = {}
-  ) {
+  static async acquireChannel(system: System, channelName: string, options: IMessageBusOptions = {}) {
     const busId = Math.random().toString(36)
     const { MessageBus } = await system.loadComponents(['MessageBus'])
 

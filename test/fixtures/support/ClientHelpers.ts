@@ -1,9 +1,4 @@
-import {
-  System,
-  Transports,
-  SystemTransport,
-  inject
-} from '../../../lib/client/index'
+import { System, Transports, SystemTransport, inject } from '../../../lib/client/index'
 import { WebWorkerTransport } from '../../../lib/client/transports/WebWorker'
 import { Test } from '../../scenarios/support/Commons'
 
@@ -111,16 +106,11 @@ export function testToFail(fn: (system: System) => Promise<any>) {
   )
 }
 
-export function testSystem(system: {
-  new (transport: SystemTransport): TestableSystem
-}) {
+export function testSystem(system: { new (transport: SystemTransport): TestableSystem }) {
   return new system(WebWorkerTransport())
 }
 
-export async function shouldFail(
-  fn: () => Promise<any>,
-  msg: string = 'shouldFail'
-) {
+export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {
   try {
     await fn()
     throw new Error(`${msg} - It did not fail.`)

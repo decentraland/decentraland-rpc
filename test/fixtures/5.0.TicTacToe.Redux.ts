@@ -28,10 +28,7 @@ const initialState: ITicTacToeState = {
 
 let state = initialState
 
-function reducer(
-  state: ITicTacToeState = initialState,
-  action: IGenericAction
-): ITicTacToeState {
+function reducer(state: ITicTacToeState = initialState, action: IGenericAction): ITicTacToeState {
   const { type, payload } = action
 
   switch (type) {
@@ -83,26 +80,18 @@ const winingCombinations = [
 
 const getWinner = () =>
   ['x', 'o'].find($ =>
-    winingCombinations.some(combination =>
-      combination.every(position => state.board[position] === $)
-    )
+    winingCombinations.some(combination => combination.every(position => state.board[position] === $))
   )
 
 test(async ScriptingClient => {
-  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents([
-    'Test',
-    'TicTacToeBoard'
-  ])) as {
+  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents(['Test', 'TicTacToeBoard'])) as {
     Test: Test
     TicTacToeBoard: any
   }
 
   const futureWinner = future()
 
-  const messageBus = await MessageBusClient.acquireChannel(
-    ScriptingClient,
-    'rtc://tictactoe.signaling.com'
-  )
+  const messageBus = await MessageBusClient.acquireChannel(ScriptingClient, 'rtc://tictactoe.signaling.com')
 
   TicTacToeBoard.onChooseSymbol(({ symbol }: { symbol: GameSymbol }) => {
     handleAction({
