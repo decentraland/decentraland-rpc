@@ -33,7 +33,7 @@ export interface IWebSocket {
 
   addEventListener<K extends keyof IWebSocketEventMap>(
     type: K,
-    listener: (this: WebSocket, ev: IWebSocketEventMap[K]) => any,
+    listener: (ev: IWebSocketEventMap[K]) => any,
     options?: any
   ): void
 }
