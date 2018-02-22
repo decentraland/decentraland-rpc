@@ -12,6 +12,7 @@ export type ITestInWorkerOptions = {
   validateResult?: (result: any, worker: ScriptingHost) => void
   execute?: (worker: ScriptingHost) => void
   plugins?: any[]
+  sendEncoding?: 'JSON' | 'msgpack'
 }
 
 export function wait(ms: number): Promise<void> {
@@ -43,6 +44,10 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   it(file, async () => {
     const worker = new Worker(file)
     const system = await ScriptingHost.fromTransport(WebWorkerTransport(worker))
+
+    if (options.sendEncoding) {
+      system.sendEncoding = options.sendEncoding
+    }
 
     if (options.log) {
       system.setLogging({ logConsole: true })

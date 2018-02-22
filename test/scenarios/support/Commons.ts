@@ -41,7 +41,6 @@ export class Methods extends API {
 
   @exposeMethod
   async bounce(...args: any[]) {
-    console.log('bounce received', arguments)
     return args
   }
 

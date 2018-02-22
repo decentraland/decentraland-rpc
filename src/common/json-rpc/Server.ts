@@ -1,6 +1,7 @@
 import { EventDispatcher, EventDispatcherBinding } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
-
+import * as msgpack from 'msgpack-lite'
+const codec = msgpack.createCodec()
 /**
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
@@ -9,6 +10,8 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map()
   private _consoleLog: boolean = false
   private _isEnabled = false
+
+  sendEncoding: 'JSON' | 'msgpack' = 'msgpack'
 
   get isEnabled(): boolean {
     return this._isEnabled
@@ -19,7 +22,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     this.setLogging(opts)
   }
 
-  abstract sendMessage(to: ClientType, message: string): void
+  abstract sendMessage(to: ClientType, message: string | Buffer): void
   abstract getAllClients(): Iterable<ClientType>
 
   on(method: 'error', callback: (error: any) => void, once?: boolean): EventDispatcherBinding
@@ -61,7 +64,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
 
     if (clients) {
       for (let client of clients) {
-        this._send(client, { method, params })
+        this._send(client, { method, params, jsonrpc: '2.0' })
       }
     } else {
       throw new Error('Server does not support broadcasting. No "getAllClients: ClientType[]" returned null')
@@ -75,25 +78,36 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   protected enable() {
     if (!this._isEnabled) {
       this._isEnabled = true
-      this.notifyIfEnabled()
-    }
-  }
-
-  protected notifyIfEnabled() {
-    if (this._isEnabled) {
       this.notify('RPC.Enabled')
     }
   }
 
-  protected processMessage(from: ClientType, messageStr: string): void {
+  protected disable() {
+    if (this._isEnabled) {
+      this._isEnabled = false
+    }
+  }
+
+  protected processMessage(from: ClientType, messageStr: string | Buffer | Uint8Array | number[]): void {
     this._logMessage(messageStr, 'receive')
     let request: JsonRpc2.IRequest
 
-    // Ensure JSON is not malformed
     try {
-      request = JSON.parse(messageStr)
+      if (typeof messageStr === 'string' && messageStr.charAt(0) === '{') {
+        // Ensure JSON is not malformed
+        request = JSON.parse(messageStr)
+      } else if (
+        typeof messageStr === 'string' ||
+        messageStr instanceof Uint8Array ||
+        (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
+        messageStr instanceof Array
+      ) {
+        request = msgpack.decode(messageStr as any, { codec })
+      } else {
+        throw new Error(`Unable to parse message ${JSON.stringify(messageStr)}`)
+      }
     } catch (e) {
-      return this._sendError(from, null, JsonRpc2.ErrorCode.ParseError)
+      return this._sendError(from, null, JsonRpc2.ErrorCode.ParseError, e)
     }
 
     // Ensure method is atleast defined
@@ -121,6 +135,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
                 result
                   .then((actualResult: any) => {
                     this._send(from, {
+                      jsonrpc: '2.0',
                       id: request.id,
                       result: typeof actualResult === 'undefined' ? null : actualResult
                     })
@@ -131,6 +146,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
               } else {
                 // Result is not a promise so send immediately
                 this._send(from, {
+                  jsonrpc: '2.0',
                   id: request.id,
                   result: typeof result === 'undefined' ? null : result
                 })
@@ -152,14 +168,28 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     }
   }
 
-  private _logMessage(messageStr: string, direction: 'send' | 'receive') {
+  private _logMessage(messageStr: string | Buffer | Uint8Array | number[], direction: 'send' | 'receive') {
     if (this._consoleLog) {
-      console.log(`${direction === 'send' ? 'Server > Client' : 'Server < Client'}`, messageStr)
+      const msg =
+        typeof messageStr === 'object' && (messageStr instanceof Array || messageStr instanceof Uint8Array)
+          ? Array.from(messageStr)
+              .map($ => String.fromCharCode($))
+              .join('')
+          : messageStr.toString()
+
+      console.log(`${direction === 'send' ? 'Server > Client' : 'Server < Client'}`, msg, typeof messageStr)
     }
   }
 
   private _send(receiver: ClientType, message: JsonRpc2.IResponse | JsonRpc2.INotification) {
-    const messageStr = JSON.stringify(message)
+    let messageStr: string | Buffer
+
+    if (this.sendEncoding === 'msgpack') {
+      messageStr = msgpack.encode(message, { codec })
+    } else {
+      messageStr = JSON.stringify(message)
+    }
+
     this._logMessage(messageStr, 'send')
     this.sendMessage(receiver, messageStr)
   }
@@ -172,6 +202,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   ) {
     try {
       this._send(receiver, {
+        jsonrpc: '2.0',
         id: (request && request.id) || -1,
         error: this._errorFromCode(errorCode, (error && error.message) || error, request && request.method)
       })

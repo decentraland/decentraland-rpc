@@ -19,7 +19,7 @@ export type INotification = {
   params?: any
 
   /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
-  jsonrpc?: '2.0'
+  jsonrpc: '2.0'
 }
 
 /**
@@ -47,7 +47,7 @@ export type IResponse = {
   error?: IError
 
   /** Version of the JSON-RPC protocol. MUST be exactly "2.0". */
-  jsonrpc?: '2.0'
+  jsonrpc: '2.0'
 }
 
 /**

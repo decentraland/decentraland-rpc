@@ -100,7 +100,7 @@ export function testToFail(fn: (system: Script) => Promise<any>) {
         return Test.fail(x)
       })
       .catch(x => {
-        console.log(x)
+        console.dir(x)
         return Test.pass(x)
       })
   )

@@ -16,12 +16,12 @@ export class TransportBasedServer extends Server<ScriptingTransport> {
     }
 
     if (this.transport.onClose) {
-      this.transport.onClose(() => this.emit('transportClosed'))
+      this.transport.onClose(() => this.disable())
     }
 
     if (this.transport.onConnect) {
       this.transport.onConnect(() => {
-        this.notifyIfEnabled()
+        this.enable()
       })
     }
   }

@@ -93,6 +93,12 @@ export type APIClass<T> = {
 
 export type ExposableMethod = (...args: any[]) => Promise<any>
 
+// we use an interface here because it is mergable with the class
+export interface API {
+  apiDidMount?(): Promise<void> | void
+  apiWillUnmount?(): Promise<void> | void
+}
+
 /**
  * This pattern bears resemblance to the Gang of Four’s Strategy pattern.
  * Both patterns are about taking part of an object’s behavior and delegating
@@ -132,12 +138,6 @@ export abstract class API {
   static factory(ctor: APIClass<API>, options: APIOptions) {
     return new ctor(options)
   }
-}
-
-// we use an interface here because it is mergable with the class
-export interface API {
-  apiDidMount?(): Promise<void> | void
-  apiWillUnmount?(): Promise<void> | void
 }
 
 export abstract class SubscribableAPI extends API {

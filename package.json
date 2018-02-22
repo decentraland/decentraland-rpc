@@ -38,6 +38,7 @@
     "express": "^4.16.2",
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
+    "msgpack-lite": "^0.1.26",
     "tslint": "^5.9.1",
     "tslint-language-service": "^0.9.8",
     "ws": "^4.0.0"
@@ -48,6 +49,7 @@
     "printWidth": 120
   },
   "dependencies": {
+    "@types/msgpack-lite": "^0.1.6",
     "awesome-typescript-loader": "^3.4.1",
     "glob": "^7.1.2",
     "rimraf": "^2.6.2",

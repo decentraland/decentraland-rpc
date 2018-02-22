@@ -1,5 +1,8 @@
 import { EventDispatcher } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
+import * as msgpack from 'msgpack-lite'
+
+const codec = msgpack.createCodec()
 
 /**
  * Creates a RPC Client.
@@ -9,20 +12,24 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   private _responsePromiseMap: Map<number, JsonRpc2.Resolvable> = new Map()
   private _nextMessageId: number = 0
   private _consoleLog: boolean = false
-  private _requestQueue: string[] = []
+  private _requestQueue: (string | Buffer)[] = []
   private _connected = false
+
+  sendEncoding: 'JSON' | 'msgpack' = 'msgpack'
 
   constructor(opts?: JsonRpc2.IClientOpts) {
     super()
     this.setLogging(opts)
   }
 
-  abstract sendMessage(message: string): void
+  abstract sendMessage(message: string | Buffer): void
 
-  public processMessage(messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification)) {
+  public processMessage(
+    messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification) | Buffer | Uint8Array | number[]
+  ) {
     let message: JsonRpc2.IResponse & JsonRpc2.INotification
 
-    if (typeof messageStr === 'string') {
+    if (typeof messageStr === 'string' && messageStr.charAt(0) === '{') {
       this._logMessage(messageStr, 'receive')
 
       // Ensure JSON is not malformed
@@ -31,6 +38,13 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       } catch (e) {
         return this.emit('error', e)
       }
+    } else if (
+      typeof messageStr === 'string' ||
+      messageStr instanceof Uint8Array ||
+      (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
+      messageStr instanceof Array
+    ) {
+      message = msgpack.decode(messageStr as any, { codec })
     } else {
       message = messageStr
     }
@@ -84,11 +98,11 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   call(method: string, params: { [key: string]: any }): Promise<any>
   call(method: string, params?: any) {
     if (typeof params !== 'undefined' && typeof params !== 'object') {
-      throw new Error('Client#call Params must be structured data (Array | Object) got ${JSON.stringify(params)}')
+      throw new Error(`Client#call Params must be structured data (Array | Object) got ${JSON.stringify(params)}`)
     }
 
     const id = ++this._nextMessageId
-    const message: JsonRpc2.IRequest = { id, method, params }
+    const message: JsonRpc2.IRequest = { id, method, params, jsonrpc: '2.0' }
 
     return new Promise((resolve, reject) => {
       try {
@@ -112,7 +126,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       throw new Error(`Client#notify Params must be structured data (Array | Object) got ${JSON.stringify(params)}`)
     }
 
-    this._send({ method, params })
+    this._send({ method, params, jsonrpc: '2.0' })
   }
 
   protected didConnect() {
@@ -123,7 +137,11 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   }
 
   private _send(message: JsonRpc2.INotification | JsonRpc2.IRequest) {
-    this._requestQueue.push(JSON.stringify(message))
+    if (this.sendEncoding === 'msgpack') {
+      this._requestQueue.push(msgpack.encode(message, { codec }))
+    } else {
+      this._requestQueue.push(JSON.stringify(message))
+    }
     this._sendQueuedRequests()
   }
 
@@ -137,9 +155,9 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     }
   }
 
-  private _logMessage(message: string, direction: 'send' | 'receive') {
+  private _logMessage(message: string | Buffer, direction: 'send' | 'receive') {
     if (this._consoleLog) {
-      console.log(`Client ${direction === 'send' ? '>' : '<'}`, message)
+      console.log(`Client ${direction === 'send' ? '>' : '<'}`, message.toString())
     }
   }
 }
