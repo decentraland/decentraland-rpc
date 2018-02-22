@@ -61,8 +61,6 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
     }
   }
 
-  console.log(socket)
-
   const api: ScriptingTransport = {
     onConnect(handler) {
       if (socket.readyState === socket.OPEN) {
