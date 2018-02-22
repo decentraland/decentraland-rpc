@@ -19,7 +19,8 @@ traceur.require.makeDefault(
 import { resolve } from 'path'
 import * as http from 'http'
 import * as express from 'express'
-import * as WS from '../test/server/_testWebSocketServer'
+
+const WS = require('../test/server/_testWebSocketServer')
 
 const runner: (a: any) => Promise<any> = require('mocha-headless-chrome')
 
