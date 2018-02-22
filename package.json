@@ -38,7 +38,6 @@
     "express": "^4.16.2",
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
-    "msgpack-lite": "^0.1.26",
     "tslint": "^5.9.1",
     "tslint-language-service": "^0.9.8",
     "ws": "^4.0.0"
@@ -52,8 +51,9 @@
     "@types/msgpack-lite": "^0.1.6",
     "awesome-typescript-loader": "^3.4.1",
     "glob": "^7.1.2",
+    "msgpack-lite": "^0.1.26",
     "rimraf": "^2.6.2",
-    "typescript": "^2.7.0-rc",
-    "webpack": "^3.10.0"
+    "typescript": "^2.7.2",
+    "webpack": "^3.11.0"
   }
 }
