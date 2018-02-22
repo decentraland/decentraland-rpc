@@ -1,11 +1,12 @@
 import { future, wait } from './support/Helpers'
 import * as assert from 'assert'
-import { registerComponent, Component, ComponentSystem, exposeMethod } from '../../lib/host'
+import { registerAPI, API, ScriptingHost, exposeMethod } from '../../lib/host'
 import { Test, setUpPlugins } from './support/Commons'
 import './support/MessageBusManager'
+import { WebWorkerTransport } from '../../lib/client'
 
-@registerComponent('TicTacToeBoard')
-export class TicTacToeBoard extends Component {
+@registerAPI('TicTacToeBoard')
+export class TicTacToeBoard extends API {
   /**
    * This API should mock the behavior of a board in the floor
    * inside a parcel. It will emit events that mimic click
@@ -37,10 +38,10 @@ describe('TicTacToe', function() {
 
   function randomizeGame(file: string) {
     it(`randomized game ${numberOfGames++} ${file}`, async function() {
-      let workerO = await ComponentSystem.fromURL(file)
-      let workerX = await ComponentSystem.fromURL(file)
+      let workerO = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker(file)))
+      let workerX = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker(file)))
 
-      assert.equal(workerO.componentInstances.has('TicTacToeBoard'), false)
+      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), false)
 
       setUpPlugins(workerO)
       setUpPlugins(workerX)
@@ -51,10 +52,10 @@ describe('TicTacToe', function() {
       // workerX.setLogging({ logConsole: true })
       // workerO.setLogging({ logConsole: true });
 
-      let apiX = workerX.getComponentInstance(TicTacToeBoard)
-      let apiO = workerO.getComponentInstance(TicTacToeBoard)
+      let apiX = workerX.getAPIInstance(TicTacToeBoard)
+      let apiO = workerO.getAPIInstance(TicTacToeBoard)
 
-      assert.equal(workerO.componentInstances.has('TicTacToeBoard'), true)
+      assert.equal(workerO.apiInstances.has('TicTacToeBoard'), true)
 
       if (!apiX) throw new Error('Cannot get apiX instance')
       if (!apiO) throw new Error('Cannot get apiX instance')
@@ -80,8 +81,8 @@ describe('TicTacToe', function() {
       }
 
       // waits for result
-      const TestPluginX = workerX.getComponentInstance(Test)
-      const TestPluginO = workerO.getComponentInstance(Test)
+      const TestPluginX = workerX.getAPIInstance(Test)
+      const TestPluginO = workerO.getAPIInstance(Test)
 
       if (!TestPluginX) throw new Error('Cannot retieve Test plugin instance')
       if (!TestPluginO) throw new Error('Cannot retieve Test plugin instance')

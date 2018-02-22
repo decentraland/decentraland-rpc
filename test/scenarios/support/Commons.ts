@@ -1,14 +1,9 @@
-import {
-  registerComponent,
-  Component,
-  exposeMethod,
-  ComponentSystem
-} from '../../../lib/host'
+import { registerAPI, API, exposeMethod, ScriptingHost } from '../../../lib/host'
 import { future } from './Helpers'
 import './MessageBusManager'
 
-@registerComponent('Logger')
-export class Logger extends Component {
+@registerAPI('Logger')
+export class Logger extends API {
   @exposeMethod
   async error(message: string) {
     console.error.call(console, message)
@@ -30,8 +25,8 @@ export class Logger extends Component {
   }
 }
 
-@registerComponent('Methods')
-export class Methods extends Component {
+@registerAPI('Methods')
+export class Methods extends API {
   store: { [key: string]: any } = {}
 
   @exposeMethod
@@ -106,9 +101,7 @@ export class Methods extends Component {
   @exposeMethod
   async failsWithoutParams() {
     if (arguments.length !== 1) {
-      throw new Error(
-        `Did not receive an argument. got: ${JSON.stringify(arguments)}`
-      )
+      throw new Error(`Did not receive an argument. got: ${JSON.stringify(arguments)}`)
     }
     return { args: arguments }
   }
@@ -116,28 +109,21 @@ export class Methods extends Component {
   @exposeMethod
   async failsWithParams() {
     if (arguments.length !== 0) {
-      throw new Error(
-        `Did receive arguments. got: ${JSON.stringify(arguments)}`
-      )
+      throw new Error(`Did receive arguments. got: ${JSON.stringify(arguments)}`)
     }
     return { args: arguments }
   }
 }
 
-@registerComponent('Test')
-export class Test extends Component {
+@registerAPI('Test')
+export class Test extends API {
   future = future<{ pass: boolean; arg: any }>()
 
   async waitForPass() {
     const result = await this.future
 
     if (!result.pass) {
-      throw Object.assign(
-        new Error(
-          'WebWorker test failed. The worker did not report error data.'
-        ),
-        result.arg || {}
-      )
+      throw Object.assign(new Error('WebWorker test failed. The worker did not report error data.'), result.arg || {})
     }
 
     return result.arg
@@ -154,8 +140,8 @@ export class Test extends Component {
   }
 }
 
-export function setUpPlugins(worker: ComponentSystem) {
-  worker.getComponentInstance(Logger)
-  worker.getComponentInstance(Methods)
-  worker.getComponentInstance(Test)
+export function setUpPlugins(worker: ScriptingHost) {
+  worker.getAPIInstance(Logger)
+  worker.getAPIInstance(Methods)
+  worker.getAPIInstance(Test)
 }

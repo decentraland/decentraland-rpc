@@ -1,8 +1,8 @@
 import { inject, EventSubscriber } from '../../lib/client'
-import { testSystem, TestableSystem, future, wait } from './support/ClientHelpers'
+import { testScript, TestableScript, future, wait } from './support/ClientHelpers'
 import * as assert from 'assert'
 
-export class SomeSystem extends TestableSystem {
+export class SomeSystem extends TestableScript {
   @inject('eventController') eventController: any | null = null
 
   async doTest() {
@@ -37,4 +37,4 @@ export class SomeSystem extends TestableSystem {
   }
 }
 
-testSystem(SomeSystem)
+testScript(SomeSystem)

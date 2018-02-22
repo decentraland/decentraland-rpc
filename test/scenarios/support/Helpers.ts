@@ -1,5 +1,6 @@
-import { ComponentSystem } from '../../../lib/host'
+import { ScriptingHost } from '../../../lib/host'
 import { Test } from './Commons'
+import { WebWorkerTransport } from '../../../lib/client'
 
 export type IFuture<T> = Promise<T> & {
   resolve: (x: T) => void
@@ -8,8 +9,8 @@ export type IFuture<T> = Promise<T> & {
 
 export type ITestInWorkerOptions = {
   log?: boolean
-  validateResult?: (result: any, worker: ComponentSystem) => void
-  execute?: (worker: ComponentSystem) => void
+  validateResult?: (result: any, worker: ScriptingHost) => void
+  execute?: (worker: ScriptingHost) => void
   plugins?: any[]
 }
 
@@ -40,27 +41,27 @@ export function future<T = any>(): IFuture<T> {
 
 export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   it(file, async () => {
-    const worker = await ComponentSystem.fromURL(file)
+    const worker = new Worker(file)
+    const system = await ScriptingHost.fromTransport(WebWorkerTransport(worker))
 
     if (options.log) {
-      worker.setLogging({ logConsole: true })
+      system.setLogging({ logConsole: true })
     }
 
-    options.plugins &&
-      options.plugins.forEach($ => worker.getComponentInstance($))
+    options.plugins && options.plugins.forEach($ => system.getAPIInstance($))
 
-    worker.enable()
+    system.enable()
 
-    options.execute && options.execute(worker)
+    options.execute && options.execute(system)
 
-    const TestPlugin = worker.getComponentInstance(Test)
+    const TestPlugin = system.getAPIInstance(Test)
 
     if (!TestPlugin) throw new Error('Cannot get the Test plugin instance')
 
     const result = await TestPlugin.waitForPass()
 
-    options.validateResult && options.validateResult(result, worker)
+    options.validateResult && options.validateResult(result, system)
 
-    worker.unmount()
+    system.unmount()
   })
 }

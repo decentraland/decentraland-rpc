@@ -1,8 +1,8 @@
-import { registerComponent, Component, exposeMethod, rateLimit } from '../../lib/host'
+import { registerAPI, API, exposeMethod, rateLimit } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 
-@registerComponent('RateLimiter')
-export class RateLimiter extends Component {
+@registerAPI('RateLimiter')
+export class RateLimiter extends API {
   private calls: number = 0
 
   @rateLimit(100)

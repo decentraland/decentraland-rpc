@@ -1,5 +1,5 @@
 import { EventDispatcher } from '../../../lib/common/core/EventDispatcher'
-import { System } from '../../../lib/client'
+import { Script } from '../../../lib/client'
 
 export interface IMessageBusOptions {}
 
@@ -21,9 +21,9 @@ export class MessageBusClient<T = any> extends EventDispatcher<T> {
     })
   }
 
-  static async acquireChannel(system: System, channelName: string, options: IMessageBusOptions = {}) {
+  static async acquireChannel(system: Script, channelName: string, options: IMessageBusOptions = {}) {
     const busId = Math.random().toString(36)
-    const { MessageBus } = await system.loadComponents(['MessageBus'])
+    const { MessageBus } = await system.loadAPIs(['MessageBus'])
 
     const bus = await MessageBus.getChannel(channelName, busId, options)
 

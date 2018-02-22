@@ -1,12 +1,13 @@
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 
-import { ComponentSystem } from '../../lib/host'
+import { ScriptingHost } from '../../lib/host'
 import * as assert from 'assert'
 import { future } from './support/Helpers'
 import { Test } from './support/Commons'
+import { WebWorkerTransport } from '../../lib/client'
 
 it('test/out/2.Proxy.js', async () => {
-  const worker = await ComponentSystem.fromURL('test/out/2.Proxy.js')
+  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/2.Proxy.js')))
 
   let aFuture = future()
 
@@ -15,9 +16,9 @@ it('test/out/2.Proxy.js', async () => {
   const enable = async () => void 0
 
   // Fool the worker to make it believe it has these plugins loaded
-  worker.componentInstances.set('xDebugger', {} as any)
-  worker.componentInstances.set('xProfiler', {} as any)
-  worker.componentInstances.set('xRuntime', {} as any)
+  worker.apiInstances.set('xDebugger', {} as any)
+  worker.apiInstances.set('xProfiler', {} as any)
+  worker.apiInstances.set('xRuntime', {} as any)
 
   worker.expose('xDebugger.enable', enable)
 
@@ -39,7 +40,7 @@ it('test/out/2.Proxy.js', async () => {
 
   assert.equal(await aFuture, 333, 'Did stop should have been called.')
 
-  const TestPlugin = worker.getComponentInstance(Test)
+  const TestPlugin = worker.getAPIInstance(Test)
 
   if (!TestPlugin) throw new Error('Cannot retieve Test plugin instance')
 

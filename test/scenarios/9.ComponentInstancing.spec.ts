@@ -1,20 +1,20 @@
-import { registerComponent, Component, ComponentOptions, exposeMethod } from '../../lib/host'
+import { registerAPI, API, APIOptions, exposeMethod } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 
-@registerComponent('Greeter')
-export class Greeter extends Component {
+@registerAPI('Greeter')
+export class Greeter extends API {
   greet(name: string) {
     return `Hello ${name}`
   }
 }
 
-@registerComponent('Instancer')
-export class Instancer extends Component {
+@registerAPI('Instancer')
+export class Instancer extends API {
   private Greeter: Greeter
 
-  constructor(options: ComponentOptions) {
+  constructor(options: APIOptions) {
     super(options)
-    this.Greeter = this.options.getComponentInstance(Greeter)
+    this.Greeter = this.options.getAPIInstance(Greeter)
   }
 
   @exposeMethod

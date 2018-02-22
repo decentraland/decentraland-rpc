@@ -84,7 +84,7 @@ const getWinner = () =>
   )
 
 test(async ScriptingClient => {
-  const { Test, TicTacToeBoard } = (await ScriptingClient.loadComponents(['Test', 'TicTacToeBoard'])) as {
+  const { Test, TicTacToeBoard } = (await ScriptingClient.loadAPIs(['Test', 'TicTacToeBoard'])) as {
     Test: Test
     TicTacToeBoard: any
   }

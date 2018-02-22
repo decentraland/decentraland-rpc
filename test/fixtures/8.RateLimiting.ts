@@ -1,8 +1,8 @@
-import { testSystem, TestableSystem, wait } from './support/ClientHelpers'
+import { testScript, TestableScript, wait } from './support/ClientHelpers'
 import { inject } from '../../lib/client/index'
 import * as assert from 'assert'
 
-export class RateLimited extends TestableSystem {
+export class RateLimited extends TestableScript {
   @inject('RateLimiter') RateLimiter: any = null
 
   async doTest() {
@@ -34,4 +34,4 @@ export class RateLimited extends TestableSystem {
   }
 }
 
-testSystem(RateLimited)
+testScript(RateLimited)

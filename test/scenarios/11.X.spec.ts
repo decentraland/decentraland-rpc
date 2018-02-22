@@ -1,5 +1,5 @@
 import { EventDispatcher, EventDispatcherBinding } from '../../lib/common/core/EventDispatcher'
-import { SubscribableComponent, ComponentOptions, exposeMethod, registerComponent } from '../../lib/host'
+import { SubscribableAPI, APIOptions, exposeMethod, registerAPI } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 import * as assert from 'assert'
 
@@ -10,7 +10,7 @@ class EventListener extends EventDispatcher {
     super()
     const evt = new CustomEvent('customEvent', { detail: 'test' })
 
-    window.addEventListener('customEvent', e => {
+    self.addEventListener('customEvent', e => {
       this.handleEvent(e.type, (e as CustomEvent).detail)
     })
 
@@ -19,7 +19,7 @@ class EventListener extends EventDispatcher {
     })
 
     setInterval(() => {
-      window.dispatchEvent(evt)
+      self.dispatchEvent(evt)
     }, 100)
   }
 
@@ -34,12 +34,12 @@ class EventListener extends EventDispatcher {
   }
 }
 
-@registerComponent('eventController')
-export class EventController extends SubscribableComponent {
+@registerAPI('eventController')
+export class EventController extends SubscribableAPI {
   private listener: EventListener
   private bindings: EventDispatcherBinding[] = []
 
-  constructor(opts: ComponentOptions) {
+  constructor(opts: APIOptions) {
     super(opts)
     this.listener = new EventListener()
 

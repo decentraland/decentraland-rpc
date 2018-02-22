@@ -128,3 +128,23 @@ export type IServer = {
 }
 
 export type IServerOpts = ILogOpts
+
+export interface ScriptingTransport {
+  /** sendMessage is used to send a string message thru the transport */
+  sendMessage(message: string): void
+
+  /** the onConnect callback is called when the transport gets connected */
+  onConnect?(callback: () => void): void
+
+  /** the onMessage callback is called when the transport receives a message */
+  onMessage(callback: (message: string) => void): void
+
+  /** the onError callback is called when the transport triggers an error */
+  onError?(callback: (e: Error) => void): void
+
+  /** the onClose callback is called when the transport gets disconnected */
+  onClose?(callback: () => void): void
+
+  /** the close function will be called when it is decided to end the communication */
+  close(): void
+}

@@ -1,6 +1,6 @@
-import { System, Transports } from '../../lib/client'
+import { Script, WebWorkerTransport } from '../../lib/client'
 
-const ScriptingClient = new System(Transports.WebWorker())
+const ScriptingClient = new Script(WebWorkerTransport(self as any))
 
 const x = async () => {
   const data: object = await ScriptingClient.call('MethodX', ['a worker generated string'])

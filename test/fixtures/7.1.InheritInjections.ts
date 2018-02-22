@@ -1,9 +1,9 @@
 import * as assert from 'assert'
-import { testSystem, shouldFail, TestableSystem } from './support/ClientHelpers'
+import { testScript, shouldFail, TestableScript } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
-import { inject, getInjectedComponents } from '../../lib/client/index'
+import { inject, getInjectedAPIs } from '../../lib/client/index'
 
-export class BaseTestMethods extends TestableSystem {
+export class BaseTestMethods extends TestableScript {
   @inject('Methods') m: Methods | null = null
 
   async doTest() {
@@ -17,7 +17,7 @@ export class TestMethods extends BaseTestMethods {
   @inject('Test') xxx: any = null
 
   async doTest() {
-    assert.deepEqual(Array.from(getInjectedComponents(this)), [
+    assert.deepEqual(Array.from(getInjectedAPIs(this)), [
       ['testComponent', 'Test'],
       ['m', 'Methods'],
       ['Logger', 'Logger'],
@@ -70,4 +70,4 @@ export class TestMethods extends BaseTestMethods {
   }
 }
 
-testSystem(TestMethods)
+testScript(TestMethods)

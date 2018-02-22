@@ -1,8 +1,8 @@
-import { registerComponent, Component, exposeMethod, throttle } from '../../lib/host'
+import { registerAPI, API, exposeMethod, throttle } from '../../lib/host'
 import { testInWorker } from './support/Helpers'
 
-@registerComponent('Throttling')
-export class Throttling extends Component {
+@registerAPI('Throttling')
+export class Throttling extends API {
   private calls: number = 0
 
   @throttle(5, 100)

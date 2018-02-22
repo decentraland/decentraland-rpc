@@ -3,15 +3,27 @@
 import { ScriptingHost } from '../../lib/host'
 import * as assert from 'assert'
 import { future } from './support/Helpers'
-import { WebWorkerTransport } from '../../lib/client'
+import { Script, MemoryTransport } from '../../lib/client'
 
-it('test/out/1.Echo.js', async () => {
-  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/1.Echo.js')))
+it('test/out/1.Echo.withoutWebWorker.spec', async () => {
+  const memory = MemoryTransport()
+
+  // CLIENT
+
+  const ScriptingClient = new Script(memory.client)
+
+  const x = async () => {
+    const data: object = await ScriptingClient.call('MethodX', ['a worker generated string'])
+    await ScriptingClient.call('JumpBack', data)
+  }
+  x().catch(x => console.error(x))
+
+  // SERVER
+
+  const worker = await ScriptingHost.fromTransport(memory.server)
 
   const randomNumber = Math.random()
   const aFuture = future()
-
-  // worker.setLogging({ logConsole: true, logEmit: true });
 
   worker.expose('MethodX', async message => {
     return { number: randomNumber }

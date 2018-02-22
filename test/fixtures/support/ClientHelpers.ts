@@ -1,13 +1,13 @@
-import { System, Transports, SystemTransport, inject } from '../../../lib/client/index'
-import { WebWorkerTransport } from '../../../lib/client/transports/WebWorker'
+import { Script, inject, WebWorkerTransport } from '../../../lib/client/index'
 import { Test } from '../../scenarios/support/Commons'
+import { ScriptingTransport } from '../../../lib/common/json-rpc/types'
 
-export abstract class TestableSystem extends System {
+export abstract class TestableScript extends Script {
   @inject('Test') testComponent: Test | null = null
 
   private didFail: Error | null = null
 
-  constructor(a: SystemTransport) {
+  constructor(a: ScriptingTransport) {
     super(a)
 
     this.on('error', (e: Error) => {
@@ -73,10 +73,10 @@ export function wait(ms: number): Promise<void> {
   })
 }
 
-export function test(fn: (system: System) => Promise<any>) {
-  const ScriptingClient = new System(Transports.WebWorker())
+export function test(fn: (system: Script) => Promise<any>) {
+  const ScriptingClient = new Script(WebWorkerTransport(self as any))
 
-  ScriptingClient.loadComponents(['Test'])
+  ScriptingClient.loadAPIs(['Test'])
     .then(({ Test }) =>
       fn(ScriptingClient)
         .then(x => Test.pass(x))
@@ -89,10 +89,10 @@ export function test(fn: (system: System) => Promise<any>) {
     .catch(x => console.error(x))
 }
 
-export function testToFail(fn: (system: System) => Promise<any>) {
-  const ScriptingClient = new System(Transports.WebWorker())
+export function testToFail(fn: (system: Script) => Promise<any>) {
+  const ScriptingClient = new Script(WebWorkerTransport(self as any))
 
-  ScriptingClient.loadComponents(['Test']).then(({ Test }) =>
+  ScriptingClient.loadAPIs(['Test']).then(({ Test }) =>
     fn(ScriptingClient)
       .then(x => {
         console.error('Test did not fail')
@@ -106,8 +106,8 @@ export function testToFail(fn: (system: System) => Promise<any>) {
   )
 }
 
-export function testSystem(system: { new (transport: SystemTransport): TestableSystem }) {
-  return new system(WebWorkerTransport())
+export function testScript(system: { new (transport: ScriptingTransport): TestableScript }) {
+  return new system(WebWorkerTransport(self as any))
 }
 
 export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {

@@ -1,7 +1,7 @@
 import { test } from './support/ClientHelpers'
 
 test(async System => {
-  const { Terminator } = await System.loadComponents(['Terminate'])
+  const { Terminator } = await System.loadAPIs(['Terminate'])
 
   setInterval(() => Terminator.emitPing(), 16)
 

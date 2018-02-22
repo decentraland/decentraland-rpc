@@ -1,2 +1,2 @@
-export * from './Component'
-export * from './ComponentSystem'
+export * from './API'
+export * from './ScriptingHost'

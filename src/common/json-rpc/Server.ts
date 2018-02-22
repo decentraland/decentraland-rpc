@@ -75,6 +75,12 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   protected enable() {
     if (!this._isEnabled) {
       this._isEnabled = true
+      this.notifyIfEnabled()
+    }
+  }
+
+  protected notifyIfEnabled() {
+    if (this._isEnabled) {
       this.notify('RPC.Enabled')
     }
   }

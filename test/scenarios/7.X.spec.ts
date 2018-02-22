@@ -1,10 +1,10 @@
 import { testInWorker } from './support/Helpers'
 import { Logger, Methods, Test } from './support/Commons'
-import { registerComponent, Component, exposeMethod, ComponentSystem } from '../../lib/host'
+import { registerAPI, API, exposeMethod, ScriptingHost } from '../../lib/host'
 import * as assert from 'assert'
 
-@registerComponent('Test7')
-export class Test7 extends Component {
+@registerAPI('Test7')
+export class Test7 extends API {
   receivedNumber: number = -1
   status: string = ''
 
@@ -52,8 +52,8 @@ describe('Class based systems', function() {
   testInWorker('test/out/7.2.ValidateValuesInServer.js', {
     plugins: [],
     log: false,
-    validateResult: (result: any, worker: ComponentSystem) => {
-      const test7 = worker.getComponentInstance(Test7)
+    validateResult: (result: any, worker: ScriptingHost) => {
+      const test7 = worker.getAPIInstance(Test7)
       assert.notEqual(test7.receivedNumber, -1)
     }
   })
@@ -61,8 +61,8 @@ describe('Class based systems', function() {
   testInWorker('test/out/7.3.Interval.js', {
     plugins: [],
     log: false,
-    validateResult: (result: any, worker: ComponentSystem) => {
-      const test7 = worker.getComponentInstance(Test7)
+    validateResult: (result: any, worker: ScriptingHost) => {
+      const test7 = worker.getAPIInstance(Test7)
 
       setTimeout(() => {
         test7.setStatus()

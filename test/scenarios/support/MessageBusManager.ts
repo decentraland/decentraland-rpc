@@ -1,13 +1,10 @@
-import { registerComponent, Component, exposeMethod } from '../../../lib/host'
-import {
-  EventDispatcher,
-  EventDispatcherBinding
-} from '../../../lib/common/core/EventDispatcher'
+import { registerAPI, API, exposeMethod } from '../../../lib/host'
+import { EventDispatcher, EventDispatcherBinding } from '../../../lib/common/core/EventDispatcher'
 
 const messageBus = new EventDispatcher()
 
-@registerComponent('MessageBus')
-export class MessageBusManager extends Component {
+@registerAPI('MessageBus')
+export class MessageBusManager extends API {
   joinedTo: EventDispatcherBinding[] = []
 
   @exposeMethod

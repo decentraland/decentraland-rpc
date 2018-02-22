@@ -3,7 +3,7 @@ import { test, shouldFail } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 
 test(async ScriptingClient => {
-  const { Methods } = (await ScriptingClient.loadComponents(['Methods'])) as {
+  const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
     Methods: Methods
   }
 

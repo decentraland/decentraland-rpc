@@ -1,8 +1,8 @@
 import { EventDispatcher, EventDispatcherBinding } from '../common/core/EventDispatcher'
-import { ISubscribableComponent } from '../host/Component'
+import { ISubscribableAPI } from '../host/API'
 
 export class EventSubscriber extends EventDispatcher {
-  constructor(private component: ISubscribableComponent) {
+  constructor(private component: ISubscribableAPI) {
     super()
 
     component.onSubscribedEvent((data: any) => {

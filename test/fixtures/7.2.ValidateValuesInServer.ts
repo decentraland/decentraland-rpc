@@ -1,7 +1,7 @@
-import { testSystem, TestableSystem } from './support/ClientHelpers'
+import { testScript, TestableScript } from './support/ClientHelpers'
 import { inject } from '../../lib/client/index'
 
-export class TestMethods extends TestableSystem {
+export class TestMethods extends TestableScript {
   @inject('Test7') test7: any = null
 
   async doTest() {
@@ -9,4 +9,4 @@ export class TestMethods extends TestableSystem {
   }
 }
 
-testSystem(TestMethods)
+testScript(TestMethods)

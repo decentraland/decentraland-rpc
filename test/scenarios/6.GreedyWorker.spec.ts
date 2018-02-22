@@ -1,6 +1,7 @@
 import { wait } from './support/Helpers'
-import { registerComponent, Component, ComponentSystem, ComponentOptions } from '../../lib/host'
+import { registerAPI, API, ScriptingHost, APIOptions } from '../../lib/host'
 import './support/MessageBusManager'
+import { WebWorkerTransport } from '../../lib/client'
 
 /**
  * This test validates that we are able to unmount workers that fail
@@ -11,11 +12,11 @@ import './support/MessageBusManager'
  * loop will continue.
  */
 
-@registerComponent('Terminate')
-export class Terminator extends Component {
+@registerAPI('Terminate')
+export class Terminator extends API {
   private lastPing: number = 0
 
-  constructor(opt: ComponentOptions) {
+  constructor(opt: APIOptions) {
     super(opt)
     opt.on('Ping', () => (this.lastPing = +new Date()))
     this.lastPing = +new Date()
@@ -29,9 +30,9 @@ export class Terminator extends Component {
 
 describe('Terminate', function() {
   it('should kill the worker', async () => {
-    const worker = await ComponentSystem.fromURL('test/out/6.GreedyWorker.js')
+    const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/6.GreedyWorker.js')))
     worker.enable()
-    const api = worker.getComponentInstance(Terminator)
+    const api = worker.getAPIInstance(Terminator)
 
     while (api.isAlive()) {
       console.log('it is alive')

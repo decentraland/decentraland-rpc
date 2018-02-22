@@ -6,7 +6,7 @@ const hasSymbol = typeof Symbol === 'function' && Symbol.for
 
 const exposedMethodSymbol = hasSymbol ? Symbol('exposedMethod') : 0xfea1
 
-export function exposeMethod<T extends Component>(
+export function exposeMethod<T extends API>(
   target: T,
   propertyKey: keyof T,
   descriptor: TypedPropertyDescriptor<ExposableMethod>
@@ -14,7 +14,7 @@ export function exposeMethod<T extends Component>(
   getExposedMethods(target).add(propertyKey)
 }
 
-export function getExposedMethods<T extends Component>(instance: T): Set<keyof T> {
+export function getExposedMethods<T extends API>(instance: T): Set<keyof T> {
   const instanceAny: any = instance
   instanceAny[exposedMethodSymbol] = instanceAny[exposedMethodSymbol] || new Set()
   return instanceAny[exposedMethodSymbol]
@@ -77,18 +77,18 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
   }
 }
 
-export type ComponentOptions = {
-  componentName: string
+export type APIOptions = {
+  apiName: string
   on(event: string, handler: <A, O extends object>(params: Array<A> | O) => void): void
   notify(event: string, params?: Object | Array<any>): void
   expose(event: string, handler: <A, O extends object>(params: Array<A> | O) => Promise<any>): void
-  getComponentInstance<X>(component: { new (options: ComponentOptions): X }): X
-  getComponentInstance(name: string): Component | null
+  getAPIInstance<X>(component: { new (options: APIOptions): X }): X
+  getAPIInstance(name: string): API | null
   system: any
 }
 
-export type ComponentClass<T> = {
-  new (options: ComponentOptions): T
+export type APIClass<T> = {
+  new (options: APIOptions): T
 }
 
 export type ExposableMethod = (...args: any[]) => Promise<any>
@@ -117,10 +117,10 @@ export type ExposableMethod = (...args: any[]) => Promise<any>
  * both the provider’s concrete type and implementation and the process used to
  * locate it.
  */
-export abstract class Component {
+export abstract class API {
   static expose = exposeMethod
 
-  constructor(protected options: ComponentOptions) {
+  constructor(protected options: APIOptions) {
     for (let methodName of getExposedMethods(this)) {
       const theMethod: any = this[methodName]
       if (typeof theMethod === 'function') {
@@ -129,22 +129,22 @@ export abstract class Component {
     }
   }
 
-  static factory(ctor: ComponentClass<Component>, options: ComponentOptions) {
+  static factory(ctor: APIClass<API>, options: APIOptions) {
     return new ctor(options)
   }
 }
 
 // we use an interface here because it is mergable with the class
-export interface Component {
-  componentDidMount?(): Promise<void> | void
-  componentWillUnmount?(): Promise<void> | void
+export interface API {
+  apiDidMount?(): Promise<void> | void
+  apiWillUnmount?(): Promise<void> | void
 }
 
-export abstract class SubscribableComponent extends Component {
+export abstract class SubscribableAPI extends API {
   abstract async subscribe(event: string): Promise<void>
 }
 
-export interface ISubscribableComponent {
+export interface ISubscribableAPI {
   subscribe(event: string): Promise<void>
   unsubscribe(event: string): Promise<void>
   onSubscribedEvent(fn: (data: any) => void): void
