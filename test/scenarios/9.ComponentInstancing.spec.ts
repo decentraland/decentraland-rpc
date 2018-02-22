@@ -26,6 +26,6 @@ export class Instancer extends API {
 describe('Intance a Component from another Component', function() {
   testInWorker('test/out/9.ComponentInstancing.js', {
     plugins: [Instancer],
-    log: true
+    log: false
   })
 })

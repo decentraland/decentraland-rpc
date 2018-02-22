@@ -1,7 +1,25 @@
 import { EventDispatcher, EventDispatcherBinding } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
-import * as msgpack from 'msgpack-lite'
-const codec = msgpack.createCodec()
+
+import { createCodec, encode, decode } from 'msgpack-lite'
+const codec = createCodec()
+
+const errorColumns = { name: 1, message: 1, stack: 1, columnNumber: 1, fileName: 1, lineNumber: 1 }
+
+function sanitizeError(error: any) {
+  if (error instanceof Error) {
+    const ret: any = Object.assign({}, error)
+
+    for (let i in errorColumns) {
+      ret[i] = (error as any)[i]
+    }
+
+    return ret
+  } else {
+    return error
+  }
+}
+
 /**
  * Creates a RPC Server.
  * It is intentional that Server does not create a Worker object since we prefer composability
@@ -11,7 +29,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
   private _consoleLog: boolean = false
   private _isEnabled = false
 
-  sendEncoding: 'JSON' | 'msgpack' = 'msgpack'
+  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
 
   get isEnabled(): boolean {
     return this._isEnabled
@@ -96,13 +114,9 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
       if (typeof messageStr === 'string' && messageStr.charAt(0) === '{') {
         // Ensure JSON is not malformed
         request = JSON.parse(messageStr)
-      } else if (
-        typeof messageStr === 'string' ||
-        messageStr instanceof Uint8Array ||
-        (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
-        messageStr instanceof Array
-      ) {
-        request = msgpack.decode(messageStr as any, { codec })
+      } else if (typeof messageStr === 'string' || messageStr instanceof Uint8Array || messageStr instanceof Array) {
+        request = decode(messageStr as any, { codec })
+        this.sendEncoding = 'msgpack'
       } else {
         throw new Error(`Unable to parse message ${JSON.stringify(messageStr)}`)
       }
@@ -185,7 +199,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     let messageStr: string | Buffer
 
     if (this.sendEncoding === 'msgpack') {
-      messageStr = msgpack.encode(message, { codec })
+      messageStr = encode(message, { codec })
     } else {
       messageStr = JSON.stringify(message)
     }
@@ -204,7 +218,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
       this._send(receiver, {
         jsonrpc: '2.0',
         id: (request && request.id) || -1,
-        error: this._errorFromCode(errorCode, (error && error.message) || error, request && request.method)
+        error: this._errorFromCode(errorCode, sanitizeError(error), request && request.method)
       })
     } catch (error) {
       // Since we can't even send errors, do nothing. The connection was probably closed.

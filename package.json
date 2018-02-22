@@ -38,6 +38,7 @@
     "express": "^4.16.2",
     "mocha": "^4.1.0",
     "mocha-headless-chrome": "^1.7.1",
+    "traceur": "0.0.111",
     "tslint": "^5.9.1",
     "tslint-language-service": "^0.9.8",
     "ws": "^4.0.0"

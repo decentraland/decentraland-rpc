@@ -16,6 +16,6 @@ export class Throttling extends API {
 describe('Throttling', function() {
   testInWorker('test/out/10.Throttling.js', {
     plugins: [Throttling],
-    log: true
+    log: false
   })
 })

@@ -83,7 +83,7 @@ export class ScriptingHost extends TransportBasedServer {
   }
 
   /**
-   * This methdod should be called only from the interface that manages the COmponentSystems.
+   * This methdod should be called only from the interface that manages the ScriptingHosts.
    * It initializes the system and it's queued components. It also sends a first notification
    * to the implementation of the system telling it is now enabled. In that moment, the
    * implementation will send the queued messages and execute the queued methods against the

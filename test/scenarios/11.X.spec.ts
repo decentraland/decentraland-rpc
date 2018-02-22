@@ -71,11 +71,11 @@ export class EventController extends SubscribableAPI {
 describe('EventDispatcher', function() {
   testInWorker('test/out/11.1.EventSubscriber.js', {
     plugins: [EventController],
-    log: true
+    log: false
   })
 
   testInWorker('test/out/11.2.ComplexEventSubscriber.js', {
     plugins: [EventController],
-    log: true
+    log: false
   })
 })

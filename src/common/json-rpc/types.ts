@@ -131,13 +131,13 @@ export type IServerOpts = ILogOpts
 
 export interface ScriptingTransport {
   /** sendMessage is used to send a string message thru the transport */
-  sendMessage(message: string): void
+  sendMessage(message: string | Uint8Array): void
 
   /** the onConnect callback is called when the transport gets connected */
   onConnect?(callback: () => void): void
 
   /** the onMessage callback is called when the transport receives a message */
-  onMessage(callback: (message: string) => void): void
+  onMessage(callback: (message: string | Uint8Array) => void): void
 
   /** the onError callback is called when the transport triggers an error */
   onError?(callback: (e: Error) => void): void
@@ -147,4 +147,7 @@ export interface ScriptingTransport {
 
   /** the close function will be called when it is decided to end the communication */
   close(): void
+
+  /** the allowBinary property tells if the transport allows binary serialization */
+  allowBinary?: boolean
 }

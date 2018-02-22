@@ -2,7 +2,7 @@ import { testToFail } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 
 testToFail(async ScriptingClient => {
-  ScriptingClient.sendEncoding = 'JSON'
+  ScriptingClient.sendEncoding = 'msgpack'
   const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
     Methods: Methods
   }

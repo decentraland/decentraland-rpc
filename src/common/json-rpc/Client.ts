@@ -1,8 +1,8 @@
 import { EventDispatcher } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
-import * as msgpack from 'msgpack-lite'
+import { createCodec, encode, decode } from 'msgpack-lite'
 
-const codec = msgpack.createCodec()
+const codec = createCodec()
 
 /**
  * Creates a RPC Client.
@@ -15,7 +15,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   private _requestQueue: (string | Buffer)[] = []
   private _connected = false
 
-  sendEncoding: 'JSON' | 'msgpack' = 'msgpack'
+  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
 
   constructor(opts?: JsonRpc2.IClientOpts) {
     super()
@@ -44,7 +44,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
       messageStr instanceof Array
     ) {
-      message = msgpack.decode(messageStr as any, { codec })
+      message = decode(messageStr as any, { codec })
     } else {
       message = messageStr
     }
@@ -138,7 +138,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
 
   private _send(message: JsonRpc2.INotification | JsonRpc2.IRequest) {
     if (this.sendEncoding === 'msgpack') {
-      this._requestQueue.push(msgpack.encode(message, { codec }))
+      this._requestQueue.push(encode(message, { codec }))
     } else {
       this._requestQueue.push(JSON.stringify(message))
     }

@@ -20,6 +20,11 @@
     "config": "./src/client/tsconfig.json"
   },
   {
+    "name": "WS Server",
+    "kind": "TSC",
+    "config": "./test/server/tsconfig.json"
+  },
+  {
     "name": "Compile test web workers",
     "kind": "Webpack",
     "file": "./test/fixtures/*.ts",

@@ -73,8 +73,8 @@ export function wait(ms: number): Promise<void> {
   })
 }
 
-export function test(fn: (system: Script) => Promise<any>) {
-  const ScriptingClient = new Script(WebWorkerTransport(self as any))
+export function testWithTransport(transport: ScriptingTransport, fn: (system: Script) => Promise<any>) {
+  const ScriptingClient = new Script(transport)
 
   ScriptingClient.loadAPIs(['Test'])
     .then(({ Test }) =>
@@ -87,6 +87,10 @@ export function test(fn: (system: Script) => Promise<any>) {
         })
     )
     .catch(x => console.error(x))
+}
+
+export function test(fn: (system: Script) => Promise<any>) {
+  testWithTransport(WebWorkerTransport(self as any), fn)
 }
 
 export function testToFail(fn: (system: Script) => Promise<any>) {

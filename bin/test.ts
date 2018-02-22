@@ -1,8 +1,25 @@
 #!/usr/bin/env node
+
+// We use esnext in dcl-sdk, webpack and rollup handle it natively but not Node.js
+
+const traceur = require('traceur')
+
+// replace node.js require by traceur's
+traceur.require.makeDefault(
+  function(filename: string) {
+    // don't transpile our dependencies, just our app
+    return filename.indexOf('node_modules') === -1
+  },
+  {
+    asyncFunctions: true,
+    asyncGenerators: true
+  }
+)
+
 import { resolve } from 'path'
-import * as ws from 'ws'
 import * as http from 'http'
 import * as express from 'express'
+import * as WS from '../test/server/_testWebSocketServer'
 
 const runner: (a: any) => Promise<any> = require('mocha-headless-chrome')
 
@@ -10,7 +27,8 @@ const keepOpen = process.argv.some($ => $ === '--keep-open')
 const app = express()
 const port = process.env.PORT || 3000
 const server = http.createServer(app)
-const wss = new ws.Server({ server })
+
+WS.initializeWebSocketTester(server)
 
 // serve build.html
 app.get('/', function(req, res) {
@@ -27,11 +45,7 @@ server.listen(port, function(error: any) {
     console.error(error)
     process.exit(1)
   } else {
-    console.info(
-      '==> 🌎  Listening on port %s. Open up http://localhost:%s/ in your browser.',
-      port,
-      port
-    )
+    console.info('==> 🌎  Listening on port %s. Open up http://localhost:%s/ in your browser.', port, port)
 
     const options = {
       file: `http://localhost:${port}`,
@@ -51,18 +65,4 @@ server.listen(port, function(error: any) {
   }
 })
 
-wss.on('connection', function connection(ws, req) {
-  ws.on('message', function incoming(data) {
-    console.log('[WSS] received: %s', data)
-    wss.clients.forEach(function each(client) {
-      if (client !== ws && client.readyState === ws.OPEN) {
-        client.send(data)
-      }
-    })
-  })
-
-  ws.on('error', e => console.log(e))
-})
-
-wss.on('error', e => console.log(e))
 server.on('error', e => console.log(e))

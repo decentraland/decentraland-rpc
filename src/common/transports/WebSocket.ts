@@ -39,25 +39,37 @@ export interface IWebSocket {
 }
 
 export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
-  const queue: string[] = []
+  const queue: (string | Uint8Array | ArrayBuffer | SharedArrayBuffer | Buffer)[] = []
 
   socket.addEventListener('open', function() {
     flush()
   })
 
   function flush() {
-    if (socket.readyState === WebSocket.OPEN) {
-      queue.forEach($ => socket.send($))
+    if (socket.readyState === socket.OPEN) {
+      queue.forEach($ => send($))
       queue.length = 0
     }
   }
+
+  function send(msg: string | Uint8Array | ArrayBuffer | SharedArrayBuffer | Buffer) {
+    if (typeof msg === 'string') {
+      socket.send(msg, { binary: false })
+    } else if (msg instanceof Uint8Array || msg instanceof ArrayBuffer || msg instanceof SharedArrayBuffer) {
+      ;(socket as any).binaryType = 'arraybuffer'
+      socket.send(msg, { binary: true })
+    }
+  }
+
+  console.log(socket)
 
   const api: ScriptingTransport = {
     onConnect(handler) {
       if (socket.readyState === socket.OPEN) {
         handler()
+      } else {
+        socket.addEventListener('open', () => handler(), { once: true })
       }
-      socket.addEventListener('open', () => handler(), { once: true })
     },
     onError(handler) {
       socket.addEventListener('error', (err: ErrorEvent) => handler(err.error))
@@ -68,10 +80,12 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
       })
     },
     sendMessage(message) {
+      const toSend = message instanceof Uint8Array ? message.buffer : message
+
       if (socket.readyState === socket.OPEN) {
-        socket.send(message)
+        send(toSend)
       } else {
-        queue.push(message)
+        queue.push(toSend)
       }
     },
     close() {

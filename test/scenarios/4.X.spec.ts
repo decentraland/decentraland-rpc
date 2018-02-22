@@ -1,14 +1,16 @@
-import { testInWorker } from './support/Helpers'
+import { testInWorker, testWithTransport } from './support/Helpers'
 import { Logger, Methods, Test } from './support/Commons'
 import * as assert from 'assert'
+import { WebSocketTransport } from '../../lib/client'
 
 describe('Failure and exception transport (Server uses JSON)', () => {
   testInWorker('test/out/4.0.Failures.js', {
     plugins: [Logger, Methods, Test],
     validateResult: result => {
-      assert.deepEqual(result, { code: -32603, data: 'A message' })
+      assert.equal(result.code, -32603)
+      assert.equal(result.data.message, 'A message')
     },
-    log: true,
+    log: false,
     sendEncoding: 'JSON'
   })
 
@@ -24,13 +26,13 @@ describe('Failure and exception transport (Server uses JSON)', () => {
     sendEncoding: 'JSON'
   })
 
-  testInWorker('test/out/4.3.Methods.JSON.js', {
+  testInWorker('test/out/4.3.Methods.msgpack.js', {
     plugins: [Logger, Methods, Test],
     log: false,
     sendEncoding: 'JSON'
   })
 
-  testInWorker('test/out/4.4.Failures.JSON.js', {
+  testInWorker('test/out/4.4.Failures.msgpack.js', {
     plugins: [Logger, Methods, Test],
     log: true,
     sendEncoding: 'JSON'
@@ -41,28 +43,47 @@ describe('Failure and exception transport (Server uses msgpack)', () => {
   testInWorker('test/out/4.0.Failures.js', {
     plugins: [Logger, Methods, Test],
     validateResult: result => {
-      assert.deepEqual(result, { code: -32603, data: 'A message' })
+      assert.equal(result.code, -32603)
+      assert.equal(result.data.message, 'A message')
     },
-    log: true
+    log: false,
+    sendEncoding: 'msgpack'
   })
 
   testInWorker('test/out/4.1.Methods.js', {
     plugins: [Logger, Methods, Test],
-    log: false
+    log: false,
+    sendEncoding: 'msgpack'
   })
 
   testInWorker('test/out/4.2.UnknownComponent.js', {
     plugins: [],
-    log: false
+    log: false,
+    sendEncoding: 'msgpack'
   })
 
-  testInWorker('test/out/4.3.Methods.JSON.js', {
+  testInWorker('test/out/4.3.Methods.msgpack.js', {
     plugins: [Logger, Methods, Test],
-    log: false
+    log: false,
+    sendEncoding: 'msgpack'
   })
 
-  testInWorker('test/out/4.4.Failures.JSON.js', {
+  testInWorker('test/out/4.4.Failures.msgpack.js', {
     plugins: [Logger, Methods, Test],
-    log: true
+    log: false,
+    sendEncoding: 'msgpack'
+  })
+})
+
+describe('WebSocket transport', () => {
+  it('tests the worker thru the socket', async () => {
+    await testWithTransport(
+      'test/out/4.4.Failures.JSON.js',
+      {
+        plugins: [Logger, Methods, Test],
+        log: true
+      },
+      WebSocketTransport(new WebSocket(`ws://${location.host}/test`))
+    )
   })
 })
