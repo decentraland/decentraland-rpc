@@ -170,18 +170,17 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       }
     } else if (event === 'error') {
       const firstArgument: any = arguments[1]
-
-      console.error('EventDispatcher: Unhandled error event', arguments)
+      let error: Error | null = null
 
       if (firstArgument instanceof Error) {
-        throw arguments[1]
+        error = firstArgument
+      } else {
+        error = Object.assign(new Error('EventDispatcher: Unhandled error event'), { data: arguments })
       }
 
-      if (typeof firstArgument === 'string') {
-        throw new Error(firstArgument)
-      }
+      console.error(error)
 
-      throw firstArgument
+      throw error
     }
   }
 
