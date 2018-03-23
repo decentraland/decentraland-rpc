@@ -1,7 +1,10 @@
-import { EventDispatcher, EventDispatcherBinding } from '../core/EventDispatcher'
+import { createCodec, encode, decode } from 'msgpack-lite'
+
 import * as JsonRpc2 from './types'
 
-import { createCodec, encode, decode } from 'msgpack-lite'
+import { EventDispatcher, EventDispatcherBinding } from '../core/EventDispatcher'
+import { isPromiseLike } from '../core/isPromiseLike'
+
 const codec = createCodec()
 
 const errorColumns = { name: 1, message: 1, stack: 1, columnNumber: 1, fileName: 1, lineNumber: 1 }
@@ -144,7 +147,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
                   ? handler.apply(this, request.params)
                   : handler.call(this, request.params)
 
-              if (result instanceof Promise) {
+              if (isPromiseLike(result)) {
                 // Result is a promise, so lets wait for the result and handle accordingly
                 result
                   .then((actualResult: any) => {

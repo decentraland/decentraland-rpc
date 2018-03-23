@@ -1,6 +1,7 @@
 import { Client } from '../common/json-rpc/Client'
 import { getApi } from '../common/json-rpc/API'
 import { ILogOpts, ScriptingTransport } from '../common/json-rpc/types'
+import { isPromiseLike } from '../common/core/isPromiseLike'
 
 /** this is defined in the constructor ScriptingHost() */
 const loadAPIsNotificationName = 'LoadComponents'
@@ -56,6 +57,8 @@ export class Script extends Client {
   static inject = inject
 
   loadedAPIs: { [key: string]: API } = {}
+
+  protected started = false
 
   constructor(private transport: ScriptingTransport, opt?: ILogOpts) {
     super(opt)
@@ -122,10 +125,11 @@ export class Script extends Client {
 
     injection
       .then(() => {
-        if (this.systemDidEnable) {
+        if (this.systemDidEnable && !this.started) {
+          this.started = true
           try {
             const r = this.systemDidEnable()
-            if (r && r instanceof Promise) {
+            if (r && isPromiseLike(r)) {
               r.catch(e => this.emit('error', e))
             }
           } catch (e) {
