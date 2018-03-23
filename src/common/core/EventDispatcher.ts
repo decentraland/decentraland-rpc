@@ -175,10 +175,11 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       if (firstArgument instanceof Error) {
         error = firstArgument
       } else {
-        error = Object.assign(new Error('EventDispatcher: Unhandled error event'), { data: arguments })
+        error = Object.assign(new Error('EventDispatcher: Unhandled "error" event'), { data: arguments })
       }
 
       console.error(error)
+      console.trace(arguments)
 
       throw error
     }
