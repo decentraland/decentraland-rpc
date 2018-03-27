@@ -73,8 +73,9 @@ const winingCombinations = [
   [0, 3, 6], // 1 col
   [1, 4, 7], // 2 col
   [2, 5, 8], // 3 col
-
+  // tslint:disable-next-line
   [0, 4, 8], // nw - se
+  // tslint:disable-next-line
   [6, 4, 2] // sw - ne
 ]
 
@@ -118,6 +119,7 @@ test(async ScriptingClient => {
     const winner = getWinner()
 
     if (winner !== undefined) {
+      // tslint:disable-next-line
       Test.pass(winner)
       futureWinner.resolve(winner)
     }

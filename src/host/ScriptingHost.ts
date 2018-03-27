@@ -5,6 +5,7 @@ import { ScriptingTransport } from '../common/json-rpc/types'
 
 // If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
+// tslint:disable-next-line
 const hasSymbol = typeof Symbol === 'function' && Symbol.for
 
 const apiNameSymbol: any = hasSymbol ? Symbol('pluginName') : 0xfea2
@@ -129,7 +130,7 @@ export class ScriptingHost extends TransportBasedServer {
       const apiName = getAPIName(api)
 
       // if it has a name, use that indirection to find in the instance's map
-      if (apiName != null) {
+      if (apiName !== null) {
         if (this.apiInstances.has(apiName)) {
           return this.apiInstances.get(apiName)
         }
@@ -178,6 +179,7 @@ export class ScriptingHost extends TransportBasedServer {
       notify: (event, params?) => this.notify(`${apiName}.${event}`, params),
       expose: (event, handler) => this.expose(`${apiName}.${event}`, handler),
       getAPIInstance: (name: any) => {
+        // tslint:disable-next-line
         return this.getAPIInstance(name) as any
       },
       system: this
@@ -194,13 +196,14 @@ export class ScriptingHost extends TransportBasedServer {
    * Preloads a list of components
    */
   private async RPCLoadAPIs(apiNames: string[]) {
+    // tslint:disable-next-line
     if (typeof apiNames !== 'object' || !(apiNames instanceof Array)) {
       throw new TypeError('RPCLoadComponents(names) name must be an array of strings')
     }
 
     const notFound = apiNames
       .map(name => ({ api: this.getAPIInstance(name), name }))
-      .filter($ => $.api == null)
+      .filter($ => $.api === null)
       .map($ => $.name)
 
     if (notFound.length) {

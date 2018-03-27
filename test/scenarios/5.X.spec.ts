@@ -49,9 +49,6 @@ describe('TicTacToe', function() {
       workerO.enable()
       workerX.enable()
 
-      // workerX.setLogging({ logConsole: true })
-      // workerO.setLogging({ logConsole: true });
-
       let apiX = workerX.getAPIInstance(TicTacToeBoard)
       let apiO = workerO.getAPIInstance(TicTacToeBoard)
 

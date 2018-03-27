@@ -9,13 +9,13 @@ const codec = createCodec()
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
 export abstract class Client extends EventDispatcher implements JsonRpc2.IClient {
+  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
+
   private _responsePromiseMap: Map<number, JsonRpc2.Resolvable> = new Map()
   private _nextMessageId: number = 0
   private _consoleLog: boolean = false
   private _requestQueue: (string | Buffer)[] = []
   private _connected = false
-
-  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
 
   constructor(opts?: JsonRpc2.IClientOpts) {
     super()
@@ -40,7 +40,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       }
     } else if (
       typeof messageStr === 'string' ||
-      messageStr instanceof Uint8Array ||
+      messageStr instanceof Uint8Array /* tslint:disable-next-line */ ||
       (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
       messageStr instanceof Array
     ) {
@@ -86,7 +86,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
    * Set logging for all received and sent messages
    */
   public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
-    this._consoleLog = logConsole
+    this._consoleLog = !!logConsole
   }
 
   call(method: string): Promise<any>

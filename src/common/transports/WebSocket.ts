@@ -19,11 +19,6 @@ export interface IWebSocket {
 
   readyState: number
 
-  onopen: (event: any) => void
-  onerror: (event: any) => void
-  onclose: (event: any) => void
-  onmessage: (event: any) => void
-
   close(code?: number, data?: string): void
 
   send(data: any, cb?: (err: Error) => void): void
@@ -56,6 +51,7 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
     if (typeof msg === 'string') {
       socket.send(msg, { binary: false })
     } else if (msg instanceof Uint8Array || msg instanceof ArrayBuffer || msg instanceof SharedArrayBuffer) {
+      // tslint:disable-next-line:semicolon
       ;(socket as any).binaryType = 'arraybuffer'
       socket.send(msg, { binary: true })
     }

@@ -28,11 +28,11 @@ function sanitizeError(error: any) {
  * It is intentional that Server does not create a Worker object since we prefer composability
  */
 export abstract class Server<ClientType = any> extends EventDispatcher implements JsonRpc2.IServer {
+  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
+
   private _exposedMethodsMap: Map<string, (params: any) => JsonRpc2.PromiseOrNot<any>> = new Map()
   private _consoleLog: boolean = false
   private _isEnabled = false
-
-  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
 
   get isEnabled(): boolean {
     return this._isEnabled
@@ -62,7 +62,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
    * Set logging for all received and sent messages
    */
   public setLogging({ logConsole }: JsonRpc2.ILogOpts = {}) {
-    this._consoleLog = logConsole
+    this._consoleLog = !!logConsole
   }
 
   expose(method: string, handler: (...params: any[]) => Promise<any>): void {

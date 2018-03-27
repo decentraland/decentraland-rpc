@@ -49,7 +49,7 @@ export function testInWorker(file: string, options: ITestInWorkerOptions = {}) {
   })
 
   it(`tests the worker ${file}`, () => {
-    testWithTransport(file, options, WebWorkerTransport(worker!))
+    return testWithTransport(file, options, WebWorkerTransport(worker!))
   })
 }
 

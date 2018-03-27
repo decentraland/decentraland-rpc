@@ -2,6 +2,7 @@
 
 // If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
+// tslint:disable-next-line
 const hasSymbol = typeof Symbol === 'function' && Symbol.for
 
 const exposedMethodSymbol = hasSymbol ? Symbol('exposedMethod') : 0xfea1
@@ -79,12 +80,12 @@ export function throttle<T>(callLimit: number, interval: number = 100) {
 
 export type APIOptions = {
   apiName: string
+  system: any
   on(event: string, handler: <A, O extends object>(params: Array<A> | O) => void): void
   notify(event: string, params?: Object | Array<any>): void
   expose(event: string, handler: <A, O extends object>(params: Array<A> | O) => Promise<any>): void
   getAPIInstance<X>(component: { new (options: APIOptions): X }): X
   getAPIInstance(name: string): API | null
-  system: any
 }
 
 export type APIClass<T> = {

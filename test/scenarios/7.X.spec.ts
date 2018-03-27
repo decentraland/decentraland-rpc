@@ -65,7 +65,7 @@ describe('Class based systems', function() {
       const test7 = worker.getAPIInstance(Test7)
 
       setTimeout(() => {
-        test7.setStatus()
+        return test7.setStatus()
       }, 500)
     }
   })

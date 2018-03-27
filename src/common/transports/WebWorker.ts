@@ -25,8 +25,10 @@ export function WebWorkerTransport(worker: IWorker): ScriptingTransport {
     },
     close() {
       if ('terminate' in worker) {
+        // tslint:disable-next-line:semicolon
         ;(worker as any).terminate()
       } else if ('close' in worker) {
+        // tslint:disable-next-line:semicolon
         ;(worker as any).close()
       }
     }

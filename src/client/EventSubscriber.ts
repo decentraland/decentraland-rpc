@@ -39,7 +39,7 @@ export class EventSubscriber extends EventDispatcher {
       event = event.event
     }
 
-    if (theEventToValidate != null) {
+    if (theEventToValidate !== null) {
       if (this.getEventBindings(theEventToValidate).length === 0) {
         // If we are removing the last event listener, remove it also from the component
         // this will keep listeners unrelated to the component intact

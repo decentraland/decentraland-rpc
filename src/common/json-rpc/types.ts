@@ -130,6 +130,9 @@ export type IServer = {
 export type IServerOpts = ILogOpts
 
 export interface ScriptingTransport {
+  /** the allowBinary property tells if the transport allows binary serialization */
+  allowBinary?: boolean
+
   /** sendMessage is used to send a string message thru the transport */
   sendMessage(message: string | Uint8Array): void
 
@@ -147,7 +150,4 @@ export interface ScriptingTransport {
 
   /** the close function will be called when it is decided to end the communication */
   close(): void
-
-  /** the allowBinary property tells if the transport allows binary serialization */
-  allowBinary?: boolean
 }

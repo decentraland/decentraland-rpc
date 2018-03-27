@@ -77,10 +77,6 @@ export async function compile(opt: ICompilerOptions) {
 
     const compiler = webpack(options)
 
-    // compiler.apply(new ProgressPlugin({
-    //   profile: false
-    // }));
-
     if (!isWatching) {
       compiler.run((err, stats) => {
         if (err) {

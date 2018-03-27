@@ -8,6 +8,8 @@ const loadAPIsNotificationName = 'LoadComponents'
 
 // If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
+
+// tslint:disable-next-line
 const hasSymbol = typeof Symbol === 'function' && Symbol.for
 
 const injectedAPISymbol = hasSymbol ? Symbol('injectedAPIs') : 0xfea0
