@@ -13,10 +13,7 @@ const isWatching = process.argv.some($ => $ === '--watch')
 
 import { spawn } from 'child_process'
 
-export function findConfigFile(
-  baseDir: string,
-  configFileName: string
-): string | null {
+export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName)
 
   if (fs.existsSync(configFilePath)) {
@@ -51,14 +48,22 @@ export async function compile(opt: ICompilerOptions) {
       resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json'],
-        plugins: [
-          new TsConfigPathsPlugin({ configFileName: opt.tsconfig }),
-          new CheckerPlugin()
-        ]
+        plugins: [new TsConfigPathsPlugin({ configFileName: opt.tsconfig }), new CheckerPlugin()]
       },
       watch: isWatching,
       module: {
         rules: [
+          {
+            test: /\.(jpe?g|png|gif|svg)$/i,
+            use: [
+              {
+                loader: 'url-loader',
+                options: {
+                  limit: 512000
+                }
+              }
+            ]
+          },
           // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
           {
             test: /\.tsx?$/,
@@ -85,28 +90,23 @@ export async function compile(opt: ICompilerOptions) {
         }
       })
     } else {
-      compiler.watch(
-        { ignored: /node_modules/, aggregateTimeout: 1000 },
-        (err, stats) => {
-          if (stats.hasErrors() || stats.hasWarnings()) {
-            console.log(
-              stats.toString({
-                colors: true,
-                errors: true,
-                warnings: true
-              })
-            )
-          } else {
-            console.log(
-              'OK  ' + opt.file + ' -> ' + opt.outDir + '/' + opt.outFile
-            )
-          }
-
-          if (!err) {
-            onSuccess(stats)
-          }
+      compiler.watch({ ignored: /node_modules/, aggregateTimeout: 1000 }, (err, stats) => {
+        if (stats.hasErrors() || stats.hasWarnings()) {
+          console.log(
+            stats.toString({
+              colors: true,
+              errors: true,
+              warnings: true
+            })
+          )
+        } else {
+          console.log('OK  ' + opt.file + ' -> ' + opt.outDir + '/' + opt.outFile)
         }
-      )
+
+        if (!err) {
+          onSuccess(stats)
+        }
+      })
     }
   })
 }
@@ -161,12 +161,7 @@ export async function tsc(tsconfig: string) {
   await semaphore
 }
 
-export async function processFile(opt: {
-  file: string
-  outFile?: string
-  watch?: boolean
-  target?: string
-}) {
+export async function processFile(opt: { file: string; outFile?: string; watch?: boolean; target?: string }) {
   if (opt.file.endsWith('.json')) {
     return processJson(opt.file)
   }
