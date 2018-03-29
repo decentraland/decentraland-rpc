@@ -56,11 +56,16 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       if (this._responsePromiseMap.has(message.id)) {
         // Resolve promise from pending message
         const promise = this._responsePromiseMap.get(message.id) as JsonRpc2.Resolvable
+        this._responsePromiseMap.delete(message.id)
 
         if ('result' in message) {
           promise.resolve(message.result)
         } else if ('error' in message) {
-          const error = Object.assign(new Error('Remote error'), message.error)
+          const error = Object.assign(
+            new Error('Remote error'),
+            message.error,
+            (message.error && message.error.data) || {}
+          )
           promise.reject(error)
         } else {
           promise.reject(
@@ -69,8 +74,6 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
             })
           )
         }
-
-        this._responsePromiseMap.delete(message.id)
       } else {
         this.emit('error', new Error(`Response with id:${message.id} has no pending request`))
       }
