@@ -19,10 +19,10 @@ traceur.require.makeDefault(
 import { resolve } from 'path'
 import * as http from 'http'
 import * as express from 'express'
+import titere = require('titere')
+import fs = require('fs')
 
 const WS = require('../test/server/_testWebSocketServer')
-
-const runner: (a: any) => Promise<any> = require('mocha-headless-chrome')
 
 const keepOpen = process.argv.some($ => $ === '--keep-open')
 const app = express()
@@ -48,14 +48,24 @@ server.listen(port, function(error: any) {
   } else {
     console.info('==> 🌎  Listening on port %s. Open up http://localhost:%s/ in your browser.', port, port)
 
-    const options = {
+    const options: titere.Options = {
       file: `http://localhost:${port}`,
-      visible: keepOpen
+      visible: keepOpen,
+      height: 600,
+      width: 800,
+      timeout: 5 * 60 * 1000,
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
     }
 
-    runner(options)
+    titere
+      .run(options)
       .then(result => {
-        console.dir(result)
+        if (result.coverage) {
+          fs.writeFileSync('test/out/out.json', JSON.stringify(result.coverage))
+        } else {
+          console.error('Coverage data not found')
+          process.exit(1)
+        }
         if (!keepOpen) process.exit(result.result.stats.failures)
       })
       .catch((err: Error) => {

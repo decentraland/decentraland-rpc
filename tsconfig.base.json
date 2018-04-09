@@ -4,7 +4,9 @@
     "target": "es2017",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "sourceMap": true,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "inlineSources": true,
     "moduleResolution": "node",
     "declaration": true,
     "strictFunctionTypes": true,
@@ -25,7 +27,5 @@
       }
     ]
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }

@@ -2,14 +2,10 @@
   "compilerOptions": {
     "declarationDir": "../lib",
     "outDir": "../lib",
-    "lib": [
-      "es2017",
-      "dom"
-    ]
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "lib": ["es2017", "dom"]
   },
-  "exclude": [
-    "../node_modules",
-    "client"
-  ],
+  "exclude": ["../node_modules", "client"],
   "extends": "../tsconfig.base.json"
 }

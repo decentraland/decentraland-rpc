@@ -71,6 +71,8 @@ export function registerAPI(apiName: string): (klass: APIClass<API>) => void {
 }
 
 export class ScriptingHost extends TransportBasedServer {
+  unmounted = false
+
   apiInstances: Map<string, API> = new Map()
 
   private constructor(worker: ScriptingTransport) {
@@ -147,16 +149,23 @@ export class ScriptingHost extends TransportBasedServer {
    * This method unmounts all the components and releases the Worker
    */
   unmount() {
+    if (this.unmounted) return
     this.notify('SIGKILL')
 
     this.emit(ScriptingHostEvents.systemWillUnmount)
 
-    this.apiInstances.forEach(PrivateHelpers.unmountAPI)
-    this.apiInstances.clear()
+    try {
+      this.apiInstances.forEach(PrivateHelpers.unmountAPI)
+      this.apiInstances.clear()
+    } catch (e) {
+      this.emit('error', e)
+    }
 
     this.transport.close()
 
     this.emit(ScriptingHostEvents.systemDidUnmount)
+
+    this.unmounted = true
   }
 
   protected initializeAPI<X extends API>(ctor: {

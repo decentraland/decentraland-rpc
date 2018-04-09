@@ -34,6 +34,7 @@
     "name": "Compile tests web workers",
     "kind": "Webpack",
     "file": "./test/scenarios/index.ts",
-    "target": "web"
+    "target": "web",
+    "coverage": true
   }
 ]

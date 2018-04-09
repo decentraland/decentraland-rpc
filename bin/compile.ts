@@ -8,10 +8,10 @@ import * as rimraf from 'rimraf'
 import * as fs from 'fs'
 import { resolve, parse as parsePath, dirname, basename } from 'path'
 import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader'
+import { spawn } from 'child_process'
 
 const isWatching = process.argv.some($ => $ === '--watch')
-
-import { spawn } from 'child_process'
+const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
 
 export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName)
@@ -33,6 +33,7 @@ export interface ICompilerOptions {
   outDir: string
   tsconfig: string
   target?: 'web' | 'webworker' | 'node'
+  coverage?: boolean
 }
 
 export async function compile(opt: ICompilerOptions) {
@@ -68,11 +69,27 @@ export async function compile(opt: ICompilerOptions) {
           {
             test: /\.tsx?$/,
             loader: 'awesome-typescript-loader',
-            options: { configFileName: opt.tsconfig, silent: true }
+            options: {
+              configFileName: opt.tsconfig,
+              silent: true
+            }
           }
         ]
       },
       target: opt.target
+    }
+
+    if (opt.coverage || instrumentCoverage) {
+      // tslint:disable-next-line:semicolon
+      ;(options.module as any).rules.push({
+        test: /\.[jt]sx?$/,
+        use: {
+          loader: 'istanbul-instrumenter-loader',
+          options: { esModules: true, sourceMaps: true }
+        },
+        enforce: 'post',
+        exclude: /node_modules|\.spec\.js$/
+      })
     }
 
     const compiler = webpack(options)
@@ -157,7 +174,13 @@ export async function tsc(tsconfig: string) {
   await semaphore
 }
 
-export async function processFile(opt: { file: string; outFile?: string; watch?: boolean; target?: string }) {
+export async function processFile(opt: {
+  file: string
+  outFile?: string
+  watch?: boolean
+  target?: string
+  coverage?: boolean
+}) {
   if (opt.file.endsWith('.json')) {
     return processJson(opt.file)
   }
@@ -190,7 +213,8 @@ export async function processFile(opt: { file: string; outFile?: string; watch?:
     file: opt.file,
     outFile,
     outDir,
-    tsconfig: configFile
+    tsconfig: configFile,
+    coverage: opt.coverage
   }
 
   console.log(`
