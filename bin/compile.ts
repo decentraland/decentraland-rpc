@@ -79,7 +79,7 @@ export async function compile(opt: ICompilerOptions) {
       target: opt.target
     }
 
-    if (opt.coverage || instrumentCoverage) {
+    if (opt.coverage) {
       // tslint:disable-next-line:semicolon
       ;(options.module as any).rules.push({
         test: /\.[jt]sx?$/,
@@ -209,12 +209,14 @@ export async function processFile(opt: {
     outFile = outFile.replace(outDir + '/', '')
   }
 
+  const coverage = !isWatching && (opt.coverage || instrumentCoverage)
+
   const options: ICompilerOptions = {
     file: opt.file,
     outFile,
     outDir,
     tsconfig: configFile,
-    coverage: opt.coverage
+    coverage: coverage
   }
 
   console.log(`
@@ -222,6 +224,7 @@ compiling: ${opt.file}
   outFile: ${options.outFile}
    outDir: ${options.outDir}
  tsconfig: ${options.tsconfig}
+ coverage: ${coverage}
   `)
 
   const result = await compile(options)
