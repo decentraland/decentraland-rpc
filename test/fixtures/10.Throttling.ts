@@ -1,8 +1,8 @@
-import { testScript, TestableScript, wait } from './support/ClientHelpers'
+import { TestableScript, wait } from './support/ClientHelpers'
 import { inject } from '../../lib/client/index'
 import * as assert from 'assert'
 
-export class Throttling extends TestableScript {
+export default class Throttling extends TestableScript {
   @inject('Throttling') throttling: any = null
 
   async doTest() {
@@ -54,5 +54,3 @@ export class Throttling extends TestableScript {
     assert.equal(failed, true)
   }
 }
-
-testScript(Throttling)

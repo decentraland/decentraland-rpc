@@ -1,5 +1,5 @@
 import * as assert from 'assert'
-import { testScript, shouldFail, TestableScript } from './support/ClientHelpers'
+import { shouldFail, TestableScript } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 import { inject, getInjectedAPIs } from '../../lib/client/index'
 
@@ -11,7 +11,7 @@ export class BaseTestMethods extends TestableScript {
   }
 }
 
-export class TestMethods extends BaseTestMethods {
+export default class TestMethods extends BaseTestMethods {
   @inject() Logger: any = null
   @inject('Test') testComponent: any = null
   @inject('Test') xxx: any = null
@@ -69,5 +69,3 @@ export class TestMethods extends BaseTestMethods {
     console.log('If you see this console.log, it did work')
   }
 }
-
-testScript(TestMethods)

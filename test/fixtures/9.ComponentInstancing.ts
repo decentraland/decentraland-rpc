@@ -1,8 +1,8 @@
-import { testScript, TestableScript } from './support/ClientHelpers'
+import { TestableScript } from './support/ClientHelpers'
 import { inject } from '../../lib/client/index'
 import * as assert from 'assert'
 
-export class ComponentInstancing extends TestableScript {
+export default class ComponentInstancing extends TestableScript {
   @inject('Instancer') Instancer: any = null
 
   async doTest() {
@@ -10,5 +10,3 @@ export class ComponentInstancing extends TestableScript {
     assert.equal(msg, 'Hello World')
   }
 }
-
-testScript(ComponentInstancing)

@@ -42,6 +42,7 @@
     "traceur": "0.0.111",
     "tslint": "^5.9.1",
     "tslint-language-service": "^0.9.9",
+    "virtual-module-webpack-plugin": "^0.4.0",
     "ws": "^4.1.0"
   },
   "prettier": {

@@ -110,10 +110,6 @@ export function testToFail(fn: (system: Script) => Promise<any>) {
   )
 }
 
-export function testScript(system: { new (transport: ScriptingTransport): TestableScript }) {
-  return new system(WebWorkerTransport(self as any))
-}
-
 export async function shouldFail(fn: () => Promise<any>, msg: string = 'shouldFail') {
   try {
     await fn()

@@ -9,6 +9,7 @@ import * as fs from 'fs'
 import { resolve, parse as parsePath, dirname, basename } from 'path'
 import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader'
 import { spawn } from 'child_process'
+const VirtualModulePlugin = require('virtual-module-webpack-plugin')
 
 const isWatching = process.argv.some($ => $ === '--watch')
 const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
@@ -36,10 +37,23 @@ export interface ICompilerOptions {
   coverage?: boolean
 }
 
+const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
+
+const entryPointWebWorker = (filename: string) => `
+import { WebWorkerTransport } from '${webWorkerTransport}'
+const imported = require('${filename}')
+
+if (imported && imported.__esModule && imported['default']) {
+  new imported['default'](WebWorkerTransport(self))
+}
+`
+
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
+    const entry = opt.target === 'webworker' ? `${opt.file}.WebWorkerWrapper.js` : opt.file
+
     const options: webpack.Configuration = {
-      entry: opt.file,
+      entry,
       output: {
         filename: opt.outFile,
         path: opt.outDir,
@@ -77,6 +91,16 @@ export async function compile(opt: ICompilerOptions) {
         ]
       },
       target: opt.target
+    }
+
+    if (opt.target === 'webworker') {
+      options.plugins = options.plugins || []
+      options.plugins.push(
+        new VirtualModulePlugin({
+          moduleName: entry,
+          contents: entryPointWebWorker(opt.file)
+        })
+      )
     }
 
     if (opt.coverage) {
@@ -216,7 +240,8 @@ export async function processFile(opt: {
     outFile,
     outDir,
     tsconfig: configFile,
-    coverage: coverage
+    coverage: coverage,
+    target: (opt.target as any) || 'web'
   }
 
   console.log(`

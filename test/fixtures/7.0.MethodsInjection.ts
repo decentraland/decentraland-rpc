@@ -1,9 +1,9 @@
 import * as assert from 'assert'
-import { testScript, shouldFail, TestableScript } from './support/ClientHelpers'
+import { shouldFail, TestableScript } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 import { inject } from '../../lib/client/index'
 
-export class TestMethods extends TestableScript {
+export default class TestMethods extends TestableScript {
   @inject() Methods: Methods | null = null
 
   async doTest() {
@@ -38,5 +38,3 @@ export class TestMethods extends TestableScript {
     console.log('If you see this console.log, it did work')
   }
 }
-
-testScript(TestMethods)

@@ -1,7 +1,7 @@
-import { testScript, TestableScript } from './support/ClientHelpers'
+import { TestableScript } from './support/ClientHelpers'
 import { inject } from '../../lib/client/index'
 
-export class Interval extends TestableScript {
+export default class Interval extends TestableScript {
   @inject('Test7') test7: any = null
 
   async doTest() {
@@ -12,5 +12,3 @@ export class Interval extends TestableScript {
     }, 100)
   }
 }
-
-testScript(Interval)

@@ -1,4 +1,4 @@
-import { future, TestableScript, testScript } from './support/ClientHelpers'
+import { future, TestableScript } from './support/ClientHelpers'
 import { MessageBusClient } from './support/MessageBusClient'
 import { inject } from '../../lib/client/index'
 
@@ -11,13 +11,13 @@ const winingCombinations = [
   [1, 4, 7], // 2 col
   [2, 5, 8], // 3 col
 
-  [0, 4, 8], // nw - se
-  [6, 4, 2] // sw - ne
+  [0, 4, 8], // a nw - se
+  [6, 4, 2] //  a sw - ne
 ]
 
 type GameSymbol = 'x' | 'o' | null
 
-class Game extends TestableScript {
+export default class Game extends TestableScript {
   @inject('TicTacToeBoard') ticTacToe: any = null
 
   mySymbol: GameSymbol = null
@@ -65,5 +65,3 @@ class Game extends TestableScript {
     await futureWinner
   }
 }
-
-testScript(Game)
