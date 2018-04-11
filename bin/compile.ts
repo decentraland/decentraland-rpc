@@ -7,12 +7,13 @@ import * as globPkg from 'glob'
 import * as rimraf from 'rimraf'
 import * as fs from 'fs'
 import { resolve, parse as parsePath, dirname, basename } from 'path'
-import { TsConfigPathsPlugin, CheckerPlugin } from 'awesome-typescript-loader'
+import { TsConfigPathsPlugin } from 'awesome-typescript-loader'
 import { spawn } from 'child_process'
-const VirtualModulePlugin = require('virtual-module-webpack-plugin')
+import { tmpdir } from 'os'
 
 const isWatching = process.argv.some($ => $ === '--watch')
 const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
+const isProduction = process.env.NODE_ENV !== 'development' && !isWatching && !instrumentCoverage
 
 export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName)
@@ -40,8 +41,8 @@ export interface ICompilerOptions {
 const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
 
 const entryPointWebWorker = (filename: string) => `
-import { WebWorkerTransport } from '${webWorkerTransport}'
-const imported = require('${filename}')
+import { WebWorkerTransport } from ${JSON.stringify(webWorkerTransport)}
+const imported = require(${JSON.stringify(filename)})
 
 if (imported && imported.__esModule && imported['default']) {
   new imported['default'](WebWorkerTransport(self))
@@ -50,20 +51,32 @@ if (imported && imported.__esModule && imported['default']) {
 
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
-    const entry = opt.target === 'webworker' ? `${opt.file}.WebWorkerWrapper.js` : opt.file
+    let entry = opt.file
+
+    if (opt.target === 'webworker') {
+      const file = resolve(tmpdir(), Math.random().toString() + 'WebWorker.js')
+      entry = file
+      fs.writeFileSync(file, entryPointWebWorker(opt.file))
+    }
 
     const options: webpack.Configuration = {
       entry,
+      mode: isProduction ? 'production' : 'development',
+      optimization: {
+        nodeEnv: isProduction ? 'production' : 'development',
+        namedModules: !isProduction,
+        minimize: isProduction
+      },
       output: {
         filename: opt.outFile,
         path: opt.outDir,
-        libraryTarget: 'umd'
+        libraryTarget: opt.target === 'webworker' ? 'this' : 'umd'
       },
 
       resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions: ['.ts', '.tsx', '.js', '.json'],
-        plugins: [new TsConfigPathsPlugin({ configFileName: opt.tsconfig }), new CheckerPlugin()]
+        plugins: [new TsConfigPathsPlugin({ configFileName: opt.tsconfig })]
       },
       watch: isWatching,
       module: {
@@ -91,16 +104,6 @@ export async function compile(opt: ICompilerOptions) {
         ]
       },
       target: opt.target
-    }
-
-    if (opt.target === 'webworker') {
-      options.plugins = options.plugins || []
-      options.plugins.push(
-        new VirtualModulePlugin({
-          moduleName: entry,
-          contents: entryPointWebWorker(opt.file)
-        })
-      )
     }
 
     if (opt.coverage) {
@@ -245,11 +248,13 @@ export async function processFile(opt: {
   }
 
   console.log(`
-compiling: ${opt.file}
-  outFile: ${options.outFile}
-   outDir: ${options.outDir}
- tsconfig: ${options.tsconfig}
- coverage: ${coverage}
+ compiling: ${opt.file}
+   outFile: ${options.outFile}
+    outDir: ${options.outDir}
+  tsconfig: ${options.tsconfig}
+  coverage: ${coverage}
+production: ${isProduction}
+     watch: ${isWatching}
   `)
 
   const result = await compile(options)
@@ -341,3 +346,7 @@ cli(process.argv)
     console.error(err)
     process.exit(1)
   })
+
+process.on('unhandledRejection', e => {
+  throw e
+})
