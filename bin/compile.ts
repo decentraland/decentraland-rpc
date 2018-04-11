@@ -7,7 +7,7 @@ import * as globPkg from 'glob'
 import * as rimraf from 'rimraf'
 import * as fs from 'fs'
 import { resolve, parse as parsePath, dirname, basename, relative } from 'path'
-import { TsConfigPathsPlugin } from 'awesome-typescript-loader'
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 import { spawn } from 'child_process'
 import { tmpdir } from 'os'
 
@@ -106,7 +106,7 @@ export async function compile(opt: ICompilerOptions) {
       resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
         extensions,
-        plugins: [new TsConfigPathsPlugin({ configFileName: opt.tsconfig })]
+        plugins: [new TsconfigPathsPlugin({ configFile: opt.tsconfig })]
       },
       watch: isWatching,
       module: {
@@ -115,7 +115,7 @@ export async function compile(opt: ICompilerOptions) {
             test: /\.(jpe?g|png|gif|svg)$/i,
             use: [
               {
-                loader: 'url-loader',
+                loader: require.resolve('url-loader'),
                 options: {
                   limit: 512000
                 }
@@ -125,10 +125,9 @@ export async function compile(opt: ICompilerOptions) {
           // All files with a '.ts' or '.tsx' extension will be handled by 'awesome-typescript-loader'.
           {
             test: /\.tsx?$/,
-            loader: 'awesome-typescript-loader',
+            loader: require.resolve('ts-loader'),
             options: {
-              configFileName: opt.tsconfig,
-              silent: true
+              configFile: opt.tsconfig
             }
           }
         ]
@@ -239,11 +238,13 @@ export async function processFile(opt: {
   target?: string
   coverage?: boolean
 }) {
-  const baseFile = opt.file || (opt.files && opt.files[0]) || ''
+  const baseFiles = (opt.file && [opt.file]) || (opt.files && opt.files[0]) || []
 
-  if (!baseFile) {
+  if (!baseFiles.length) {
     throw new Error(`Unable to find a file to compile`)
   }
+
+  const baseFile = baseFiles[0]
 
   if (baseFile.endsWith('.json')) {
     return processJson(baseFile)

@@ -52,12 +52,13 @@
   },
   "dependencies": {
     "@types/msgpack-lite": "^0.1.6",
-    "awesome-typescript-loader": "^5.0.0",
     "glob": "^7.1.2",
     "istanbul-instrumenter-loader": "^3.0.1",
     "msgpack-lite": "^0.1.26",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.6.2",
+    "ts-loader": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^3.0.3",
     "typescript": "^2.8.1",
     "url-loader": "^1.0.1",
     "webpack": "^4.5.0"
