@@ -34,22 +34,22 @@ export class Test7 extends API {
 }
 
 describe('Class based systems', function() {
-  testInWorker('test/out/7.0.MethodsInjection.js', {
+  testInWorker('test/out/fixtures/7.0.MethodsInjection.js', {
     plugins: [Logger, Methods, Test],
     log: false
   })
 
-  testInWorker('test/out/7.0.MethodsInjection.js?without_preload', {
+  testInWorker('test/out/fixtures/7.0.MethodsInjection.js?without_preload', {
     plugins: [],
     log: false
   })
 
-  testInWorker('test/out/7.1.InheritInjections.js', {
+  testInWorker('test/out/fixtures/7.1.InheritInjections.js', {
     plugins: [],
     log: false
   })
 
-  testInWorker('test/out/7.2.ValidateValuesInServer.js', {
+  testInWorker('test/out/fixtures/7.2.ValidateValuesInServer.js', {
     plugins: [],
     log: false,
     validateResult: (result: any, worker: ScriptingHost) => {
@@ -58,7 +58,7 @@ describe('Class based systems', function() {
     }
   })
 
-  testInWorker('test/out/7.3.Interval.js', {
+  testInWorker('test/out/fixtures/7.3.Interval.js', {
     plugins: [],
     log: false,
     validateResult: (result: any, worker: ScriptingHost) => {

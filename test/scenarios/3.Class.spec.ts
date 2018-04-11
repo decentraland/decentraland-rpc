@@ -47,7 +47,7 @@ export class Runtime extends API {
   }
 }
 
-testInWorker('test/out/3.Class.js', {
+testInWorker('test/out/fixtures/3.Class.js', {
   plugins: [Debugger, Profiler, Runtime],
   validateResult: async result => {
     assert.equal(await aFuture, true)

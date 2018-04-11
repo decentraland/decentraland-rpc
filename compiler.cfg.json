@@ -31,6 +31,12 @@
     "target": "webworker"
   },
   {
+    "name": "Compile test files",
+    "kind": "Webpack",
+    "file": "./test/fixtures/**/*.test.ts",
+    "target": "webworker"
+  },
+  {
     "name": "Compile tests web workers",
     "kind": "Webpack",
     "file": "./test/scenarios/index.ts",

@@ -6,8 +6,8 @@ import { future } from './support/Helpers'
 import { Test } from './support/Commons'
 import { WebWorkerTransport } from '../../lib/client'
 
-it('test/out/2.Proxy.js', async () => {
-  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/2.Proxy.js')))
+it('test/out/fixtures/2.Proxy.js', async () => {
+  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/fixtures/2.Proxy.js')))
 
   let aFuture = future()
 

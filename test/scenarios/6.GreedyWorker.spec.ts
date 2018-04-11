@@ -30,7 +30,9 @@ export class Terminator extends API {
 
 describe('Terminate', function() {
   it('should kill the worker', async () => {
-    const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/6.GreedyWorker.js')))
+    const worker = await ScriptingHost.fromTransport(
+      WebWorkerTransport(new Worker('test/out/fixtures/6.GreedyWorker.js'))
+    )
     worker.enable()
     const api = worker.getAPIInstance(Terminator)
 

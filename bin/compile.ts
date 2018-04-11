@@ -6,7 +6,7 @@ import * as webpack from 'webpack'
 import * as globPkg from 'glob'
 import * as rimraf from 'rimraf'
 import * as fs from 'fs'
-import { resolve, parse as parsePath, dirname, basename } from 'path'
+import { resolve, parse as parsePath, dirname, basename, relative } from 'path'
 import { TsConfigPathsPlugin } from 'awesome-typescript-loader'
 import { spawn } from 'child_process'
 import { tmpdir } from 'os'
@@ -30,12 +30,12 @@ export function findConfigFile(baseDir: string, configFileName: string): string 
 }
 
 export interface ICompilerOptions {
-  file: string
-  outFile: string
+  files: string[]
   outDir: string
   tsconfig: string
   target?: 'web' | 'webworker' | 'node'
   coverage?: boolean
+  rootFolder: string
 }
 
 const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
@@ -51,13 +51,44 @@ if (imported && imported.__esModule && imported['default']) {
 
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
-    let entry = opt.file
+    let entry: webpack.Entry | string[] = opt.files
+
+    const extensions = ['.ts', '.tsx', '.js', '.json']
 
     if (opt.target === 'webworker') {
-      const file = resolve(tmpdir(), Math.random().toString() + 'WebWorker.js')
-      entry = file
-      fs.writeFileSync(file, entryPointWebWorker(opt.file))
+      entry = entry.map($ => {
+        const file = resolve(tmpdir(), Math.random().toString() + '.WebWorker.js')
+        fs.writeFileSync(file, entryPointWebWorker($))
+        return file
+      })
     }
+
+    entry = entry.reduce(
+      (obj, $, $$) => {
+        let name = relative(opt.rootFolder, opt.files[$$])
+        extensions.forEach($ => {
+          if (name.endsWith($)) {
+            name = name.substr(0, name.length - $.length)
+          }
+        })
+        let target = name
+        if (target.endsWith('.js')) {
+          target = target.substr(0, target.length - 3)
+        }
+        obj[target] = $
+        return obj
+      },
+      {} as webpack.Entry
+    )
+
+    console.log(
+      [
+        `     files:`,
+        ...Object.keys(entry).map(
+          ($, $$) => `            (root)/${relative(opt.rootFolder, opt.files[$$])} -> (outDir)/${$}.js`
+        )
+      ].join('\n')
+    )
 
     const options: webpack.Configuration = {
       entry,
@@ -68,14 +99,13 @@ export async function compile(opt: ICompilerOptions) {
         minimize: isProduction
       },
       output: {
-        filename: opt.outFile,
         path: opt.outDir,
         libraryTarget: opt.target === 'webworker' ? 'this' : 'umd'
       },
 
       resolve: {
         // Add '.ts' and '.tsx' as resolvable extensions.
-        extensions: ['.ts', '.tsx', '.js', '.json'],
+        extensions,
         plugins: [new TsConfigPathsPlugin({ configFileName: opt.tsconfig })]
       },
       watch: isWatching,
@@ -140,7 +170,7 @@ export async function compile(opt: ICompilerOptions) {
             })
           )
         } else {
-          console.log('OK  ' + opt.file + ' -> ' + opt.outDir + '/' + opt.outFile)
+          console.log('OK ' + opt.outDir)
         }
 
         if (!err) {
@@ -202,23 +232,32 @@ export async function tsc(tsconfig: string) {
 }
 
 export async function processFile(opt: {
-  file: string
+  file?: string
+  files?: string[]
   outFile?: string
   watch?: boolean
   target?: string
   coverage?: boolean
 }) {
-  if (opt.file.endsWith('.json')) {
-    return processJson(opt.file)
+  const baseFile = opt.file || (opt.files && opt.files[0]) || ''
+
+  if (!baseFile) {
+    throw new Error(`Unable to find a file to compile`)
   }
 
-  const parsed = parsePath(opt.file)
+  if (baseFile.endsWith('.json')) {
+    return processJson(baseFile)
+  }
 
-  const configFile = findConfigFile(dirname(opt.file), 'tsconfig.json')
+  const parsed = parsePath(baseFile)
+
+  const configFile = findConfigFile(dirname(baseFile), 'tsconfig.json')
 
   if (!configFile) {
     throw new Error(`Unable to find a tsconfig.json file for ${opt.file}`)
   }
+
+  const rootFolder = dirname(configFile)
 
   const parsedTsConfig = require(configFile)
 
@@ -239,23 +278,18 @@ export async function processFile(opt: {
   const coverage = !isWatching && (opt.coverage || instrumentCoverage)
 
   const options: ICompilerOptions = {
-    file: opt.file,
-    outFile,
+    files: opt.files || [opt.file as string],
     outDir,
     tsconfig: configFile,
     coverage: coverage,
-    target: (opt.target as any) || 'web'
+    target: (opt.target as any) || 'web',
+    rootFolder
   }
 
   console.log(`
- compiling: ${opt.file}
-   outFile: ${options.outFile}
+      root: ${options.rootFolder}
     outDir: ${options.outDir}
-  tsconfig: ${options.tsconfig}
-  coverage: ${coverage}
-production: ${isProduction}
-     watch: ${isWatching}
-  `)
+   options: { coverage: ${coverage}, production: ${isProduction}, watch: ${isWatching} }`)
 
   const result = await compile(options)
 
@@ -319,10 +353,7 @@ export async function processJson(file: string) {
       // compile TS
       const files = await glob($.file)
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]
-        await processFile({ ...$, file })
-      }
+      await processFile({ ...$, files })
     } else if ($.kind === 'TSC') {
       if (!$.config) {
         throw new Error(`Missing config in: ${JSON.stringify($, null, 2)}`)

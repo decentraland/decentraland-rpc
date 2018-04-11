@@ -5,8 +5,8 @@ import * as assert from 'assert'
 import { future } from './support/Helpers'
 import { WebWorkerTransport } from '../../lib/client'
 
-it('test/out/1.Echo.js', async () => {
-  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/1.Echo.js')))
+it('test/out/fixtures/1.Echo.js', async () => {
+  const worker = await ScriptingHost.fromTransport(WebWorkerTransport(new Worker('test/out/fixtures/1.Echo.js')))
 
   const randomNumber = Math.random()
   const aFuture = future()

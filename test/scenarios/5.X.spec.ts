@@ -95,13 +95,13 @@ describe('TicTacToe', function() {
     })
   }
 
-  randomizeGame('test/out/5.0.TicTacToe.Redux.js')
-  randomizeGame('test/out/5.0.TicTacToe.Redux.js')
-  randomizeGame('test/out/5.0.TicTacToe.Redux.js')
-  randomizeGame('test/out/5.0.TicTacToe.Redux.js')
+  randomizeGame('test/out/fixtures/5.0.TicTacToe.Redux.js')
+  randomizeGame('test/out/fixtures/5.0.TicTacToe.Redux.js')
+  randomizeGame('test/out/fixtures/5.0.TicTacToe.Redux.js')
+  randomizeGame('test/out/fixtures/5.0.TicTacToe.Redux.js')
 
-  randomizeGame('test/out/5.1.TicTacToe.Class.js')
-  randomizeGame('test/out/5.1.TicTacToe.Class.js')
-  randomizeGame('test/out/5.1.TicTacToe.Class.js')
-  randomizeGame('test/out/5.1.TicTacToe.Class.js')
+  randomizeGame('test/out/fixtures/5.1.TicTacToe.Class.js')
+  randomizeGame('test/out/fixtures/5.1.TicTacToe.Class.js')
+  randomizeGame('test/out/fixtures/5.1.TicTacToe.Class.js')
+  randomizeGame('test/out/fixtures/5.1.TicTacToe.Class.js')
 })
