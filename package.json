@@ -1,6 +1,6 @@
 {
   "name": "metaverse-rpc",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "",
   "main": "lib/client/index.js",
   "typings": "lib/client/index.d.ts",
@@ -8,8 +8,7 @@
     "build:cli": "tsc -p bin/tsconfig.json && chmod +x bin/*.js",
     "watch": "npm run build:cli && ./bin/compile.js compiler.cfg.json --watch",
     "build": "npm run build:cli && ./bin/compile.js compiler.cfg.json",
-    "test":
-      "npm run build && node ./bin/test.js && nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text && mocha test/out/fixtures/**/*.test.js",
+    "test": "npm run build && node ./bin/test.js && nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text && mocha test/out/fixtures/**/*.test.js",
     "test:local": "npm run build && (npm run watch & node ./bin/test.js --keep-open)",
     "lint:fix": "tslint --project tsconfig.json --fix",
     "lint": "tslint --project tsconfig.json"
