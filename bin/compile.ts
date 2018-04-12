@@ -10,6 +10,8 @@ import { resolve, parse as parsePath, dirname, basename, relative } from 'path'
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 import { spawn } from 'child_process'
 import { tmpdir } from 'os'
+import ProgressBar = require('progress')
+import chalk from 'chalk'
 
 const isWatching = process.argv.some($ => $ === '--watch')
 const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
@@ -132,7 +134,8 @@ export async function compile(opt: ICompilerOptions) {
           }
         ]
       },
-      target: opt.target
+      target: opt.target,
+      plugins: [ProgressBarPlugin({})]
     }
 
     if (opt.coverage) {
@@ -382,3 +385,85 @@ cli(process.argv)
 process.on('unhandledRejection', e => {
   throw e
 })
+
+function ProgressBarPlugin(options: any) {
+  options = options || {}
+
+  let stream = options.stream || process.stderr
+  let enabled = stream && stream.isTTY
+
+  if (!enabled) {
+    return function() {
+      // stub
+    }
+  }
+
+  let barLeft = chalk.bold('[')
+  let barRight = chalk.bold(']')
+  let preamble = chalk.cyan.bold('  build ') + barLeft
+  let barFormat = options.format || preamble + ':bar' + barRight + chalk.green.bold(' :percent')
+  let summary = options.summary !== false
+  let summaryContent = options.summaryContent
+  let customSummary = options.customSummary
+
+  delete options.format
+  delete options.total
+  delete options.summary
+  delete options.summaryContent
+  delete options.customSummary
+
+  let barOptions = Object.assign(
+    {
+      complete: '=',
+      incomplete: ' ',
+      width: 20,
+      total: 100,
+      clear: true
+    },
+    options
+  )
+
+  let bar = new ProgressBar(barFormat, barOptions)
+
+  let running = false
+  let startTime: Date = new Date()
+  let lastPercent = 0
+
+  return new webpack.ProgressPlugin(function(percent, msg) {
+    if (!running && lastPercent !== 0 && !customSummary) {
+      stream.write('\n')
+    }
+
+    let newPercent = Math.ceil(percent * barOptions.width)
+
+    if (lastPercent !== newPercent) {
+      bar.update(percent, {
+        msg: msg
+      })
+      lastPercent = newPercent
+    }
+
+    if (!running) {
+      running = true
+      startTime = new Date()
+      lastPercent = 0
+    } else if (percent === 1) {
+      let now = new Date()
+      let buildTime = (now.getTime() - startTime.getTime()) / 1000 + 's'
+
+      bar.terminate()
+
+      if (summary) {
+        stream.write(chalk.green.bold('Build completed in ' + buildTime + '\n\n'))
+      } else if (summaryContent) {
+        stream.write('    ' + summaryContent + '(' + buildTime + ')\n\n')
+      }
+
+      if (customSummary) {
+        customSummary(buildTime)
+      }
+
+      running = false
+    }
+  })
+}
