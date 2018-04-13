@@ -13,9 +13,22 @@ import { tmpdir } from 'os'
 import ProgressBar = require('progress')
 import chalk from 'chalk'
 
+const packageJson = JSON.parse(fs.readFileSync(require.resolve('../package.json')).toString())
 const isWatching = process.argv.some($ => $ === '--watch')
 const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
 const isProduction = process.env.NODE_ENV !== 'development' && !isWatching && !instrumentCoverage
+const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
+
+const entryPointWebWorker = (filename: string) => `
+import { WebWorkerTransport } from ${JSON.stringify(webWorkerTransport)}
+const imported = require(${JSON.stringify(filename)})
+
+if (imported && imported.__esModule && imported['default']) {
+  new imported['default'](WebWorkerTransport(self))
+}
+`
+
+console.log('metaverse-compiler version: ' + chalk.green(packageJson.version))
 
 export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName)
@@ -39,17 +52,6 @@ export interface ICompilerOptions {
   coverage?: boolean
   rootFolder: string
 }
-
-const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
-
-const entryPointWebWorker = (filename: string) => `
-import { WebWorkerTransport } from ${JSON.stringify(webWorkerTransport)}
-const imported = require(${JSON.stringify(filename)})
-
-if (imported && imported.__esModule && imported['default']) {
-  new imported['default'](WebWorkerTransport(self))
-}
-`
 
 export async function compile(opt: ICompilerOptions) {
   return new Promise<webpack.Stats>((onSuccess, onError) => {
