@@ -184,7 +184,7 @@ export async function compile(opt: ICompilerOptions) {
 }
 
 export async function tsc(tsconfig: string) {
-  const tscLocation = require.resolve('typescript/bin/tsc')
+  const tscLocation = require.resolve('typescript/lib/tsc')
 
   console.log(
     `
@@ -192,13 +192,13 @@ export async function tsc(tsconfig: string) {
   `.trim()
   )
 
-  const args = ['-p', basename(tsconfig)]
+  const args = [tscLocation, '-p', basename(tsconfig)]
 
   if (isWatching) {
     args.push('--watch')
   }
 
-  const childProcess = spawn(tscLocation, args, {
+  const childProcess = spawn('node', args, {
     cwd: dirname(tsconfig)
   })
 
