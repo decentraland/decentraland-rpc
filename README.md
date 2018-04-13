@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc)
+[![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc)[![Build status](https://ci.appveyor.com/api/projects/status/mluhmefwikk9no17?svg=true)](https://ci.appveyor.com/project/menduz/metaverse-rpc)
 
 # `metaverse-rpc`
 
