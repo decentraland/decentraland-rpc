@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// This started as something different as it is right now. It became gulp. damnit
+// This started as something different as it is right now. It became gulp.
 
 import * as webpack from 'webpack'
 import * as globPkg from 'glob'
