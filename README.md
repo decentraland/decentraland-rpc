@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc)
 
-# `metaverse-api`
+# `metaverse-rpc`
 
 This repository contains the low-level API that allows us to run sandboxed (and even remote) code for Decentralands LANDs and other systems like Physics.
 
