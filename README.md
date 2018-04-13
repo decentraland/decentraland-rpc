@@ -30,7 +30,7 @@ An example implementation can be found at [3.Class.spec.ts](test/scenarios/3.Cla
 
 ### See also
 
-1.  [Scripts introduction](docs/apis/introduction.md)
+1.  [APIs introduction](docs/apis/introduction.md)
 2.  [Common patterns](docs/apis/common-patterns.md)
 3.  [Scripting host](docs/apis/scripting-host.md)
 
