@@ -33,22 +33,16 @@ Extending the `EventDispatchter` class is the recommended way to allow the commu
 
 Similarly, the API can extend the `SubscribableAPI` class as it needs to implement the `subscribe()`and `unsubscribe()` methods to allow Scripts to subscribe to events via an [EventSubscriber](../scripts/common-patterns.md). In this context, APIs become intermediaries between the two parts:
 
-```
+```ts
 @registerAPI('eventController')
 export class EventController extends SubscribableAPI {
-
-  private listener: EventListener
+  private listener: EventListener = new EventListener()
   private bindings: EventDispatcherBinding[] = []
-
-  constructor(opts: APIOptions) {
-    super(opts)
-    this.listener = new EventListener
-  }
 
   @exposeMethod
   async subscribe(event: string) {
     const binding = this.listener.on(event, (e: any) => {
-      this.options.notify('SubscribedEvent', {event, data: e.data})
+      this.options.notify('SubscribedEvent', { event, data: e.data })
     })
 
     this.bindings.push(binding)
@@ -56,9 +50,7 @@ export class EventController extends SubscribableAPI {
 
   @exposeMethod
   async unsubscribe(event: string) {
-    this.bindings
-      .filter(binding => binding.event === event)
-      .forEach(binding => binding.off())
+    this.bindings.filter(binding => binding.event === event).forEach(binding => binding.off())
   }
 }
 ```

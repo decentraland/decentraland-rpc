@@ -1,32 +1,49 @@
 [![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc)
 
-# Basic Concepts
+# `metaverse-api`
+
+This repository contains the low-level API that allows us to run sandboxed (and even remote) code for Decentralands LANDs and other systems like Physics.
 
 ## Scripting
 
-Scripts are pieces of logic that run inside the context of a Web Worker. They are meant to provide the user a way to run custom logic inside the player's client, allowing the creation of rich experiences inside Decentraland. To achieve this, low level hooks are exposed from the scripting host and consumed by the scripting client.
+Scripts are pieces of logic that run inside the context of a Web Worker or remotely in a server. They are meant to provide the user a way to run custom logic inside the player's client, allowing the creation of rich experiences inside Decentraland. To achieve this, low level hooks are exposed from the scripting host and consumed by the scripting client.
 
-## Component System
+## Transports
 
-The `component system` is a core piece of the Client that instanciates Components and handles incoming/outgoing messages from the external Systems.
+The scripts communicate with the host application thru a JSON-RPC2 based protocol using a defined transport. We have 3 built in transports.
 
-## Components
+* [WebWorker](src/common/transports/WebWorker.ts): Used to load a sandboxed script locally, inside a WebWorker
+* [WebSocket](src/common/transports/WebSocket.ts): Used to run scripts in remote servers
+* [Memory](src/common/transports/Memory.ts): Used to run tests, mainly. The script runs in the same execution context as the host.
 
-Components work as a bridge between user-created scripts and the lower level APIs of the client (communication, 3D entity management, etc). It provides a set of exposed methods that can be accessed from the Web Worker context. These methods are `async` by default and Promises are used as hooks for events that may be triggered in the future (HTTP Responses, entity collisions, etc).
+## Scripting host
 
-The `@exposeMethod` decorator is provided as means of exposing component methods to the Scripting Client.
+The [ScriptingHost](src/host/ScriptingHost.ts) is a core piece that instanciates APIs and handles incoming/outgoing messages from the scripts.
 
-An example implementation can be found at https://github.com/decentraland/script/blob/master/test/scenarios/3.Class.spec.ts
+## APIs
 
-## Entities
+APIs work as a bridge between user-created scripts and the lower level APIs of the client (communication, 3D entity management, etc). It provides a set of exposed methods that can be accessed from the script context. These methods are `async` by default and Promises are used as hooks for events that may be triggered in the future (HTTP Responses, entity collisions, etc).
 
-Entities are all assets that the client will be able to load and users will be able to interact with. They can be audio, 3D objects, etc. They can contain scripts which grants them additional behaviours.
+The `@exposeMethod` decorator is provided as means of exposing API methods to the Script.
 
-## Systems
+An example implementation can be found at [3.Class.spec.ts](test/scenarios/3.Class.spec.ts)
 
-The term "system" or "scripting system" refers to the instance of a user-created script running inside a Web Worker. To access a Component instance the decorator `@inject(component: string)` function is used. From then on, the user will be able to call all exposed methods and `await` the promises returned by them.
+### See also
 
-An example implementation can be found at https://github.com/decentraland/script/blob/master/test/fixtures/7.0.MethodsInjection.ts
+1.  [Scripts introduction](docs/apis/introduction.md)
+2.  [Common patterns](docs/apis/common-patterns.md)
+3.  [Scripting host](docs/apis/scripting-host.md)
+
+## Scripts
+
+The term "script" or sometimes "system" refers to the instance of a user-created script, normally running inside a Web Worker. To access an API instance the decorator `@inject(apiName: string)` function is used. From then on, the user will be able to call all exposed methods and `await` the promises returned by them.
+
+An example implementation can be found at [7.0.MethodsInjection.ts](test/fixtures/7.0.MethodsInjection.ts)
+
+### See also
+
+1.  [Scripts introduction](docs/scripts/introduction.md)
+2.  [Common patterns](docs/scripts/common-patterns.md)
 
 # Related documents
 
