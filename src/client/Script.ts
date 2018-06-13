@@ -29,7 +29,9 @@ export function inject(apiName?: string) {
     throw new TypeError('API name cannot be null / empty')
   }
   return function<T extends Script>(target: T, propertyKey: keyof T) {
-    getInjectedAPIs(target).set(propertyKey, apiName || propertyKey)
+    if (typeof propertyKey === 'string') {
+      getInjectedAPIs(target).set(propertyKey, apiName || propertyKey)
+    } else throw new TypeError('Cannot inject APIs with non-string names')
   }
 }
 

@@ -131,7 +131,9 @@ export abstract class API {
     for (let methodName of getExposedMethods(this)) {
       const theMethod: any = this[methodName]
       if (typeof theMethod === 'function') {
-        this.options.expose(methodName, theMethod.bind(this))
+        if (typeof methodName === 'string') {
+          this.options.expose(methodName, theMethod.bind(this))
+        }
       }
     }
   }
