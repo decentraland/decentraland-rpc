@@ -51,3 +51,30 @@ An example implementation can be found at [7.0.MethodsInjection.ts](test/fixture
 [The Entity-Component-System - An awesome gamedesign pattern in C Part 1](https://www.gamasutra.com/blogs/TobiasStein/20171122/310172/The_EntityComponentSystem__An_awesome_gamedesign_pattern_in_C_Part_1.php)
 
 Why do we create a component based system? [Components](http://gameprogrammingpatterns.com/component.html)
+
+# Metaverse Compiler
+
+The metaverse compiler is used to build all sort of TypeScript related projects. Both DCL's client all all of the SDK's dynamic scenes use it. You can think about it as an scoped task runner which only does a few things but it does them well.
+
+To get started create a build.json file:
+
+```json
+[
+    {
+        "name": "Compile systems",
+        "kind": "Webpack",
+        "file": "./scene.tsx",
+        "target": "webworker"
+    }
+]
+```
+
+Then run the following command:
+
+`metaverse-compiler build.json`
+
+To run in watch mode:
+
+`metaverse-compiler build.json --watch`
+
+To use custom loaders (Webpack builds only) refer to https://webpack.js.org/concepts/loaders/#inline
