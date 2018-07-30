@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc). 
+[![CircleCI](https://circleci.com/gh/decentraland/metaverse-rpc.svg?style=svg&circle-token=33a7ab6330a3c900c456c0367c118d912e48f484)](https://circleci.com/gh/decentraland/metaverse-rpc).
 [![Build status](https://ci.appveyor.com/api/projects/status/v2ql8549rfh311go/branch/master?svg=true)](https://ci.appveyor.com/project/decentraland/metaverse-rpc/branch/master)
 
 # `metaverse-rpc`
@@ -13,9 +13,9 @@ Scripts are pieces of logic that run inside the context of a Web Worker or remot
 
 The scripts communicate with the host application thru a JSON-RPC2 based protocol using a defined transport. We have 3 built in transports.
 
-* [WebWorker](src/common/transports/WebWorker.ts): Used to load a sandboxed script locally, inside a WebWorker
-* [WebSocket](src/common/transports/WebSocket.ts): Used to run scripts in remote servers
-* [Memory](src/common/transports/Memory.ts): Used to run tests, mainly. The script runs in the same execution context as the host.
+- [WebWorker](src/common/transports/WebWorker.ts): Used to load a sandboxed script locally, inside a WebWorker
+- [WebSocket](src/common/transports/WebSocket.ts): Used to run scripts in remote servers
+- [Memory](src/common/transports/Memory.ts): Used to run tests, mainly. The script runs in the same execution context as the host.
 
 ## Scripting host
 
@@ -60,12 +60,12 @@ To get started create a build.json file:
 
 ```json
 [
-    {
-        "name": "Compile systems",
-        "kind": "Webpack",
-        "file": "./scene.tsx",
-        "target": "webworker"
-    }
+  {
+    "name": "Compile systems",
+    "kind": "Webpack",
+    "file": "./scene.tsx",
+    "target": "webworker"
+  }
 ]
 ```
 
