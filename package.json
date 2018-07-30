@@ -1,5 +1,5 @@
 {
-  "name": "@decentraland/rpc",
+  "name": "decentraland-rpc",
   "version": "2.8.0",
   "description": "",
   "main": "lib/client/index.js",
@@ -13,6 +13,7 @@
     "lint:fix": "tslint --project tsconfig.json --fix",
     "lint": "tslint --project tsconfig.json"
   },
+  "private": false,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/decentraland/script.git"
