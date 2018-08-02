@@ -52,9 +52,9 @@ An example implementation can be found at [7.0.MethodsInjection.ts](test/fixture
 
 Why do we create a component based system? [Components](http://gameprogrammingpatterns.com/component.html)
 
-# Metaverse Compiler
+# Decentraland Compiler
 
-The metaverse compiler is used to build all sort of TypeScript related projects. Both DCL's client all all of the SDK's dynamic scenes use it. You can think about it as an scoped task runner which only does a few things but it does them well.
+The Decentraland Compiler is used to build all sort of TypeScript related projects. Both DCL's client all all of the SDK's dynamic scenes use it. You can think about it as an scoped task runner which only does a few things but it does them well.
 
 To get started create a build.json file:
 
@@ -71,10 +71,10 @@ To get started create a build.json file:
 
 Then run the following command:
 
-`metaverse-compiler build.json`
+`decentraland-compiler build.json`
 
 To run in watch mode:
 
-`metaverse-compiler build.json --watch`
+`decentraland-compiler build.json --watch`
 
 To use custom loaders (Webpack builds only) refer to https://webpack.js.org/concepts/loaders/#inline

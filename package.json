@@ -25,8 +25,8 @@
     "url": "https://github.com/decentraland/script/issues"
   },
   "bin": {
-    "metaverse-compiler": "./bin/compile.js",
-    "decentraland-compiler": "./bin/compile.js"
+    "decentraland-compiler": "./bin/compile.js",
+    "metaverse-compiler": "./bin/compile.js"
   },
   "homepage": "https://github.com/decentraland/script#readme",
   "devDependencies": {
