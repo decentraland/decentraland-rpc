@@ -1,6 +1,6 @@
 {
   "name": "decentraland-rpc",
-  "version": "2.8.3",
+  "version": "2.8.4",
   "description": "",
   "main": "lib/client/index.js",
   "typings": "lib/client/index.d.ts",
