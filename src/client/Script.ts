@@ -14,7 +14,7 @@ const hasSymbol = typeof Symbol === 'function' && Symbol.for
 
 const injectedAPISymbol = hasSymbol ? Symbol('injectedAPIs') : 0xfea0
 
-export interface Script {
+interface Script {
   systemDidEnable?(): Promise<void> | void
 }
 
@@ -57,7 +57,7 @@ async function _injectAPIs(target: Script) {
   })
 }
 
-export class Script extends Client {
+class Script extends Client {
   static inject = inject
 
   loadedAPIs: { [key: string]: API } = {}
@@ -144,3 +144,5 @@ export class Script extends Client {
       .catch(e => this.emit('error', e))
   }
 }
+
+export { Script }
