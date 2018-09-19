@@ -61,7 +61,7 @@ export enum ScriptingHostEvents {
 }
 
 export function getAPIName(klass: APIClass<API>): string | null {
-  return (klass as any)[apiNameSymbol] || null
+  return (klass as any)[apiNameSymbol] || klass.name || null
 }
 
 export function registerAPI(apiName: string): (klass: APIClass<API>) => void {
