@@ -3,13 +3,12 @@ import { test, shouldFail } from './support/ClientHelpers'
 import { Methods } from './support/ClientCommons'
 
 test(async ScriptingClient => {
-  ScriptingClient.sendEncoding = 'msgpack'
   const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
     Methods: Methods
   }
 
   assert.equal(await Methods.enable(), 1)
-  assert.equal(typeof await Methods.getRandomNumber(), 'number')
+  assert.equal(typeof (await Methods.getRandomNumber()), 'number')
   assert((await Methods.getRandomNumber()) > 0)
 
   const sentObject = {

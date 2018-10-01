@@ -1,20 +1,15 @@
 import { EventDispatcher } from '../core/EventDispatcher'
 import * as JsonRpc2 from './types'
-import { createCodec, encode, decode } from 'msgpack-lite'
-
-const codec = createCodec()
 
 /**
  * Creates a RPC Client.
  * It is intentional that Client does not create a WebSocket object since we prefer composability
  */
 export abstract class Client extends EventDispatcher implements JsonRpc2.IClient {
-  sendEncoding: 'JSON' | 'msgpack' = 'JSON'
-
   private _responsePromiseMap: Map<number, JsonRpc2.Resolvable> = new Map()
   private _nextMessageId: number = 0
   private _consoleLog: boolean = false
-  private _requestQueue: (string | Buffer)[] = []
+  private _requestQueue: string[] = []
   private _connected = false
 
   constructor(opts?: JsonRpc2.IClientOpts) {
@@ -22,14 +17,12 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     this.setLogging(opts)
   }
 
-  abstract sendMessage(message: string | Buffer): void
+  abstract sendMessage(message: string): void
 
-  public processMessage(
-    messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification) | Buffer | Uint8Array | number[]
-  ) {
+  public processMessage(messageStr: string | (JsonRpc2.IResponse & JsonRpc2.INotification)) {
     let message: JsonRpc2.IResponse & JsonRpc2.INotification
 
-    if (typeof messageStr === 'string' && messageStr.charAt(0) === '{') {
+    if (typeof messageStr === 'string') {
       this._logMessage(messageStr, 'receive')
 
       // Ensure JSON is not malformed
@@ -38,13 +31,6 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
       } catch (e) {
         return this.emit('error', e)
       }
-    } else if (
-      typeof messageStr === 'string' ||
-      messageStr instanceof Uint8Array /* tslint:disable-next-line */ ||
-      (typeof Buffer !== 'undefined' && messageStr instanceof Buffer) ||
-      messageStr instanceof Array
-    ) {
-      message = decode(messageStr as any, { codec })
     } else {
       message = messageStr
     }
@@ -140,11 +126,8 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
   }
 
   private _send(message: JsonRpc2.INotification | JsonRpc2.IRequest) {
-    if (this.sendEncoding === 'msgpack') {
-      this._requestQueue.push(encode(message, { codec }))
-    } else {
-      this._requestQueue.push(JSON.stringify(message))
-    }
+    this._requestQueue.push(JSON.stringify(message))
+
     this._sendQueuedRequests()
   }
 
@@ -158,7 +141,7 @@ export abstract class Client extends EventDispatcher implements JsonRpc2.IClient
     }
   }
 
-  private _logMessage(message: string | Buffer, direction: 'send' | 'receive') {
+  private _logMessage(message: string, direction: 'send' | 'receive') {
     if (this._consoleLog) {
       console.log(`Client ${direction === 'send' ? '>' : '<'}`, message.toString())
     }

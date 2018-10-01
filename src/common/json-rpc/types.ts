@@ -134,13 +134,13 @@ export interface ScriptingTransport {
   allowBinary?: boolean
 
   /** sendMessage is used to send a string message thru the transport */
-  sendMessage(message: string | Uint8Array): void
+  sendMessage(message: string): void
 
   /** the onConnect callback is called when the transport gets connected */
   onConnect?(callback: () => void): void
 
   /** the onMessage callback is called when the transport receives a message */
-  onMessage(callback: (message: string | Uint8Array) => void): void
+  onMessage(callback: (message: string) => void): void
 
   /** the onError callback is called when the transport triggers an error */
   onError?(callback: (e: Error) => void): void

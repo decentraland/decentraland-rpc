@@ -34,7 +34,7 @@ export interface IWebSocket {
 }
 
 export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
-  const queue: (string | Uint8Array | ArrayBuffer | SharedArrayBuffer | Buffer)[] = []
+  const queue: (string | Uint8Array | ArrayBuffer | SharedArrayBuffer)[] = []
 
   socket.addEventListener('open', function() {
     flush()
@@ -47,7 +47,7 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
     }
   }
 
-  function send(msg: string | Uint8Array | ArrayBuffer | SharedArrayBuffer | Buffer) {
+  function send(msg: string | Uint8Array | ArrayBuffer | SharedArrayBuffer) {
     if (typeof msg === 'string') {
       socket.send(msg, { binary: false })
     } else if (msg instanceof Uint8Array || msg instanceof ArrayBuffer || msg instanceof SharedArrayBuffer) {
@@ -87,7 +87,7 @@ export function WebSocketTransport(socket: IWebSocket): ScriptingTransport {
         handler(message.data)
       })
     },
-    sendMessage(message) {
+    sendMessage(message: any) {
       const toSend = message instanceof Uint8Array ? message.buffer : message
 
       if (socket.readyState === socket.OPEN) {
