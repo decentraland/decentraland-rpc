@@ -299,7 +299,20 @@ export async function processFile(opt: {
 
   const result = await compile(options)
 
-  if (result.hasErrors() || result.hasWarnings()) {
+  if (result.hasErrors()) {
+    throw new Error(
+      result.toString({
+        assets: true,
+        colors: true,
+        entrypoints: true,
+        env: true,
+        errors: true,
+        publicPath: true
+      })
+    )
+  }
+
+  if (result.hasWarnings()) {
     console.log(
       result.toString({
         assets: true,
