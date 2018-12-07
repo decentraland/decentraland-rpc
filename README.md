@@ -78,3 +78,9 @@ To run in watch mode:
 `decentraland-compiler build.json --watch`
 
 To use custom loaders (Webpack builds only) refer to https://webpack.js.org/concepts/loaders/#inline
+
+
+
+## Copyright info
+
+This repository is protected with a standard Apache 2 licence. See the terms and conditions in the [LICENCE](https://github.com/decentraland/decentraland-rpc/blob/master/LICENSE) file.
