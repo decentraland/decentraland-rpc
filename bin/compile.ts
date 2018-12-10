@@ -3,6 +3,7 @@
 // This started as something different as it is right now. It became gulp.
 
 import * as webpack from 'webpack'
+import { ConcatSource } from 'webpack-sources'
 import * as globPkg from 'glob'
 import * as rimraf from 'rimraf'
 import * as fs from 'fs'
@@ -48,7 +49,8 @@ export interface ICompilerOptions {
   files: string[]
   outDir: string
   tsconfig: string
-  target?: 'web' | 'webworker' | 'node'
+  target?: 'web' | 'webworker' | 'node' | 'esm'
+  library?: string
   coverage?: boolean
   rootFolder: string
 }
@@ -94,6 +96,17 @@ export async function compile(opt: ICompilerOptions) {
       ].join('\n')
     )
 
+    const libraryName = opt.library || 'library'
+    const plugins = [ProgressBarPlugin({})]
+    let libraryTarget: any = 'umd'
+
+    if (opt.target === 'webworker') {
+      libraryTarget = 'this'
+    } else if (opt.target === 'esm') {
+      libraryTarget = 'var'
+      plugins.push(new ESModulePlugin({ exportedMember: libraryName }))
+    }
+
     const options: webpack.Configuration = {
       entry,
       mode: isProduction ? 'production' : 'development',
@@ -104,7 +117,8 @@ export async function compile(opt: ICompilerOptions) {
       },
       output: {
         path: opt.outDir,
-        libraryTarget: opt.target === 'webworker' ? 'this' : 'umd'
+        libraryTarget,
+        library: libraryName
       },
 
       resolve: {
@@ -136,8 +150,8 @@ export async function compile(opt: ICompilerOptions) {
           }
         ]
       },
-      target: opt.target,
-      plugins: [ProgressBarPlugin({})]
+      target: opt.target === 'esm' ? 'web' : opt.target,
+      plugins
     }
 
     if (opt.coverage) {
@@ -242,6 +256,7 @@ export async function processFile(opt: {
   watch?: boolean
   target?: string
   coverage?: boolean
+  library?: string
 }) {
   const baseFiles = (opt.file && [opt.file]) || (opt.files && opt.files[0]) || []
 
@@ -270,8 +285,8 @@ export async function processFile(opt: {
   let outFile = opt.outFile
     ? resolve(process.cwd(), opt.outFile)
     : parsedTsConfig.compilerOptions.outFile
-      ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
-      : parsed.name + '.js'
+    ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outFile)
+    : parsed.name + '.js'
 
   const outDir = parsedTsConfig.compilerOptions.outDir
     ? resolve(dirname(configFile), parsedTsConfig.compilerOptions.outDir)
@@ -289,7 +304,8 @@ export async function processFile(opt: {
     tsconfig: configFile,
     coverage: coverage,
     target: (opt.target as any) || 'web',
-    rootFolder
+    rootFolder,
+    library: opt.library
   }
 
   console.log(`
@@ -481,4 +497,32 @@ function ProgressBarPlugin(options: any) {
       running = false
     }
   })
+}
+
+class ESModulePlugin {
+  constructor(
+    public options: {
+      exportedMember: string
+    }
+  ) {}
+
+  apply(compiler: webpack.Compiler) {
+    compiler.hooks.compilation.tap('ESModulePlugin', compilation => {
+      compilation.hooks.afterOptimizeChunkAssets.tap('ESModulePlugin', chunks => {
+        for (const chunk of chunks) {
+          if (!chunk.canBeInitial()) {
+            continue
+          }
+
+          for (const file of chunk.files) {
+            compilation.assets[file] = new ConcatSource(
+              compilation.assets[file],
+              '\n',
+              `export default ${this.options.exportedMember};`
+            )
+          }
+        }
+      })
+    })
+  }
 }
