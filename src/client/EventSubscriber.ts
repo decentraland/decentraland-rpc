@@ -21,7 +21,7 @@ export class EventSubscriber extends EventDispatcher {
     if (this.getEventBindings(event).length === 0) {
       this.component.subscribe(event).catch(e => this.emit('error', e))
     }
-    return super.on.apply(this, arguments)
+    return super.on.apply(this, arguments as any)
   }
 
   /**
@@ -31,7 +31,7 @@ export class EventSubscriber extends EventDispatcher {
    */
   off(event: string | EventDispatcherBinding | Function) {
     let theEventToValidate: string | null = null
-    const offResult = super.off.apply(this, arguments)
+    const offResult = super.off.apply(this, arguments as any)
 
     if (typeof event === 'string') {
       theEventToValidate = event

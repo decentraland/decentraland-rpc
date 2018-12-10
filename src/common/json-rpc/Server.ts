@@ -108,7 +108,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
     let request: JsonRpc2.IRequest
 
     try {
-      if (typeof messageStr === 'string' && messageStr.charAt(0) === '{') {
+      if (typeof (messageStr as any) === 'string' && messageStr.charAt(0) === '{') {
         // Ensure JSON is not malformed
         request = JSON.parse(messageStr)
       } else {
@@ -135,7 +135,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
             try {
               const result: JsonRpc2.PromiseOrNot<any> =
                 request.params instanceof Array
-                  ? handler.apply(this, request.params)
+                  ? handler.apply(this, request.params as any)
                   : handler.call(this, request.params)
 
               if (isPromiseLike(result)) {
