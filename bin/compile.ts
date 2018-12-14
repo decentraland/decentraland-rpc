@@ -49,11 +49,39 @@ export interface ICompilerOptions {
   files: string[]
   outDir: string
   tsconfig: string
-  target?: 'web' | 'webworker' | 'node' | 'esm'
+  target?: 'web' | 'webworker' | 'node' | 'esm' | 'this'
   library?: string
   coverage?: boolean
   rootFolder: string
   fileName?: string
+}
+
+class ESModulePlugin {
+  constructor(
+    public options: {
+      exportedMember: string
+    }
+  ) {}
+
+  apply(compiler: webpack.Compiler) {
+    compiler.hooks.compilation.tap('ESModulePlugin', compilation => {
+      compilation.hooks.afterOptimizeChunkAssets.tap('ESModulePlugin', chunks => {
+        for (const chunk of chunks) {
+          if (!chunk.canBeInitial()) {
+            continue
+          }
+
+          for (const file of chunk.files) {
+            compilation.assets[file] = new ConcatSource(
+              compilation.assets[file],
+              '\n',
+              `export default ${this.options.exportedMember};`
+            )
+          }
+        }
+      })
+    })
+  }
 }
 
 export async function compile(opt: ICompilerOptions) {
@@ -97,15 +125,28 @@ export async function compile(opt: ICompilerOptions) {
       ].join('\n')
     )
 
-    const libraryName = opt.library || 'library'
+    const libraryName = opt.library || undefined
     const plugins = [ProgressBarPlugin({})]
     let libraryTarget: any = 'umd'
+    let target: webpack.Configuration['target'] = 'web'
 
-    if (opt.target === 'webworker') {
+    if (opt.target === 'esm') {
+      target = 'web'
+    } else if (opt.target === 'this') {
+      target = 'webworker'
+    } else {
+      target = opt.target
+    }
+
+    if (opt.target === 'this') {
+      libraryTarget = 'this'
+    } else if (opt.target === 'webworker') {
       libraryTarget = 'this'
     } else if (opt.target === 'esm') {
       libraryTarget = 'var'
-      plugins.push(new ESModulePlugin({ exportedMember: libraryName }))
+      if (libraryName) {
+        plugins.push(new ESModulePlugin({ exportedMember: libraryName }))
+      }
     }
 
     const options: webpack.Configuration = {
@@ -119,8 +160,7 @@ export async function compile(opt: ICompilerOptions) {
       output: {
         filename: opt.fileName,
         path: opt.outDir,
-        libraryTarget,
-        library: libraryName
+        libraryTarget
       },
 
       resolve: {
@@ -152,7 +192,7 @@ export async function compile(opt: ICompilerOptions) {
           }
         ]
       },
-      target: opt.target === 'esm' ? 'web' : opt.target,
+      target,
       plugins
     }
 
@@ -167,6 +207,10 @@ export async function compile(opt: ICompilerOptions) {
         enforce: 'post',
         exclude: /node_modules|\.spec\.js$/
       })
+    }
+
+    if (libraryName) {
+      options.output!.library = libraryName
     }
 
     const compiler = webpack(options)
@@ -258,7 +302,7 @@ export async function processFile(opt: {
   watch?: boolean
   target?: string
   coverage?: boolean
-  library?: string,
+  library?: string
   fileName?: string
 }) {
   const baseFiles = (opt.file && [opt.file]) || (opt.files && opt.files[0]) || []
@@ -501,32 +545,4 @@ function ProgressBarPlugin(options: any) {
       running = false
     }
   })
-}
-
-class ESModulePlugin {
-  constructor(
-    public options: {
-      exportedMember: string
-    }
-  ) {}
-
-  apply(compiler: webpack.Compiler) {
-    compiler.hooks.compilation.tap('ESModulePlugin', compilation => {
-      compilation.hooks.afterOptimizeChunkAssets.tap('ESModulePlugin', chunks => {
-        for (const chunk of chunks) {
-          if (!chunk.canBeInitial()) {
-            continue
-          }
-
-          for (const file of chunk.files) {
-            compilation.assets[file] = new ConcatSource(
-              compilation.assets[file],
-              '\n',
-              `export default ${this.options.exportedMember};`
-            )
-          }
-        }
-      })
-    })
-  }
 }
