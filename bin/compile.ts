@@ -53,6 +53,7 @@ export interface ICompilerOptions {
   library?: string
   coverage?: boolean
   rootFolder: string
+  fileName?: string
 }
 
 export async function compile(opt: ICompilerOptions) {
@@ -116,6 +117,7 @@ export async function compile(opt: ICompilerOptions) {
         minimize: isProduction
       },
       output: {
+        filename: opt.fileName,
         path: opt.outDir,
         libraryTarget,
         library: libraryName
@@ -256,7 +258,8 @@ export async function processFile(opt: {
   watch?: boolean
   target?: string
   coverage?: boolean
-  library?: string
+  library?: string,
+  fileName?: string
 }) {
   const baseFiles = (opt.file && [opt.file]) || (opt.files && opt.files[0]) || []
 
@@ -305,6 +308,7 @@ export async function processFile(opt: {
     coverage: coverage,
     target: (opt.target as any) || 'web',
     rootFolder,
+    fileName: opt.fileName,
     library: opt.library
   }
 
