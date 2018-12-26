@@ -2,6 +2,9 @@ import { ScriptingTransport } from '../json-rpc/types'
 import { EventDispatcher } from '../core/EventDispatcher'
 
 export function MemoryTransport() {
+  const onConnectList: Function[] = []
+  let connected = false
+
   const clientEd = new EventDispatcher()
   const serverEd = new EventDispatcher()
 
@@ -28,13 +31,24 @@ export function MemoryTransport() {
       },
 
       onConnect(handler) {
-        setTimeout(handler, 16)
+        if (connected == false) {
+          onConnectList.push(handler)
+        }
       }
     }
   }
 
   const client = configureMemoryTransport(clientEd, serverEd)
   const server = configureMemoryTransport(serverEd, clientEd)
+
+  // we send a RPC.Enable message when the server gets connected as start signal
+  clientEd.on('message', () => {
+    if (connected === false) {
+      onConnectList.forEach($ => $())
+      onConnectList.length = 0
+      connected = true
+    }
+  })
 
   return {
     client,
