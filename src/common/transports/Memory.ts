@@ -28,7 +28,7 @@ export function MemoryTransport() {
       },
 
       onConnect(handler) {
-        setInterval(handler, 16)
+        setTimeout(handler, 16)
       }
     }
   }
