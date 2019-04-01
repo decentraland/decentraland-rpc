@@ -54,6 +54,7 @@ export interface ICompilerOptions {
   coverage?: boolean
   rootFolder: string
   fileName?: string
+  globalObject?: string
 }
 
 class ESModulePlugin {
@@ -213,6 +214,10 @@ export async function compile(opt: ICompilerOptions) {
       options.output!.library = libraryName
     }
 
+    if (opt.globalObject) {
+      options.output!.globalObject = opt.globalObject
+    }
+
     const compiler = webpack(options)
 
     if (!isWatching) {
@@ -304,6 +309,7 @@ export async function processFile(opt: {
   coverage?: boolean
   library?: string
   fileName?: string
+  globalObject?: string
 }) {
   const baseFiles = (opt.file && [opt.file]) || (opt.files && opt.files[0]) || []
 
@@ -353,7 +359,8 @@ export async function processFile(opt: {
     target: (opt.target as any) || 'web',
     rootFolder,
     fileName: opt.fileName,
-    library: opt.library
+    library: opt.library,
+    globalObject: opt.globalObject
   }
 
   console.log(`
