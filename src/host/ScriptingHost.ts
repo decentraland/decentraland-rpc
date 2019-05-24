@@ -2,6 +2,7 @@ import { Dictionary } from '../common/core/EventDispatcher'
 import { TransportBasedServer } from './TransportBasedServer'
 import { APIClass, API, APIOptions } from './API'
 import { ScriptingTransport } from '../common/json-rpc/types'
+import { hasOwnSymbol } from '../common/core/SymbolShim'
 
 // If there is no native Symbol
 // nor polyfill, then a plain number is used for performance.
@@ -14,7 +15,8 @@ const registeredAPIs: Dictionary<APIClass<API>> = {}
 
 namespace PrivateHelpers {
   export function _registerAPI(apiName: string, api: APIClass<API>) {
-    if (apiNameSymbol in api) {
+    const hasName = hasOwnSymbol(api, apiNameSymbol)
+    if (hasName) {
       throw new Error(`The API you are trying to register is already registered`)
     }
 
@@ -197,6 +199,10 @@ export class ScriptingHost extends TransportBasedServer {
     const instance = ctor.factory ? ctor.factory(ctor, apiOptions) : new ctor(apiOptions)
 
     this.apiInstances.set(apiName, instance)
+
+    if (this.isEnabled) {
+      PrivateHelpers.mountAPI(instance)
+    }
 
     return instance
   }

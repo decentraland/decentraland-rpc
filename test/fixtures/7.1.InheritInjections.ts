@@ -18,10 +18,10 @@ export default class TestMethods extends BaseTestMethods {
 
   async doTest() {
     assert.deepEqual(Array.from(getInjectedAPIs(this)), [
-      ['testComponent', 'Test'],
-      ['m', 'Methods'],
       ['Logger', 'Logger'],
-      ['xxx', 'Test']
+      ['testComponent', 'Test'],
+      ['xxx', 'Test'],
+      ['m', 'Methods']
     ])
 
     if (!this.m) {
@@ -45,7 +45,7 @@ export default class TestMethods extends BaseTestMethods {
     assert.equal(this.xxx, this.testComponent)
 
     assert.equal(await Methods.enable(), 1)
-    assert.equal(typeof await Methods.getRandomNumber(), 'number')
+    assert.equal(typeof (await Methods.getRandomNumber()), 'number')
     assert((await Methods.getRandomNumber()) > 0)
 
     const sentObject = {
