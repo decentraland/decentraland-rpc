@@ -164,6 +164,7 @@ export abstract class Server<ClientType = any> extends EventDispatcher implement
             }
           }
         } else {
+          console.log(`Method ${request.method} not present in `, this._exposedMethodsMap)
           this._sendError(from, request, JsonRpc2.ErrorCode.MethodNotFound)
         }
       } else {

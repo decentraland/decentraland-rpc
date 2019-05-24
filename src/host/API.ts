@@ -1,3 +1,5 @@
+import { hasOwnSymbol } from '../common/core/SymbolShim'
+
 // http://gameprogrammingpatterns.com/component.html
 
 // If there is no native Symbol
@@ -12,13 +14,27 @@ export function exposeMethod<T extends API>(
   propertyKey: keyof T,
   descriptor: TypedPropertyDescriptor<ExposableMethod>
 ) {
-  getExposedMethods(target).add(propertyKey)
+  const anyTarget: any = target
+  if (!hasOwnSymbol(target, exposedMethodSymbol)) {
+    anyTarget[exposedMethodSymbol] = new Set()
+  }
+
+  anyTarget[exposedMethodSymbol].add(propertyKey)
 }
 
 export function getExposedMethods<T extends API>(instance: T): Set<keyof T> {
-  const instanceAny: any = instance
-  instanceAny[exposedMethodSymbol] = instanceAny[exposedMethodSymbol] || new Set()
-  return instanceAny[exposedMethodSymbol]
+  const result = new Set<keyof T>()
+  let currentPrototype = Object.getPrototypeOf(instance)
+
+  while (!!currentPrototype) {
+    if (hasOwnSymbol(currentPrototype, exposedMethodSymbol)) {
+      const currentList: Set<string> = currentPrototype[exposedMethodSymbol]
+      currentList.forEach($ => result.add($ as any))
+    }
+    currentPrototype = Object.getPrototypeOf(currentPrototype)
+  }
+
+  return result
 }
 
 export function rateLimit<T>(interval: number = 100) {

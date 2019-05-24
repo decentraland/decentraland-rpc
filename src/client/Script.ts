@@ -2,6 +2,7 @@ import { Client } from '../common/json-rpc/Client'
 import { getApi } from '../common/json-rpc/API'
 import { ILogOpts, ScriptingTransport } from '../common/json-rpc/types'
 import { isPromiseLike } from '../common/core/isPromiseLike'
+import { hasOwnSymbol } from '../common/core/SymbolShim'
 
 /** this is defined in the constructor ScriptingHost() */
 const loadAPIsNotificationName = 'LoadComponents'
@@ -30,7 +31,7 @@ export function inject(apiName?: string) {
   }
   return function<T extends Script>(target: T, propertyKey: keyof T) {
     if (typeof propertyKey === 'string') {
-      getInjectedAPIs(target).set(propertyKey, apiName || propertyKey)
+      getInjectableMap(target).set(propertyKey, apiName || propertyKey)
     } else throw new TypeError('Cannot inject APIs with non-string names')
   }
 }
@@ -40,13 +41,32 @@ export function inject(apiName?: string) {
  * @param instance A script to get the APIs
  */
 export function getInjectedAPIs<T extends Script>(instance: T): Map<keyof T, string> {
-  const instanceAny: any = instance
-  instanceAny[injectedAPISymbol] = instanceAny[injectedAPISymbol] || new Map()
-  return instanceAny[injectedAPISymbol]
+  const result = new Map<keyof T, string>()
+  let currentPrototype = Object.getPrototypeOf(instance)
+
+  while (!!currentPrototype) {
+    if (hasOwnSymbol(currentPrototype, injectedAPISymbol)) {
+      const currentList: Map<keyof T, string> = currentPrototype[injectedAPISymbol]
+      currentList.forEach((v, k) => result.set(k, v))
+    }
+    currentPrototype = Object.getPrototypeOf(currentPrototype)
+  }
+
+  return result
+}
+
+function getInjectableMap(target: Script): Map<any, string> {
+  const anyTarget: any = target
+
+  if (!hasOwnSymbol(target, injectedAPISymbol)) {
+    anyTarget[injectedAPISymbol] = new Map()
+  }
+
+  return anyTarget[injectedAPISymbol]
 }
 
 async function _injectAPIs(target: Script) {
-  const injectedMap = getInjectedAPIs(target)
+  let injectedMap: Map<keyof Script, string> = getInjectedAPIs(target)
 
   if (injectedMap.size === 0) return
 

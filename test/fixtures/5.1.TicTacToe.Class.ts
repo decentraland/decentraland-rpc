@@ -23,6 +23,10 @@ export default class Game extends TestableScript {
   mySymbol: GameSymbol = null
   board: GameSymbol[] = [null, null, null, null, null, null, null, null, null]
 
+  constructor(a: any) {
+    super(a)
+  }
+
   getWinner() {
     return ['x', 'o'].find($ =>
       winingCombinations.some(combination => combination.every(position => this.board[position] === $))
