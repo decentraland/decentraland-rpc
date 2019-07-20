@@ -1,3 +1,9 @@
 {
-  "extends": "dcl-tslint-config-standard"
+  "extends": "dcl-tslint-config-standard",
+  "rules": {
+    "strict-type-predicates": false,
+    "no-extra-boolean-cast": false,
+    "deprecation": false,
+    "no-floating-promises": false
+  }
 }

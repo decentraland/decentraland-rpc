@@ -1,5 +1,5 @@
 import { registerAPI, API, exposeMethod, rateLimit } from '../../lib/host'
-import { testInWorker } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 
 @registerAPI('RateLimiter')
 export class RateLimiter extends API {

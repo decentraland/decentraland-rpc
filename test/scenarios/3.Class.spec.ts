@@ -1,7 +1,8 @@
 import { registerAPI, API, exposeMethod } from '../../lib/host'
 
 import * as assert from 'assert'
-import { future, testInWorker } from './support/Helpers'
+import { future } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 
 const aFuture = future()
 

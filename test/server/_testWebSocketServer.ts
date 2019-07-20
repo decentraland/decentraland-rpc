@@ -50,7 +50,7 @@ export function initializeWebSocketTester(server: Server) {
   wss.on('connection', function connection(ws, req) {
     console.log('Got websocket connection')
 
-    testWithTransport(WebSocketTransport(ws), async ScriptingClient => {
+    testWithTransport(WebSocketTransport(ws as any), async ScriptingClient => {
       const { Methods } = (await ScriptingClient.loadAPIs(['Methods'])) as {
         Methods: Methods
       }

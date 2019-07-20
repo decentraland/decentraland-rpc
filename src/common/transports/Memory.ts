@@ -31,7 +31,7 @@ export function MemoryTransport() {
       },
 
       onConnect(handler) {
-        if (connected == false) {
+        if (!connected) {
           onConnectList.push(handler)
         }
       }
