@@ -1,5 +1,5 @@
 import { registerAPI, API, exposeMethod, throttle } from '../../lib/host'
-import { testInWorker } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 
 @registerAPI('Throttling')
 export class Throttling extends API {

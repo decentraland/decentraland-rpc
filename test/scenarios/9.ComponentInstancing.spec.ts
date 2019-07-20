@@ -1,5 +1,5 @@
 import { registerAPI, API, APIOptions, exposeMethod } from '../../lib/host'
-import { testInWorker } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 
 @registerAPI('Greeter')
 export class Greeter extends API {

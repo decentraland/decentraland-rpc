@@ -1,6 +1,6 @@
 import { EventDispatcher, EventDispatcherBinding } from '../../lib/common/core/EventDispatcher'
 import { SubscribableAPI, APIOptions, exposeMethod, registerAPI } from '../../lib/host'
-import { testInWorker } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 import * as assert from 'assert'
 
 class EventListener extends EventDispatcher {

@@ -1,4 +1,5 @@
-import { testInWorker, testWithTransport } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
+import { testWithTransport } from './support/TestWithTransport'
 import { Logger, Methods, Test } from './support/Commons'
 import * as assert from 'assert'
 import { WebSocketTransport } from '../../lib/client'

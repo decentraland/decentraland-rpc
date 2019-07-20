@@ -1,4 +1,4 @@
-import { testInWorker } from './support/Helpers'
+import { testInWorker } from './support/TestInWorker'
 import { Logger, Methods, Test } from './support/Commons'
 import { registerAPI, API, exposeMethod, ScriptingHost } from '../../lib/host'
 import * as assert from 'assert'
