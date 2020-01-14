@@ -12,13 +12,15 @@ const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 import { spawn } from 'child_process'
 import { tmpdir } from 'os'
 import ProgressBar = require('progress')
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 
 const packageJson = JSON.parse(fs.readFileSync(require.resolve('../package.json')).toString())
 const isWatching = process.argv.some($ => $ === '--watch')
 const instrumentCoverage = process.argv.some($ => $ === '--coverage') || process.env.NODE_ENV === 'coverage'
 const isProduction = process.env.NODE_ENV !== 'development' && !isWatching && !instrumentCoverage
 const webWorkerTransport = resolve(__dirname, '../lib/common/transports/WebWorker')
+
+console.log(`Compiling. isProduction = ${isProduction}`)
 
 const entryPointWebWorker = (filename: string) => `
 import { WebWorkerTransport } from ${JSON.stringify(webWorkerTransport)}
