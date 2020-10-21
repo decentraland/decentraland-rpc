@@ -51,32 +51,6 @@ When extending from the core `API` class a set of functions become available thr
 
   Low level function that serves the same purpose as the `@exposeMethod` decorator does.
 
-## Rate limiting
-
-Rate limiting allows to specify a time interval in which calls to a API's method can be accepted. This allows for more control over computationally expensive methods and can be specified by using the `@rateLimit(inteval)` decorator:
-
-```ts
-@exposeMethod
-@rateLimit(1000)  
-async playSound(): number {
-  // some sensible logic
-}
-```
-
-## Throttling
-
-Much like Rate limiting, Throttling allows to specify a time interval in which an specific amount of calls to a API's method can be accepted. This functionality can be accessed through the `@throttle(callLimit, inteval)` decorator:
-
-```ts
-@exposeMethod
-@throttle(5, 1000)
-async playSound(): number {
-  // some sensible logic
-}
-```
-
-In the above example only five sounds will be allowed to be played per second. This method is specially useful for setting more complex limitations to a method that could be could from an external script.
-
 ## Instancing a API from within another API
 
 It is possible to access an istance of a API from another API's context. This can be achieved with the `getAPIInstance()` method found inside the `options` property.

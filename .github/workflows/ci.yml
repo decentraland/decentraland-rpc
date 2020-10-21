@@ -1,0 +1,40 @@
+name: CI
+on:
+  push:
+    branches:
+      - "main"
+      - "master"
+  pull_request:
+
+jobs:
+  job:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+          lfs: true
+
+      - name: NPM Install
+        run: npm install
+
+      - name: dir
+        run: find ${{ github.workspace }}
+        if: "!contains( matrix.os, 'windows')"
+
+      - name: dir
+        run: gci -recurse ${{ github.workspace }}
+        if: contains( matrix.os, 'windows')
+
+      - name: make test
+        run: make test
+
+      - name: dir
+        run: find $RUNNER_WORKSPACE
+        shell: bash

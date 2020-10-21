@@ -54,3 +54,5 @@ bin/**/*.map
 bin/**/*.d.ts
 
 TODO.yml
+
+coverage.json

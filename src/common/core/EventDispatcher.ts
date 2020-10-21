@@ -10,7 +10,7 @@ export class EventDispatcherBinding {
     public id: number,
     public cb: Function | null,
     public event: string,
-    public sharedList: EventDispatcherBinding[],
+    public sharedList: EventDispatcherBinding[] | null,
     public object: EventDispatcher<any> | null
   ) {}
 
@@ -20,7 +20,7 @@ export class EventDispatcherBinding {
       this.cb = null
       this.object = null
       if (this.sharedList) {
-        delete this.sharedList
+        this.sharedList = null
       }
     }
   }
@@ -45,7 +45,7 @@ export class EventDispatcherBinding {
 }
 
 function turnOffCallback(f: EventDispatcherBinding) {
-  delete f.cb
+  f.cb = null
 }
 
 export interface EventDispatcherEventsBase {
@@ -72,7 +72,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
       bindList && bindList.push(tmp)
 
       if (once) {
-        tmp.cb = function(this: EventDispatcher<T>) {
+        tmp.cb = function (this: EventDispatcher<T>) {
           callback.apply(this, arguments)
           tmp.cb = null
         }.bind(this)
@@ -102,7 +102,7 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
     if (arguments.length === 0) {
       for (let i in this.edBindings) {
         for (let e in this.edBindings[i]) {
-          delete this.edBindings[i][e].cb
+          this.edBindings[i][e].cb = null
         }
         this.edBindings[i].length = 0
       }
@@ -186,6 +186,6 @@ export class EventDispatcher<T = EventDispatcherEventsBase> {
   }
 
   protected getEventBindings(event: string) {
-    return (this.edBindings[event] || []).filter($ => $ && $.enabled)
+    return (this.edBindings[event] || []).filter(($) => $ && $.enabled)
   }
 }
