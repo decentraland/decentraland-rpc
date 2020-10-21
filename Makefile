@@ -20,7 +20,6 @@ build: $(COMPILER)
 test: build
 	node ./bin/test.js
 	$(NODE_BIN)/nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text
-	$(NODE_BIN)/mocha test/out/fixtures/**/*.test.js
 
 test-local:
 	$(MAKE) watch & node ./bin/test.js --keep-open
