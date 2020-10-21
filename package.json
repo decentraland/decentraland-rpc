@@ -1,17 +1,11 @@
 {
   "name": "decentraland-rpc",
-  "version": "3.1.8",
+  "version": "4.0.0",
   "description": "",
   "main": "lib/client/index.js",
   "typings": "lib/client/index.d.ts",
   "scripts": {
-    "build:cli": "tsc -p bin/tsconfig.json",
-    "watch": "npm run build:cli && node ./bin/compile.js compiler.cfg.json --watch",
-    "build": "npm run build:cli && node ./bin/compile.js compiler.cfg.json",
-    "test": "npm run build && node ./bin/test.js && nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text && mocha test/out/fixtures/**/*.test.js",
-    "test:local": "npm run build && (npm run watch & node ./bin/test.js --keep-open)",
-    "lint:fix": "tslint --project tsconfig.json --fix",
-    "lint": "tslint --project tsconfig.json"
+    "test": "make test"
   },
   "private": false,
   "repository": {
@@ -30,22 +24,22 @@
   },
   "homepage": "https://github.com/decentraland/decentraland-rpc#readme",
   "devDependencies": {
-    "@types/express": "^4.16.0",
-    "@types/glob": "^5.0.34",
-    "@types/mocha": "^5.2.5",
-    "@types/progress": "^2.0.1",
-    "@types/rimraf": "^2.0.2",
-    "@types/webpack": "^4.4.21",
-    "@types/webpack-sources": "^0.1.5",
+    "@types/express": "^4.17.8",
+    "@types/glob": "^5.0.36",
+    "@types/mocha": "^5.2.7",
+    "@types/progress": "^2.0.3",
+    "@types/rimraf": "^2.0.4",
+    "@types/webpack": "^4.41.23",
+    "@types/webpack-sources": "^0.1.8",
     "@types/ws": "^4.0.2",
-    "assert": "^1.4.1",
+    "assert": "^1.5.0",
     "dcl-tslint-config-standard": "^1.1.0",
-    "express": "^4.16.4",
+    "express": "^4.17.1",
     "mocha": "^5.2.0",
-    "nyc": "^14.1.0",
+    "nyc": "^14.1.1",
     "titere": "^2.0.3",
     "traceur": "0.0.111",
-    "tslint": "^5.14.0",
+    "tslint": "^5.20.1",
     "tslint-language-service": "^0.9.9",
     "ws": "^4.1.0"
   },
@@ -55,16 +49,17 @@
     "printWidth": 120
   },
   "dependencies": {
+    "@types/node": "^14.14.1",
     "chalk": "^2.4.2",
-    "glob": "^7.1.4",
+    "glob": "^7.1.6",
     "istanbul-instrumenter-loader": "^3.0.1",
     "progress": "^2.0.3",
     "raw-loader": "^0.5.1",
-    "rimraf": "^2.6.3",
-    "ts-loader": "^6.0.1",
-    "tsconfig-paths-webpack-plugin": "^3.2.0",
-    "typescript": "^3.4.5",
+    "rimraf": "^2.7.1",
+    "ts-loader": "^6.2.2",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "typescript": "^4.0.3",
     "url-loader": "^1.1.2",
-    "webpack": "^4.32.2"
+    "webpack": "^4.44.2"
   }
 }

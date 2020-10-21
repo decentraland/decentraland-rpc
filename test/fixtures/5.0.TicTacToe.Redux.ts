@@ -57,7 +57,7 @@ function reducer(state: ITicTacToeState = initialState, action: IGenericAction):
         mySymbol: payload.symbol
       }
   }
-
+  // @ts-ignore
   return state
 }
 
