@@ -1,5 +1,10 @@
 COMPILER = bin/compile.js
 
+clean:
+	rm -rfv bin/*.js
+	rm -rfv lib
+	rm -rfv test/out
+
 $(COMPILER): bin/compile.ts bin/test.ts bin/tsconfig.json
 	node_modules/.bin/tsc -p bin/tsconfig.json
 	chmod +x $(COMPILER)
@@ -25,4 +30,4 @@ lint-fix:
 lint:
 	node_modules/.bin/tslint --project tsconfig.json
 
-.PHONY: watch
+.PHONY: watch clean

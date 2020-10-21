@@ -30,6 +30,7 @@ if (imported && imported.__esModule && imported['default']) {
 `
 
 console.log('decentraland-compiler version: ' + chalk.green(packageJson.version))
+console.log('decentraland-compiler: ' + chalk.redBright("PLEASE STOP USING THIS COMPLIER"))
 
 export function findConfigFile(baseDir: string, configFileName: string): string | null {
   let configFilePath = resolve(baseDir, configFileName)
