@@ -1,4 +1,5 @@
 COMPILER = bin/compile.js
+NODE_BIN := $(shell npm bin)
 
 clean:
 	rm -rfv bin/*.js
@@ -6,7 +7,7 @@ clean:
 	rm -rfv test/out
 
 $(COMPILER): bin/compile.ts bin/test.ts bin/tsconfig.json
-	node_modules/.bin/tsc -p bin/tsconfig.json
+	$(NODE_BIN)/tsc -p bin/tsconfig.json
 	chmod +x $(COMPILER)
 	chmod +x bin/test.js
 
@@ -18,16 +19,16 @@ build: $(COMPILER)
 
 test: build
 	node ./bin/test.js
-	node_modules/.bin/nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text
-	node_modules/.bin/mocha test/out/fixtures/**/*.test.js
+	$(NODE_BIN)/nyc report --temp-directory ./test/out --reporter=html --reporter=lcov --reporter=text
+	$(NODE_BIN)/mocha test/out/fixtures/**/*.test.js
 
 test-local:
 	$(MAKE) watch & node ./bin/test.js --keep-open
 
 lint-fix:
-	node_modules/.bin/tslint --project tsconfig.json --fix
+	$(NODE_BIN)/tslint --project tsconfig.json --fix
 
 lint:
-	node_modules/.bin/tslint --project tsconfig.json
+	$(NODE_BIN)/tslint --project tsconfig.json
 
 .PHONY: watch clean
