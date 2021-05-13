@@ -13,24 +13,28 @@ const apiNameSymbol: any = hasSymbol ? Symbol('pluginName') : 0xfea2
 
 const registeredAPIs: Dictionary<APIClass<API>> = {}
 
+export function setAPIName(apiName: string, api: APIClass<API>) {
+  const hasName = hasOwnSymbol(api, apiNameSymbol)
+  if (hasName) {
+    throw new Error(`The API you are trying to register is already registered`)
+  }
+
+  if (apiName in registeredAPIs) {
+    throw new Error(`The API ${apiName} is already registered`)
+  }
+
+  if (typeof (api as any) !== 'function') {
+    throw new Error(`The API ${apiName} is not a class, it is of type ${typeof api}`)
+  }
+
+  // save the registered name
+  // tslint:disable-next-line:semicolon
+  ;(api as any)[apiNameSymbol] = apiName
+}
+
 namespace PrivateHelpers {
   export function _registerAPI(apiName: string, api: APIClass<API>) {
-    const hasName = hasOwnSymbol(api, apiNameSymbol)
-    if (hasName) {
-      throw new Error(`The API you are trying to register is already registered`)
-    }
-
-    if (apiName in registeredAPIs) {
-      throw new Error(`The API ${apiName} is already registered`)
-    }
-
-    if (typeof (api as any) !== 'function') {
-      throw new Error(`The API ${apiName} is not a class, it is of type ${typeof api}`)
-    }
-
-    // save the registered name
-    // tslint:disable-next-line:semicolon
-    ;(api as any)[apiNameSymbol] = apiName
+    setAPIName(apiName, api)
 
     registeredAPIs[apiName] = api
   }
