@@ -3,11 +3,11 @@
 
 # `decentraland-rpc`
 
-This repository contains the low-level API that allows us to run sandboxed (and even remote) code for Decentralands LANDs and other systems like Physics.
+This repository contains the low-level API that runs the sandboxed code for Decentralands LANDs.
 
 ## Scripting
 
-Scripts are pieces of logic that run inside the context of a Web Worker or remotely in a server. They are meant to provide the user a way to run custom logic inside the player's client, allowing the creation of rich experiences inside Decentraland. To achieve this, low level hooks are exposed from the scripting host and consumed by the scripting client.
+Scripts are pieces of logic that run inside the context of a Web Worker. Although it's not currently used in the Decentraland specification, it also supports scenes remotely run on a server. The scripts provide the logic that is run inside the player's client. These methods are the lowest level communication layer to the scripting host (generally the [kernel](https://github.com/decentraland/kernel/tree/main/packages/shared/apis/host)) and consumed by the scripting client (usually the [runtime deployed](https://github.com/decentraland/kernel/blob/main/packages/scene-system/sdk/SceneRuntime.ts) alongside the code written by users).
 
 ## Transports
 
@@ -54,9 +54,9 @@ Why do we create a component based system? [Components](http://gameprogrammingpa
 
 # Decentraland Compiler
 
-The Decentraland Compiler is used to build all sort of TypeScript related projects. Both DCL's client all all of the SDK's dynamic scenes use it. You can think about it as an scoped task runner which only does a few things but it does them well.
+The Decentraland Compiler is a task runner used to build both the Decentraland client, as well as the scenes before deployment.
 
-To get started create a build.json file:
+It must be configured though a `build.json` file in the same folder where it's executed.
 
 ```json
 [
@@ -69,18 +69,16 @@ To get started create a build.json file:
 ]
 ```
 
-Then run the following command:
+The following command runs the "webpack" kind of task:
 
 `decentraland-compiler build.json`
 
-To run in watch mode:
+It can also be run in watch mode:
 
 `decentraland-compiler build.json --watch`
 
 To use custom loaders (Webpack builds only) refer to https://webpack.js.org/concepts/loaders/#inline
 
-
-
-## Copyright info
+## Licence
 
 This repository is protected with a standard Apache 2 licence. See the terms and conditions in the [LICENCE](https://github.com/decentraland/decentraland-rpc/blob/master/LICENSE) file.
